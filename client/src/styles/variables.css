@@ -1,0 +1,82 @@
+:root {
+
+  /* ===== BRAND ===== */
+
+  --brand-primary: #ff2e63;   /* Neon rose */
+  --brand-dark: #050505;
+  --brand-light: #ffffff;
+
+  /* ===== CATEGORY THEMES ===== */
+
+  /* 🍸 Martini — Elegant Red Lounge */
+  --martini-primary: #ff3b3b;
+  --martini-accent: #ff9f43;
+  --martini-bg: #0f0707;
+
+  /* 🏖️ Negroni — Pool / Summer Night */
+  --negroni-primary: #2dd4bf;
+  --negroni-accent: #22d3ee;
+  --negroni-bg: #071414;
+
+  /* 💜 Cosmopolitan — Glam / Corporate Luxe */
+  --cosmo-primary: #c084fc;
+  --cosmo-accent: #e879f9;
+  --cosmo-bg: #0f0714;
+
+  /* 🔥 Bloody Mary — Festival / Energy */
+  --bm-primary: #ef4444;
+  --bm-accent: #f87171;
+  --bm-bg: #120505;
+
+  /* 🖤 TIB Base — Premium Dark */
+  --tib-primary: #f59e0b;   /* Luxury amber */
+  --tib-accent: #fde047;
+  --tib-bg: #050505;
+
+  /* ===== TEXT ===== */
+
+  --text-primary: #ffffff;
+  --text-secondary: #c4c4c7;
+  --text-muted: #8b8b93;
+
+  /* ===== UI ===== */
+
+  --card-bg: #0b0b0f;
+  --border-color: #1f1f23;
+
+  /* Soft luxury shadow */
+  --shadow-soft: 0 20px 60px rgba(0,0,0,0.8);
+
+}
+
+/* ===== THEME CLASSES ===== */
+
+.theme-martini {
+  --primary: var(--martini-primary);
+  --accent: var(--martini-accent);
+  --bg: var(--martini-bg);
+}
+
+.theme-negroni {
+  --primary: var(--negroni-primary);
+  --accent: var(--negroni-accent);
+  --bg: var(--negroni-bg);
+}
+
+.theme-cosmo {
+  --primary: var(--cosmo-primary);
+  --accent: var(--cosmo-accent);
+  --bg: var(--cosmo-bg);
+}
+
+.theme-bm {
+  --primary: var(--bm-primary);
+  --accent: var(--bm-accent);
+  --bg: var(--bm-bg);
+}
+
+.theme-tib {
+  --primary: var(--tib-primary);
+  --accent: var(--tib-accent);
+  --bg: var(--tib-bg);
+}

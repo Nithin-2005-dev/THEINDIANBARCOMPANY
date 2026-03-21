@@ -1,0 +1,174 @@
+.footer {
+  background: radial-gradient(
+    ellipse at top,
+    rgba(255,255,255,0.04),
+    transparent 60%
+  ),
+  #06060a;
+
+  color: #a1a1aa;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 90px 24px 40px;
+}
+
+/* ===== GRID ===== */
+
+.grid {
+  display: grid;
+  grid-template-columns: 2fr repeat(4, 1fr);
+  gap: 48px;
+}
+
+/* ===== BRAND ===== */
+
+.brand {
+  max-width: 340px;
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.logo {
+  filter: brightness(1.1);
+}
+
+.brandName {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.08em;
+}
+
+.description {
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 22px;
+}
+
+/* SOCIALS */
+
+.socials {
+  display: flex;
+  gap: 18px;
+  font-size: 14px;
+}
+
+.socials a {
+  color: #a1a1aa;
+  transition: 0.25s;
+}
+
+.socials a:hover {
+  color: white;
+}
+
+/* ===== HEADINGS ===== */
+
+.heading {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: white;
+  margin-bottom: 16px;
+}
+
+/* ===== LINKS ===== */
+
+.links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.links a {
+  color: #a1a1aa;
+  font-size: 14px;
+  transition: 0.25s;
+}
+
+.links a:hover {
+  color: white;
+}
+
+/* ===== CONTACT ===== */
+
+.contact {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+}
+
+/* ===== BOTTOM BAR ===== */
+
+.bottom {
+  margin-top: 70px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+/* BOTTOM LINKS */
+
+.bottomLinks {
+  display: flex;
+  gap: 20px;
+}
+
+.bottomLinks a {
+  color: #a1a1aa;
+  transition: 0.25s;
+}
+
+.bottomLinks a:hover {
+  color: white;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 1000px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .brand {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .brand {
+    grid-column: auto;
+  }
+
+  .bottom {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}

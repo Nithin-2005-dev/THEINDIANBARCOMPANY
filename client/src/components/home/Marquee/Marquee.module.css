@@ -1,0 +1,38 @@
+/* ===== SECTION ===== */
+
+.section {
+  height: clamp(120px, 22vh, 220px);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+
+  background: linear-gradient(
+    to bottom,
+    #050508,
+    #08080d
+  );
+}
+
+/* ===== CONTAINER ===== */
+
+.wrapper {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ===== TEXT ===== */
+
+.track {
+  display: inline-block;
+
+  font-size: clamp(28px, 5vw, 72px);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+
+  color: rgba(255, 255, 255, 0.25);
+
+  text-transform: uppercase;
+  user-select: none;
+  will-change: transform;
+}
