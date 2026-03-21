@@ -13,25 +13,37 @@ async function bootstrap() {
     cors: false,
     rawBody: true,
   });
+
   const configService = app.get(ConfigService);
   const prismaService = app.get(PrismaService);
 
+  // ---------- GLOBAL CONFIG ----------
   app.setGlobalPrefix('api');
+
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
   });
+
   prismaService.enableShutdownHooks(app);
+
   app.use(helmet());
-  app.use(json({ limit: configService.getOrThrow<string>('API_BODY_LIMIT') }));
-  app.use(urlencoded({ extended: true, limit: configService.getOrThrow<string>('API_BODY_LIMIT') }));
+
+  const bodyLimit =
+    configService.get<string>('API_BODY_LIMIT') ?? '1mb';
+
+  app.use(json({ limit: bodyLimit }));
+  app.use(urlencoded({ extended: true, limit: bodyLimit }));
+
   app.enableCors({
-    origin: configService
-      .getOrThrow<string>('API_CORS_ORIGINS')
-      .split(',')
-      .map((origin) => origin.trim()),
+    origin:
+      configService
+        .get<string>('API_CORS_ORIGINS')
+        ?.split(',')
+        .map((o) => o.trim()) ?? '*',
     credentials: true,
   });
+
   app.useGlobalPipes(
     new SanitizationPipe(),
     new ValidationPipe({
@@ -43,11 +55,15 @@ async function bootstrap() {
       },
     }),
   );
+
   app.enableShutdownHooks();
 
+  // ---------- SWAGGER ----------
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Party as a Service API')
-    .setDescription('Production-ready backend for the Party-as-a-Service platform')
+    .setDescription(
+      'Production-ready backend for the Party-as-a-Service platform',
+    )
     .setVersion('1.0.0')
     .setContact('API Team', 'https://example.com', 'api@example.com')
     .addBearerAuth(
@@ -60,21 +76,29 @@ async function bootstrap() {
       'bearer',
     )
     .build();
+
   const swaggerEnabled =
-    configService.get<string>('NODE_ENV') !== 'production' ||
-    configService.get<string>('SWAGGER_ENABLED') === 'true';
+    process.env.NODE_ENV !== 'production' ||
+    process.env.SWAGGER_ENABLED === 'true';
+
   if (swaggerEnabled) {
-    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    const document = SwaggerModule.createDocument(
+      app,
+      swaggerConfig,
+    );
+
     SwaggerModule.setup('api/docs', app, document, {
-      swaggerOptions: {
-        persistAuthorization: true,
-      },
+      swaggerOptions: { persistAuthorization: true },
       customSiteTitle: 'Party as a Service API Docs',
     });
   }
 
-  const port = configService.get<number>('PORT') ?? 3000;
-  await app.listen(port);
+  // ---------- PORT (RENDER SAFE) ----------
+  const port = Number(process.env.PORT) || 3000;
+
+  await app.listen(port, '0.0.0.0');
+
+  console.log(`🚀 Server running on port ${port}`);
 }
 
 void bootstrap();
