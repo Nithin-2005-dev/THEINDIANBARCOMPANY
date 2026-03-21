@@ -1,87 +1,101 @@
+/* ══════════════════════════════════════════════════════
+   SERVICE TILES
+   ══════════════════════════════════════════════════════ */
+
+/* ─── SECTION ─── */
+
 .section {
   padding: 120px 24px;
-  background: #0b0b0f;
-  color: white;
+  background: var(--bg);
+  color: var(--text-primary);
 }
 
-/* HEADER */
+/* ─── HEADER ─── */
 
 .header {
   text-align: center;
   margin-bottom: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
 }
 
 .kicker {
-  font-size: 14px;
-  letter-spacing: 0.3em;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.38em;
   text-transform: uppercase;
-  color: #a1a1aa;
+  color: var(--accent);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
 }
 
 .title {
-  font-size: 42px;
-  font-weight: 700;
-  margin-top: 12px;
+  font-size: clamp(34px, 5vw, 52px);
+  font-weight: 200;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--text-primary);
+  font-family: "Didot", "GFS Didot", "Bodoni MT", "Playfair Display", Georgia, serif;
+  margin: 0;
 }
 
-/* GRID */
+/* ─── GRID ─── */
 
 .grid {
-  max-width: 1300px;
+  max-width: 900px;
   margin: 0 auto;
-
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(54px, 6vw, 40px);
 }
 
-/* CARD */
+/* ─── CARD ─── */
 
 .card {
   position: relative;
-  height: 440px;
-  border-radius: 22px;
+  width: 100%;
+  height: 420px;
+  border-radius: 20px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.35s ease;
+
+  border: 0.5px solid rgba(255,255,255,0.07);
+  box-shadow:
+    0 0 0 0.5px rgba(0,0,0,0.4),
+    0 20px 60px -12px rgba(0,0,0,0.5);
 }
 
-.card:hover {
-  transform: translateY(-10px);
-}
-
-/* VIDEO */
+/* ─── VIDEO ─── */
 
 .video {
   position: absolute;
   inset: 0;
-
   width: 100%;
   height: 100%;
   object-fit: cover;
-
-  filter: brightness(0.65);
-  transition: transform 0.6s ease;
+  filter: brightness(0.62) saturate(1.05);
+  transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1), filter 0.5s ease;
 }
 
 .card:hover .video {
-  transform: scale(1.1);
+  transform: scale(1.08);
+  filter: brightness(0.75) saturate(1.15);
 }
 
-/* OVERLAY */
+/* ─── OVERLAY ─── */
 
 .overlay {
   position: absolute;
   inset: 0;
-
   background: linear-gradient(
     to top,
-    rgba(0,0,0,0.95),
-    rgba(0,0,0,0.3)
+    rgba(0,0,0,0.92),
+    rgba(0,0,0,0.25)
   );
 }
 
-/* CONTENT */
+/* ─── CONTENT ─── */
 
 .content {
   position: absolute;
@@ -91,76 +105,219 @@
 }
 
 .tag {
-  font-size: 12px;
-  letter-spacing: 0.25em;
-  color: #d4d4d8;
-  margin-bottom: 8px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  margin-bottom: 10px;
 }
 
 .brand {
-  font-size: 16px;
-  letter-spacing: 0.2em;
-  margin-bottom: 8px;
-  opacity: 0.85;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  margin-bottom: 12px;
 }
 
 .titleCard {
-  font-size: 34px;
-  font-weight: 700;
+  font-size: clamp(28px, 3.5vw, 38px);
+  font-weight: 200;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  color: var(--text-primary);
+  font-family: "Didot", "GFS Didot", "Bodoni MT", "Playfair Display", Georgia, serif;
+  margin: 0;
 }
 
 .description {
-  margin-top: 12px;
-  color: #e4e4e7;
-  max-width: 340px;
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.48);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  max-width: 480px;
 }
 
-/* ARROW */
+/* ─── ARROW ─── */
 
 .arrow {
   position: absolute;
   bottom: 28px;
   right: 28px;
-
-  width: 54px;
-  height: 54px;
-
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: white;
-  color: black;
-
+  background: rgba(255,255,255,0.92);
+  color: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
-
-  font-size: 22px;
-  font-weight: bold;
-
-  transition: 0.3s ease;
+  font-size: 18px;
+  font-weight: 500;
+  box-shadow:
+    0 4px 16px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+  transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.3s ease;
 }
 
 .card:hover .arrow {
-  transform: translate(6px, -6px);
+  transform: translate(5px, -5px);
+  box-shadow:
+    0 8px 24px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.9);
 }
 
-/* RESPONSIVE */
-
-@media (max-width: 900px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
-  .card {
-    height: 360px;
-  }
-}
+/* ─── RESPONSIVE ─── */
 
 @media (max-width: 480px) {
-  .title {
-    font-size: 30px;
-  }
+  .card     { height: 340px; }
+  .titleCard { font-size: 24px; }
+  .content  { top: 28px; left: 24px; right: 24px; }
+  .arrow    { width: 40px; height: 40px; font-size: 16px; }
+}
 
-  .titleCard {
-    font-size: 26px;
-  }
+/* ══════════════════════════════════════════════════════
+   CINEMATIC PORTAL TRANSITION
+   ══════════════════════════════════════════════════════ */
+
+.portal {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* ─── INK FLOOD ─── */
+
+.inkFlood {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  z-index: 1;
+  will-change: clip-path;
+}
+
+/* ─── VIDEO LAYER ─── */
+
+.portalVideoWrap {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  will-change: opacity, transform, filter;
+}
+
+.portalVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.portalVignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 80% at 50% 50%, transparent 30%, rgba(0,0,0,0.55) 100%),
+    linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+}
+
+.scanline {
+  position: absolute;
+  left: -5%;
+  width: 110%;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent                      0%,
+    rgba(255,60,60,0.35)            25%,
+    rgba(255,255,255,0.55)          50%,
+    rgba(60,120,255,0.35)           75%,
+    transparent                    100%
+  );
+  filter: blur(1px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  will-change: top;
+}
+
+/* ─── TYPOGRAPHY LAYER ─── */
+
+.portalType {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  pointer-events: none;
+  perspective: 900px;
+}
+
+.portalKicker {
+  display: block;
+  font-size: clamp(9px, 1.2vw, 11px);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  will-change: opacity, letter-spacing;
+}
+
+.portalName {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0;
+  perspective: 900px;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+}
+
+.portalLetter {
+  display: inline-block;
+  font-size: clamp(52px, 9vw, 110px);
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: rgba(255,255,255,0.96);
+  font-family: "Didot", "GFS Didot", "Bodoni MT", "Playfair Display", Georgia, serif;
+  will-change: opacity, transform;
+  transform-origin: bottom center;
+  transform-style: preserve-3d;
+}
+
+.portalSubline {
+  display: block;
+  height: 0.5px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.4) 30%,
+    rgba(255,255,255,0.4) 70%,
+    transparent
+  );
+  max-width: 320px;
+  will-change: opacity, width;
+}
+
+/* ─── SEAL ─── */
+
+.seal {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  z-index: 4;
+  transform-origin: bottom center;
+  will-change: transform;
 }

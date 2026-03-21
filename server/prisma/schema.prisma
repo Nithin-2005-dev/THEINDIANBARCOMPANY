@@ -1,0 +1,352 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+  VENDOR
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  NEGOTIATING
+  WON
+  LOST
+}
+
+enum ProposalStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+}
+
+enum ContractStatus {
+  DRAFT
+  SENT
+  SIGNED
+  CANCELLED
+}
+
+enum ProjectStatus {
+  PLANNING
+  PREPARATION
+  EXECUTION
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentType {
+  ADVANCE
+  MID
+  FINAL
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum AuditAction {
+  OTP_SENT
+  OTP_VERIFIED
+  OTP_FAILED
+  LOGIN
+  REFRESH_TOKEN_ISSUED
+  REFRESH_TOKEN_REVOKED
+  LOGOUT
+  SESSION_REVOKED
+  SUSPICIOUS_ACTIVITY_DETECTED
+  LEAD_CREATED
+  LEAD_UPDATED
+  PROPOSAL_CREATED
+  PROPOSAL_DECIDED
+  CONTRACT_SIGNED
+  PAYMENT_ORDER_CREATED
+  PAYMENT_CAPTURED
+  PAYMENT_WEBHOOK_PROCESSED
+  VENDOR_ASSIGNED
+  FILE_UPLOADED
+}
+
+enum SessionStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+  SUSPICIOUS
+}
+
+enum OtpChallengeStatus {
+  PENDING
+  VERIFIED
+  FAILED
+  EXPIRED
+  LOCKED
+  CONSUMED
+}
+
+enum IdempotencyStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id                    String     @id @default(uuid())
+  phone                 String     @unique
+  email                 String?    @unique
+  name                  String?
+  role                  Role       @default(CLIENT)
+  isActive              Boolean    @default(true)
+  lastLoginAt           DateTime?
+  deletedAt             DateTime?
+  leads                 Lead[]
+  projects              Project[]  @relation("ClientProjects")
+  auditLogs             AuditLog[]
+  sessions              Session[]
+  otpChallenges         OtpChallenge[]
+  idempotencyKeys       IdempotencyKey[]
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+
+  @@index([deletedAt])
+}
+
+model Lead {
+  id         String     @id @default(uuid())
+  eventType  String
+  location   String
+  city       String?
+  eventDate  DateTime
+  guestCount Int?
+  budgetMin  Int?
+  budgetMax  Int?
+  notes      String?
+  status     LeadStatus @default(NEW)
+  clientId   String
+  client     User       @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  proposals  Proposal[]
+  deletedAt  DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([clientId])
+  @@index([deletedAt])
+  @@index([status])
+}
+
+model Proposal {
+  id           String         @id @default(uuid())
+  leadId       String
+  lead         Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  title        String
+  price        Int
+  scope        String
+  deliverables String
+  timeline     String
+  notes        String?
+  status       ProposalStatus @default(DRAFT)
+  contract     Contract?
+  deletedAt    DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([deletedAt])
+  @@index([leadId])
+  @@index([status])
+}
+
+model Contract {
+  id          String         @id @default(uuid())
+  proposalId  String         @unique
+  proposal    Proposal       @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  documentUrl String
+  status      ContractStatus @default(DRAFT)
+  signedAt    DateTime?
+  project     Project?
+  versions    ContractDocumentVersion[]
+  deletedAt   DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([deletedAt])
+}
+
+model Project {
+  id         String          @id @default(uuid())
+  contractId String          @unique
+  contract   Contract        @relation(fields: [contractId], references: [id], onDelete: Restrict)
+  clientId   String
+  client     User            @relation("ClientProjects", fields: [clientId], references: [id], onDelete: Restrict)
+  status     ProjectStatus   @default(PLANNING)
+  progress   Int             @default(0)
+  summary    String?
+  payments   Payment[]
+  vendors    ProjectVendor[]
+  deletedAt  DateTime?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@index([clientId])
+  @@index([deletedAt])
+  @@index([status])
+}
+
+model Vendor {
+  id          String          @id @default(uuid())
+  name        String
+  serviceType String
+  phone       String?
+  email       String?
+  pricingInfo String?
+  isAvailable Boolean         @default(true)
+  notes       String?
+  assignments ProjectVendor[]
+  deletedAt   DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([deletedAt])
+  @@index([serviceType])
+}
+
+model ProjectVendor {
+  id         String   @id @default(uuid())
+  projectId  String
+  vendorId   String
+  assignedAt DateTime @default(now())
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  vendor     Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, vendorId])
+  @@index([vendorId])
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  projectId      String
+  project        Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type           PaymentType
+  status         PaymentStatus @default(PENDING)
+  amount         Int
+  dueDate        DateTime?
+  currency       String        @default("INR")
+  gateway        String        @default("RAZORPAY")
+  gatewayOrderId String?
+  transactionId  String?
+  gatewaySignature String?
+  gatewayMetadata Json?
+  webhookEventId  String?      @unique
+  paidAt         DateTime?
+  notes          String?
+  deletedAt      DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([deletedAt])
+  @@index([projectId])
+  @@index([status])
+}
+
+model ContractDocumentVersion {
+  id          String   @id @default(uuid())
+  contractId  String
+  contract    Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  fileKey     String
+  version     Int
+  uploadedBy  String?
+  createdAt   DateTime @default(now())
+
+  @@unique([contractId, version])
+  @@index([contractId])
+}
+
+model AuditLog {
+  id          String      @id @default(uuid())
+  action      AuditAction
+  entityType  String
+  entityId    String?
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ipAddress   String?
+  metadata    Json?
+  createdAt   DateTime    @default(now())
+
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Session {
+  id                   String        @id @default(uuid())
+  userId               String
+  user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash     String        @unique
+  status               SessionStatus @default(ACTIVE)
+  deviceFingerprint    String?
+  userAgent            String?
+  initialIpAddress     String?
+  lastIpAddress        String?
+  lastSeenAt           DateTime?
+  expiresAt            DateTime
+  revokedAt            DateTime?
+  suspiciousActivityAt DateTime?
+  suspiciousReason     String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  @@index([userId, status])
+  @@index([expiresAt])
+}
+
+model OtpChallenge {
+  id                 String             @id @default(uuid())
+  userId             String?
+  user               User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  phone              String
+  otpCodeHash        String
+  status             OtpChallengeStatus @default(PENDING)
+  expiresAt          DateTime
+  consumedAt         DateTime?
+  attempts           Int                @default(0)
+  maxAttempts        Int                @default(5)
+  cooldownUntil      DateTime?
+  requestIpAddress   String?
+  verifyIpAddress    String?
+  abuseDetectedAt    DateTime?
+  abuseReason        String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([phone, status, createdAt])
+  @@index([expiresAt])
+}
+
+model IdempotencyKey {
+  id           String            @id @default(uuid())
+  key          String
+  scope        String
+  requestHash  String
+  status       IdempotencyStatus @default(PROCESSING)
+  responseCode Int?
+  responseBody Json?
+  userId       String?
+  user         User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt    DateTime          @default(now())
+  expiresAt    DateTime
+  updatedAt    DateTime          @updatedAt
+
+  @@unique([key, scope])
+  @@index([userId, scope])
+  @@index([expiresAt])
+}

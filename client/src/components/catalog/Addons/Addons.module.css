@@ -1,0 +1,245 @@
+/* ══════════════════════════════════════════════════════
+   ADDONS — Editorial Cards
+   ══════════════════════════════════════════════════════ */
+
+.section {
+  position: relative;
+  padding: 160px 24px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* ─── AMBIENT BLOOM ─── */
+
+.bloom {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--primary) 8%, transparent),
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── HEADER ─── */
+
+.header {
+  position: relative;
+  z-index: 2;
+  max-width: 600px;
+  margin: 0 auto 100px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+}
+
+.kickerLine {
+  display: block;
+  width: 32px;
+  height: 0.5px;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+.title {
+  font-size: clamp(36px, 5vw, 58px);
+  font-weight: 200;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: rgba(255,255,255,0.95);
+  font-family: "Didot", "GFS Didot", "Bodoni MT", "Playfair Display", Georgia, serif;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.38);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  max-width: 420px;
+  margin: 0;
+}
+
+/* ─── GRID ─── */
+
+.grid {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+/* ─── CARD ─── */
+
+.card {
+  position: relative;
+  overflow: hidden;
+  padding: 40px 36px 36px;
+  border-radius: 18px;
+
+  background: rgba(255,255,255,0.026);
+  border: 0.5px solid rgba(255,255,255,0.07);
+
+  box-shadow:
+    0 0 0 0.5px rgba(0,0,0,0.4),
+    0 16px 48px -12px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+
+  transition:
+    transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1),
+    border-color 0.3s ease,
+    box-shadow 0.45s ease;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow:
+    0 0 0 0.5px rgba(0,0,0,0.5),
+    0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent),
+    0 28px 70px -10px color-mix(in srgb, var(--primary) 28%, transparent),
+    0 40px 90px -20px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+}
+
+/* ─── CARD GLOW ─── */
+
+.cardGlow {
+  position: absolute;
+  top: -40px;
+  left: -20px;
+  right: -20px;
+  height: 160px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--primary) 16%, transparent),
+    transparent
+  );
+  pointer-events: none;
+  opacity: 0.7;
+  transition: opacity 0.4s ease;
+}
+
+.card:hover .cardGlow {
+  opacity: 1;
+}
+
+/* ─── INDEX ─── */
+
+.index {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.18);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── DIVIDER ─── */
+
+.divider {
+  display: block;
+  width: 28px;
+  height: 0.5px;
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+  transition: width 0.4s ease;
+}
+
+.card:hover .divider {
+  width: 48px;
+}
+
+/* ─── CARD TITLE ─── */
+
+.cardTitle {
+  font-size: 22px;
+  font-weight: 200;
+  letter-spacing: -0.02em;
+  color: rgba(255,255,255,0.9);
+  font-family: "Didot", "GFS Didot", "Bodoni MT", "Playfair Display", Georgia, serif;
+  margin: 0 0 14px;
+  line-height: 1.2;
+  position: relative;
+  z-index: 1;
+  transition: color 0.3s ease;
+}
+
+.card:hover .cardTitle {
+  color: var(--accent);
+}
+
+/* ─── DESCRIPTION ─── */
+
+.desc {
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.75;
+  color: rgba(255,255,255,0.42);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── ACCENT LINE ─── */
+
+.accent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 1.5px;
+  width: 0;
+  background: linear-gradient(
+    90deg,
+    var(--primary),
+    var(--accent)
+  );
+  transition: width 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.card:hover .accent {
+  width: 100%;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@media (max-width: 960px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .section { padding: 100px 16px; }
+  .grid    { grid-template-columns: 1fr; }
+  .card    { padding: 32px 26px 28px; }
+}

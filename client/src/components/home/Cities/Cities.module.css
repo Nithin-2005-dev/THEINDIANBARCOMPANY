@@ -1,112 +1,185 @@
+/* ══════════════════════════════════════════════════════
+   CITIES — Infinite Marquee
+   ══════════════════════════════════════════════════════ */
+
 .section {
-  padding: 80px 0;
-  background: #0b0b0f;
-  color: white;
+  position: relative;
+  padding: 110px 0;
+  background: var(--bg);
   overflow: hidden;
 }
 
-.heading {
-  max-width: 1200px;
-  margin: 0 auto 32px;
-  padding: 0 24px;
+/* ─── AMBIENT BLOOM ─── */
 
-  font-size: 14px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: #a1a1aa;
+.bloom {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--primary) 7%, transparent),
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* ===== WRAPPER ===== */
+/* ─── HEADER ─── */
+
+.header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.kicker {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  white-space: nowrap;
+}
+
+.kickerLine {
+  display: block;
+  width: 28px;
+  height: 0.5px;
+  background: rgba(255,255,255,0.14);
+}
+
+/* ─── WRAPPER ─── */
 
 .wrapper {
   position: relative;
+  z-index: 2;
   overflow: hidden;
 }
 
-/* Gradient fade edges */
-
+/* Fade edges */
 .wrapper::before,
 .wrapper::after {
   content: "";
   position: absolute;
   top: 0;
-  width: 120px;
+  width: 180px;
   height: 100%;
-  z-index: 2;
+  z-index: 3;
   pointer-events: none;
 }
 
 .wrapper::before {
   left: 0;
-  background: linear-gradient(to right, #0b0b0f, transparent);
+  background: linear-gradient(to right, var(--bg), transparent);
 }
 
 .wrapper::after {
   right: 0;
-  background: linear-gradient(to left, #0b0b0f, transparent);
+  background: linear-gradient(to left, var(--bg), transparent);
 }
 
-/* ===== SCROLL TRACK ===== */
+/* ─── TRACK ─── */
 
 .track {
   display: flex;
-  gap: 24px;
-  padding: 12px 24px;
-
+  gap: 14px;
+  padding: 16px 24px;
   width: max-content;
-
-  animation: scroll 28s linear infinite;
+  animation: marquee 35s linear infinite;
 }
-
-/* Pause on hover (premium UX) */
 
 .track:hover {
   animation-play-state: paused;
 }
 
-/* ===== PILLS ===== */
-
-.pill {
-  padding: 14px 32px;
-
-  background: rgba(0,0,0,0.75);
-  border-radius: 999px;
-
-  font-size: 18px;
-  white-space: nowrap;
-
-  border: 1px solid rgba(255,255,255,0.08);
-
-  transition: 0.25s ease;
-  cursor: pointer;
-}
-
-/* Hover glow */
-
-.pill:hover {
-  background: #111;
-  border-color: rgba(255,200,0,0.5);
-  transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(255,170,0,0.25);
-}
-
-/* ===== ANIMATION ===== */
-
-@keyframes scroll {
-  from { transform: translateX(0); }
+@keyframes marquee {
+  from { transform: translateX(0);    }
   to   { transform: translateX(-50%); }
 }
 
-/* ===== RESPONSIVE ===== */
+/* ─── PILL ─── */
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+
+  background: rgba(255,255,255,0.026);
+  border: 0.5px solid rgba(255,255,255,0.07);
+
+  box-shadow:
+    0 0 0 0.5px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+
+  transition:
+    transform       0.3s cubic-bezier(0.22, 0.61, 0.36, 1),
+    border-color    0.3s ease,
+    box-shadow      0.3s ease,
+    background      0.3s ease;
+}
+
+.pill:hover {
+  transform: translateY(-5px);
+  background: rgba(255,255,255,0.048);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  box-shadow:
+    0 0 0 0.5px rgba(0,0,0,0.4),
+    0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent),
+    0 12px 36px -8px color-mix(in srgb, var(--primary) 35%, transparent),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+}
+
+/* ─── PILL DOT ─── */
+
+.pillDot {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 60%, transparent);
+  flex-shrink: 0;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pill:hover .pillDot {
+  background: var(--accent);
+  box-shadow: 0 0 8px 2px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+/* ─── PILL LABEL ─── */
+
+.pillLabel {
+  font-size: 15px;
+  font-weight: 300;
+  letter-spacing: 0.03em;
+  color: rgba(255,255,255,0.55);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  transition: color 0.3s ease;
+}
+
+.pill:hover .pillLabel {
+  color: rgba(255,255,255,0.88);
+}
+
+/* ─── RESPONSIVE ─── */
 
 @media (max-width: 768px) {
-
-  .pill {
-    padding: 12px 24px;
-    font-size: 16px;
-  }
-
-  .track {
-    gap: 16px;
-  }
+  .section { padding: 80px 0; }
+  .pill    { padding: 10px 22px; }
+  .pillLabel { font-size: 14px; }
+  .wrapper::before,
+  .wrapper::after { width: 80px; }
 }

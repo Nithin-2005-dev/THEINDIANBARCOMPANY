@@ -8,10 +8,10 @@
 
   /* ===== CATEGORY THEMES ===== */
 
-  /* 🍸 Martini — Elegant Red Lounge */
-  --martini-primary: #ff3b3b;
-  --martini-accent: #ff9f43;
-  --martini-bg: #0f0707;
+ /* 🍸 Martini — Elegant Red (Logo Based) */
+--martini-primary: #d10f1b;  /* Rich brand red */
+--martini-accent: #ff4d5a;   /* Soft highlight red */
+--martini-bg: #0b0506;       /* Deep warm black (not flat black) */
 
   /* 🏖️ Negroni — Pool / Summer Night */
   --negroni-primary: #2dd4bf;

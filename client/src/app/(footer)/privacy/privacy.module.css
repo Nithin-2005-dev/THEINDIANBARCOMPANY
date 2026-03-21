@@ -1,0 +1,478 @@
+/* ══════════════════════════════════════════════════════
+   PRIVACY POLICY — Editorial
+   ══════════════════════════════════════════════════════ */
+
+.main {
+  position: relative;
+  min-height: 100vh;
+  background: var(--tib-bg);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+/* ─── BLOOMS ─── */
+
+.bloom {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--tib-primary) 8%, transparent),
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bloomBottom {
+  position: fixed;
+  bottom: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--tib-accent) 5%, transparent),
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── VERTICAL RULE ─── */
+
+.ruleV {
+  position: fixed;
+  left: clamp(24px, 6vw, 80px);
+  top: 0;
+  bottom: 0;
+  width: 0.5px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255,255,255,0.05) 15%,
+    rgba(255,255,255,0.05) 85%,
+    transparent
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ─── HERO ─── */
+
+.hero {
+  position: relative;
+  z-index: 2;
+  padding: clamp(120px, 18vh, 200px) 32px clamp(80px, 10vh, 120px);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 0.5px solid rgba(255,255,255,0.06);
+}
+
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: var(--tib-accent);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+}
+
+.kickerLine {
+  display: block;
+  width: 32px;
+  height: 0.5px;
+  background: var(--tib-accent);
+  opacity: 0.6;
+}
+
+.heroTitle {
+  font-size: clamp(52px, 8vw, 110px);
+  font-weight: 200;
+  letter-spacing: -0.04em;
+  line-height: 1.0;
+  color: rgba(255,255,255,0.95);
+  font-family: "Didot", "GFS Didot", "Bodoni MT", "Playfair Display", Georgia, serif;
+  margin: 0;
+  text-shadow:
+    0 2px 60px rgba(0,0,0,0.5),
+    0 0 80px color-mix(in srgb, var(--tib-primary) 15%, transparent);
+}
+
+.titleEm {
+  font-style: italic;
+  color: var(--tib-accent);
+}
+
+.ruleSep {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ruleH {
+  display: block;
+  width: 48px;
+  height: 0.5px;
+  background: rgba(255,255,255,0.14);
+}
+
+.ruleDot {
+  display: block;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--tib-accent);
+  opacity: 0.7;
+}
+
+.heroSub {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.3);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  margin: 0;
+}
+
+.heroMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.metaItem {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.18);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+}
+
+.metaSep {
+  display: block;
+  width: 0.5px;
+  height: 10px;
+  background: rgba(255,255,255,0.12);
+}
+
+/* ─── CONTENT ─── */
+
+.content {
+  position: relative;
+  z-index: 2;
+  padding: 80px 0 120px;
+}
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ─── SECTION ─── */
+
+.section {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 0 32px;
+  padding: 52px 0;
+  border-bottom: 0.5px solid rgba(255,255,255,0.05);
+}
+
+.section:first-child { padding-top: 16px; }
+
+.sectionHead {
+  display: contents;
+}
+
+.sectionNum {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.18);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  padding-top: 6px;
+  grid-column: 1;
+  align-self: start;
+}
+
+.sectionTitle {
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 200;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: rgba(255,255,255,0.9);
+  font-family: "Didot", "GFS Didot", "Bodoni MT", "Playfair Display", Georgia, serif;
+  margin: 0 0 28px;
+  grid-column: 2;
+}
+
+.sectionBody {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── PARA ─── */
+
+.para {
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.8;
+  color: rgba(255,255,255,0.45);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  margin: 0;
+}
+
+/* ─── SERVICE PILLS ─── */
+
+.pills {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.pill {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 0.5px solid rgba(255,255,255,0.07);
+  transition: border-color 0.2s ease;
+}
+
+.pill:hover {
+  border-color: color-mix(in srgb, var(--tib-accent) 35%, transparent);
+}
+
+.pillName {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--tib-accent);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+}
+
+.pillDesc {
+  font-size: 12px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.32);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+}
+
+/* ─── LIST ─── */
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.listItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.48);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+}
+
+.listDot {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--tib-accent) 55%, transparent);
+  flex-shrink: 0;
+  margin-top: 7px;
+}
+
+/* ─── SUBSECTIONS ─── */
+
+.subsections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sub {
+  padding: 20px 22px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.022);
+  border: 0.5px solid rgba(255,255,255,0.06);
+}
+
+.subLabel {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.38);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  margin: 0 0 14px;
+}
+
+/* ─── FOOT NOTE ─── */
+
+.footNote {
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.75;
+  color: rgba(255,255,255,0.28);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  font-style: italic;
+  padding: 14px 18px;
+  border-left: 1.5px solid color-mix(in srgb, var(--tib-accent) 30%, transparent);
+  margin: 0;
+}
+
+/* ─── CONTACT CARD ─── */
+
+.contactCard {
+  position: relative;
+  overflow: hidden;
+  margin-top: 16px;
+  padding: 48px 44px 44px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.026);
+  border: 0.5px solid rgba(255,255,255,0.08);
+  box-shadow:
+    0 0 0 0.5px rgba(0,0,0,0.4),
+    0 24px 60px -12px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.cardGlow {
+  position: absolute;
+  top: -60px;
+  left: -20px;
+  right: -20px;
+  height: 180px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--tib-primary) 12%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+.contactGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px 32px;
+  margin-top: 8px;
+}
+
+.contactItem {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.contactLabel {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.2);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+}
+
+.contactValue {
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.62);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+}
+
+.contactLink {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--tib-accent);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.contactLink:hover { opacity: 0.7; }
+
+.cardAccent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: linear-gradient(90deg, var(--tib-primary), var(--tib-accent));
+}
+
+/* ─── CONSENT ─── */
+
+.consent {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 60px;
+  padding: 0 8px;
+}
+
+.consentRule {
+  display: block;
+  flex: 1;
+  height: 0.5px;
+  background: rgba(255,255,255,0.08);
+}
+
+.consentText {
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.22);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  text-align: center;
+  max-width: 380px;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@media (max-width: 640px) {
+  .section         { grid-template-columns: 1fr; gap: 8px 0; }
+  .sectionNum      { grid-column: 1; padding-top: 0; }
+  .sectionTitle    { grid-column: 1; }
+  .sectionBody     { grid-column: 1; }
+  .ruleV           { display: none; }
+  .pills           { grid-template-columns: 1fr; }
+  .contactGrid     { grid-template-columns: 1fr; }
+  .contactCard     { padding: 32px 26px 28px; }
+  .consent         { flex-direction: column; gap: 16px; }
+  .consentRule     { width: 60px; flex: none; }
+}

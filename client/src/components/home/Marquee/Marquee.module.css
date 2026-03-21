@@ -1,38 +1,177 @@
-/* ===== SECTION ===== */
+/* ══════════════════════════════════════════════════════
+   MARQUEE — Editorial Parallax
+   ══════════════════════════════════════════════════════ */
 
 .section {
-  height: clamp(120px, 22vh, 220px);
-  display: flex;
-  align-items: center;
+  position: relative;
+  padding: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  background: var(--bg);
+  min-height: clamp(120px, 20vh, 200px);
+}
 
+/* ─── AMBIENT BLOOM ─── */
+
+.bloom {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 120% at 50% 50%,
+    color-mix(in srgb, var(--primary) 10%, transparent),
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── RULED EDGES ─── */
+
+.ruleTop,
+.ruleBottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0.5px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.ruleTop {
+  top: 0;
   background: linear-gradient(
-    to bottom,
-    #050508,
-    #08080d
+    90deg,
+    transparent,
+    rgba(255,255,255,0.07) 20%,
+    rgba(255,255,255,0.07) 80%,
+    transparent
   );
 }
 
-/* ===== CONTAINER ===== */
-
-.wrapper {
-  width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
+.ruleBottom {
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.05) 20%,
+    rgba(255,255,255,0.05) 80%,
+    transparent
+  );
 }
 
-/* ===== TEXT ===== */
+/* ─── ROWS ─── */
+
+.row {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  overflow: hidden;
+  padding: 10px 0;
+}
+
+/* Fade edges */
+.row::before,
+.row::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 200px;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.row::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg), transparent);
+}
+
+.row::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg), transparent);
+}
+
+/* ─── TRACK ─── */
 
 .track {
-  display: inline-block;
-
-  font-size: clamp(28px, 5vw, 72px);
-  font-weight: 800;
-  letter-spacing: 0.08em;
-
-  color: rgba(255, 255, 255, 0.25);
-
-  text-transform: uppercase;
-  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
   will-change: transform;
+  transition: transform 0.05s linear;
+}
+
+/* ─── ITEMS ─── */
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+
+/* TOP ROW — large, prominent */
+
+.itemText {
+  font-size: clamp(28px, 4.5vw, 72px);
+  font-weight: 200;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text-primary) 22%, transparent);
+  font-family: "Didot", "GFS Didot", "Bodoni MT", "Playfair Display", Georgia, serif;
+  transition: color 0.3s ease;
+
+  text-shadow:
+    0 0 60px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+.item:hover .itemText {
+  color: color-mix(in srgb, var(--accent) 75%, transparent);
+  text-shadow:
+    0 0 80px color-mix(in srgb, var(--primary) 45%, transparent);
+}
+
+/* BOTTOM ROW — smaller, muted */
+
+.itemTextMuted {
+  font-size: clamp(11px, 1.4vw, 18px);
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.1);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  transition: color 0.3s ease;
+}
+
+.item:hover .itemTextMuted {
+  color: rgba(255,255,255,0.22);
+}
+
+/* ─── SEPARATORS ─── */
+
+.separator {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 clamp(20px, 3vw, 52px);
+}
+
+/* Top row — diamond dot */
+.sepDot {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  transform: rotate(45deg);
+  background: color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow: 0 0 10px 2px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+/* Bottom row — short horizontal rule */
+.sepLine {
+  display: block;
+  width: clamp(16px, 2vw, 32px);
+  height: 0.5px;
+  background: rgba(255,255,255,0.1);
 }
