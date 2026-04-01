@@ -609,6 +609,7 @@ body:has(button:hover) .cursorRing {
   align-items: center;
   flex-wrap: nowrap;
   gap: 2rem;
+  will-change: transform;
   animation: marquee 40s linear infinite;
 }
 
@@ -621,8 +622,11 @@ body:has(button:hover) .cursorRing {
   color: transparent;
   -webkit-text-stroke: 0.5px rgba(255, 241, 241, 0.18);
   white-space: nowrap;
-  transition: -webkit-text-stroke 0.4s ease, color 0.4s ease;
+  text-shadow: 0 0 0 rgba(var(--accent-rgb), 0);
+  transition: -webkit-text-stroke 0.4s ease, color 0.4s ease, text-shadow 0.4s ease;
   padding: 0 1rem;
+  animation: marqueeBlink var(--marquee-duration, 6.4s) ease-in-out infinite;
+  animation-delay: var(--marquee-delay, 0s);
 }
 
 .marqueeWord:hover {
@@ -637,6 +641,8 @@ body:has(button:hover) .cursorRing {
   color: var(--accent) !important;
   opacity: 0.6;
   padding: 0 0.5rem;
+  animation: none;
+  text-shadow: none;
 }
 
 .footer {
@@ -687,6 +693,19 @@ body:has(button:hover) .cursorRing {
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
+}
+
+@keyframes marqueeBlink {
+  0%, 72%, 100% {
+    color: transparent;
+    -webkit-text-stroke: 0.5px rgba(255, 241, 241, 0.18);
+    text-shadow: 0 0 0 rgba(var(--accent-rgb), 0);
+  }
+  8%, 18% {
+    color: rgba(var(--accent-rgb), 0.14);
+    -webkit-text-stroke: 0.6px rgba(var(--accent-rgb), 0.86);
+    text-shadow: 0 0 18px rgba(var(--accent-rgb), 0.28), 0 0 36px rgba(var(--accent-rgb), 0.14);
+  }
 }
 
 @media (max-width: 1024px) {
@@ -778,19 +797,10 @@ body:has(button:hover) .cursorRing {
   .hero { padding: 7rem 1.5rem 5rem; }
   .titleBlock { --title-size-current: var(--title-size-mobile); }
   .titleSuffix { font-size: 0.28em; }
-  .marqueeStrip {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-    touch-action: pan-x;
-    padding-inline: 1rem;
-    scrollbar-width: none;
-  }
-  .marqueeStrip::-webkit-scrollbar { display: none; }
+  .marqueeStrip { padding-inline: 0; }
   .marqueeTrack {
-    animation: none;
-    padding-right: 1rem;
+    gap: 1.35rem;
+    animation-duration: 28s;
   }
   .footer { padding: 1.2rem 1.5rem; grid-template-columns: 1fr; gap: 0.3rem; }
   .footerCentre, .footerRight { display: none; }

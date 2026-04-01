@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 const marqueeWords = [
   "COMING",
@@ -20,6 +20,20 @@ const marqueeWords = [
   "COSMOPOLITAN",
   ".",
 ];
+
+const buildMarqueeBlinkStyle = (index: number, word: string): CSSProperties => {
+  if (word === ".") {
+    return {};
+  }
+
+  const delay = ((index * 1.37) % 8.6).toFixed(2);
+  const duration = (4.8 + ((index * 0.91) % 2.9)).toFixed(2);
+
+  return {
+    ["--marquee-delay" as string]: `${delay}s`,
+    ["--marquee-duration" as string]: `${duration}s`,
+  } as CSSProperties;
+};
 
 export default function Home() {
   const [reachOpen, setReachOpen] = useState(false);
@@ -223,6 +237,7 @@ export default function Home() {
             <span
               key={`${word}-${index}`}
               className={`marqueeWord ${word === "." ? "marqueeDot" : ""}`}
+              style={buildMarqueeBlinkStyle(index, word)}
             >
               {word}
             </span>
