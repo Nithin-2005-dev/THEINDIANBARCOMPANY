@@ -852,8 +852,19 @@ body:has(button:hover) .cursorRing {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .marqueeTrack { animation: none; }
   * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; }
+  .marqueeTrack {
+    animation: marquee 55s linear infinite !important;
+    animation-delay: 0s !important;
+  }
+  .marqueeWord:not(.marqueeDot) {
+    animation: marqueeBlink var(--marquee-duration, 9s) ease-in-out infinite !important;
+    animation-delay: var(--marquee-delay, 0s) !important;
+  }
+  .marqueeDot {
+    animation: none !important;
+    text-shadow: none !important;
+  }
 }
 
 @media (min-aspect-ratio: 16 / 9) {
