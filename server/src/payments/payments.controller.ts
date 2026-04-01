@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Headers, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { Role } from '@prisma/client';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth/jwt-auth.guard';
@@ -9,6 +21,7 @@ import type { AuthUser } from '../common/types/auth-user.type';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { CreatePaymentOrderDto } from './dto/create-payment-order.dto';
 import { ListPaymentsQueryDto } from './dto/list-payments-query.dto';
+import { RefundPaymentDto } from './dto/refund-payment.dto';
 import { UpdatePaymentStatusDto } from './dto/update-payment-status.dto';
 import { VerifyPaymentDto } from './dto/verify-payment.dto';
 import { PaymentsService } from './payments.service';
@@ -18,14 +31,18 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.FINANCE)
   @Post()
-  create(@Body() dto: CreatePaymentDto, @Headers('idempotency-key') idempotencyKey?: string) {
-    return this.paymentsService.create(dto, idempotencyKey);
+  create(
+    @Body() dto: CreatePaymentDto,
+    @CurrentUser() user: AuthUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
+  ) {
+    return this.paymentsService.create(dto, user.userId, idempotencyKey);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.CLIENT, Role.ADMIN)
+  @Roles(Role.CLIENT, Role.ADMIN, Role.FINANCE)
   @Post('orders')
   createOrder(
     @Body() dto: CreatePaymentOrderDto,
@@ -59,7 +76,7 @@ export class PaymentsController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.CLIENT, Role.ADMIN)
+  @Roles(Role.CLIENT, Role.ADMIN, Role.FINANCE)
   @Get()
   list(@CurrentUser() user: AuthUser, @Query() query: ListPaymentsQueryDto) {
     return this.paymentsService.listForUser(user, query);
@@ -68,14 +85,32 @@ export class PaymentsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.CLIENT, Role.ADMIN)
   @Get('project/:projectId/history')
-  history(@Param('projectId') projectId: string, @CurrentUser() user: AuthUser) {
+  history(
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @CurrentUser() user: AuthUser,
+  ) {
     return this.paymentsService.getProjectHistory(projectId, user);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.FINANCE)
   @Patch(':id/status')
-  updateStatus(@Param('id') id: string, @Body() dto: UpdatePaymentStatusDto) {
-    return this.paymentsService.updateStatus(id, dto);
+  updateStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdatePaymentStatusDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.paymentsService.updateStatus(id, dto, user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.FINANCE)
+  @Post(':id/refund')
+  refund(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RefundPaymentDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.paymentsService.refundPayment(id, dto, user);
   }
 }

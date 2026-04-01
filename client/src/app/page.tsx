@@ -27,22 +27,22 @@ export const metadata: Metadata = buildMetadata({
 export default function HomePage() {
   return (
     <>
-
-      {/* MAIN CONTENT */}
       <main className="bg-black text-white">
-
-        {/* HERO */}
         <Hero />
-        {/* Cities */}
         <Cities />
-        {/* Services Tiles */}
-        <ServiceTiles />
-        {/* Marquee */}
+
+        <section id="services">
+          <ServiceTiles />
+        </section>
+
         <Marquee />
-        {/*Provide*/}
-        <Provide />
-        <HomeHowItWorks/>
-        <HomeTestimonials/>
+
+        <section id="about">
+          <Provide />
+        </section>
+
+        <HomeHowItWorks />
+        <HomeTestimonials />
       </main>
     </>
   )

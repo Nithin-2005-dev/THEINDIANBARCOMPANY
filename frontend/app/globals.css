@@ -1,110 +1,615 @@
-/* Reset */
-* {
+/* app/globals.css — The Indian Bar Company · Premium Redesign */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@200;300;400&display=swap');
+
+:root {
+  --bg: #060604;
+  --text: #f2ede6;
+  --muted: rgba(242, 237, 230, 0.48);
+  --whisper: rgba(242, 237, 230, 0.18);
+  --rule: rgba(242, 237, 230, 0.12);
+  --display: 'Cormorant Garamond', 'Didot', 'Bodoni MT', Georgia, serif;
+  --body: 'Montserrat', 'Helvetica Neue', sans-serif;
+  --scrollbar-size: 0.82rem;
+  --scrollbar-track: rgba(255, 255, 255, 0.025);
+  --scrollbar-track-border: rgba(255, 255, 255, 0.045);
+  --scrollbar-thumb-solid: rgba(214, 154, 82, 0.52);
+  --scrollbar-thumb-hover: rgba(242, 182, 108, 0.72);
+  --scrollbar-thumb-active: rgba(255, 214, 153, 0.82);
+  --scrollbar-thumb-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 10px 24px rgba(0, 0, 0, 0.26);
+}
+
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html,
-body {
-  height: 100%;
-  background: #000;
-  color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+  scrollbar-gutter: stable;
 }
 
-/* Layout */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  overflow-x: hidden;
+  cursor: none;
+}
 
-.container {
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-solid) var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+}
+
+*::-webkit-scrollbar-track {
+  border: 1px solid var(--scrollbar-track-border);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+    var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+  background: linear-gradient(180deg, rgba(255, 218, 163, 0.78), rgba(179, 116, 43, 0.92));
+  box-shadow: var(--scrollbar-thumb-shadow);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(255, 227, 184, 0.9), rgba(215, 140, 58, 0.96));
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, rgba(255, 236, 206, 0.96), rgba(236, 160, 79, 0.98));
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ─── Custom Cursor ─── */
+.cursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+}
+
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--text);
+  border-radius: 50%;
+  position: fixed;
+  top: 0; left: 0;
+  transform: translate(-50%, -50%);
+  transition: transform 0.08s ease, width 0.25s ease, height 0.25s ease;
+}
+
+.cursor-ring {
+  width: 36px;
+  height: 36px;
+  border: 0.5px solid rgba(242, 237, 230, 0.6);
+  border-radius: 50%;
+  position: fixed;
+  top: 0; left: 0;
+  transform: translate(-50%, -50%);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+              width 0.35s ease, height 0.35s ease, border-color 0.3s ease;
+}
+
+body:has(.sectionButton:hover) .cursor-ring {
+  width: 64px;
+  height: 64px;
+  border-color: rgba(242, 237, 230, 0.9);
+}
+
+/* ─── Page ─── */
+.page {
+  position: relative;
+}
+
+/* ─── Background System ─── */
+.backgroundWrapper {
+  position: fixed;
+  inset: 0;
+  z-index: -5;
+}
+
+.backgroundImage {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 1.8s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 2.4s cubic-bezier(0.22, 1, 0.36, 1);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  filter: brightness(0.62) saturate(0.85) contrast(1.05);
+  will-change: opacity, transform;
+}
+
+.backgroundImage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      105deg,
+      rgba(6, 6, 4, 0.97) 0%,
+      rgba(6, 6, 4, 0.80) 32%,
+      rgba(6, 6, 4, 0.38) 62%,
+      rgba(6, 6, 4, 0.08) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(6, 6, 4, 0.15) 0%,
+      rgba(6, 6, 4, 0.72) 100%
+    );
+}
+
+.backgroundImage.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ─── Texture & Overlay ─── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 30% 50%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* ─── Header Logo ─── */
+.siteHeader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2.2rem 4rem;
+  mix-blend-mode: normal;
+}
+
+.siteHeader::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 4rem;
+  right: 4rem;
+  height: 0.5px;
+  background: var(--rule);
+}
+
+.siteLogo {
+  font-family: var(--body);
+  font-weight: 400;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  text-transform: lowercase;
+  color: var(--text);
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.siteLogo:hover {
+  opacity: 0.8;
+}
+
+.headerContact {
+  font-family: var(--body);
+  font-weight: 200;
+  font-size: 0.58rem;
+  letter-spacing: 0.38rem;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.headerContact:hover {
+  color: var(--text);
+}
+
+/* ─── Side Nav ─── */
+.sideNav {
+  position: fixed;
+  top: 50%;
+  right: 3rem;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  z-index: 100;
+  align-items: center;
+}
+
+.navDot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  display: block;
+}
+
+.navDot.active {
+  height: 28px;
+  border-radius: 2px;
+  background: var(--text);
+}
+
+/* ─── Section Index ─── */
+.sectionIndex {
+  position: fixed;
+  bottom: 2.8rem;
+  left: 4rem;
+  font-family: var(--body);
+  font-weight: 200;
+  font-size: 0.55rem;
+  letter-spacing: 0.3rem;
+  color: var(--muted);
+  z-index: 100;
+  transition: all 0.5s ease;
+}
+
+/* ─── Sections ─── */
+section {
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 40px 20px;
+  align-items: center;
+  padding: 0 8vw;
+  scroll-snap-align: start;
+  position: relative;
+  z-index: 10;
 }
 
-.content {
-  margin: auto;
-  text-align: center;
+.leftAlign {
+  justify-content: flex-start;
 }
 
-/* Logo */
-
-.logo {
-  width: 130px;
-  height: 130px;
-  margin-bottom: 28px;
+.rightAlign {
+  justify-content: flex-end;
 }
 
-/* Brand Name */
-
-.brand {
-  font-size: 3.2rem;
-  font-weight: 700;
-  letter-spacing: -1px;
+/* ─── Section Content ─── */
+.sectionContent {
+  max-width: 580px;
+  position: relative;
 }
 
-.brand span {
-  color: #ff7a00; /* Brand Orange */
+/* ─── Decorative line ─── */
+.sectionLine {
+  width: 1px;
+  height: 72px;
+  display: block;
+  margin-bottom: 2.8rem;
+  transform: scaleY(0);
+  transform-origin: top;
+  animation: lineRevealV 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* Tagline */
-
-.tagline {
-  margin-top: 12px;
-  color: #aaa;
-  font-size: 1rem;
-}
-
-/* Status */
-
-.status {
-  margin-top: 28px;
-  font-size: 0.95rem;
-  letter-spacing: 3px;
+/* ─── Label ─── */
+.sectionLabel {
+  font-family: var(--body);
+  font-weight: 200;
+  font-size: 0.58rem;
+  letter-spacing: 0.52rem;
   text-transform: uppercase;
-  color: #ff7a00;
+  margin-bottom: 1.6rem;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: fadeUp 0.9s ease forwards;
+  animation-delay: 0.2s;
 }
 
-/* Contact */
-
-.contact {
-  margin-top: 18px;
+/* ─── Title ─── */
+.titleWrapper {
+  overflow: hidden;
+  margin-top: -0.14em;
+  margin-right: 0;
+  margin-bottom: -0.08em;
+  margin-left: 0;
+  padding-top: 0.14em;
+  padding-bottom: 0.08em;
 }
 
-.contact a {
-  color: #fff;
+.sectionContent h1 {
+  font-family: var(--display);
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(5.5rem, 9vw, 10rem);
+  line-height: 0.88;
+  letter-spacing: -0.04em;
+  margin-bottom: 0.6rem;
+  transform: translateY(110%);
+  animation: titleReveal 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.05s;
+}
+
+.sectionContent h1 em {
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* ─── .tib suffix on titles ─── */
+.titleDotSuffix {
+  font-style: italic;
+  font-weight: 300;
+  font-size: 0.65em;
+  letter-spacing: -0.02em;
+  opacity: 0.9;
+}
+
+/* ─── Subtitle ─── */
+.sectionSubtitle {
+  max-width: 340px;
+  color: var(--muted);
+  font-family: var(--body);
+  font-weight: 200;
+  font-size: 0.72rem;
+  line-height: 2;
+  letter-spacing: 0.14rem;
+  margin-bottom: 3.2rem;
+  margin-top: 1.8rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 1s ease forwards;
+  animation-delay: 0.4s;
+}
+
+/* ─── CTA Button ─── */
+.sectionButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2.4rem;
+  padding: 0 0 1rem 0;
+  border: none;
+  background: transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.32rem;
+  font-family: var(--body);
+  font-weight: 200;
+  font-size: 0.6rem;
+  color: var(--text);
   text-decoration: none;
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 1s ease forwards;
+  animation-delay: 0.6s;
+  transition: all 0.4s ease;
+  overflow: hidden;
 }
 
-.contact a:hover {
+.sectionButton::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0.5px;
+  background: currentColor;
+  transform: scaleX(1);
+  transform-origin: left;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  opacity: 0.4;
+}
+
+.sectionButton::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0.5px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s;
   opacity: 1;
 }
 
-/* Footer */
-
-.footer {
-  text-align: center;
-  font-size: 0.8rem;
-  color: #555;
+.sectionButton:hover::before {
+  transform: scaleX(1);
 }
-.contact {
-  margin-top: 22px;
+
+.sectionButton:hover .arrow {
+  transform: translateX(10px);
+}
+
+.arrow {
+  font-size: 0.85rem;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  font-weight: 200;
+}
+
+/* ─── Section number watermark ─── */
+.sectionNumber {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateX(calc(50% - 1.5rem)) translateY(-50%) rotate(90deg);
+  transform-origin: center center;
+  font-family: var(--body);
+  font-weight: 200;
+  font-size: 0.5rem;
+  letter-spacing: 0.35rem;
+  text-transform: lowercase;
+  color: var(--whisper);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* ─── Scroll hint ─── */
+.scrollHint {
+  position: fixed;
+  bottom: 2.8rem;
+  right: 3rem;                /* ← moved from left: 4rem to right: 3rem */
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  gap: 0.8rem;
+  z-index: 100;
+  opacity: 0;
+  animation: fadeIn 1s ease forwards 1.5s;
 }
 
-.contact a {
-  color: #fff;
-  text-decoration: none;
-  opacity: 0.75;
-  transition: opacity 0.2s ease;
-  font-size: 0.95rem;
+.scrollHint span {
+  font-family: var(--body);
+  font-weight: 200;
+  font-size: 0.5rem;
+  letter-spacing: 0.35rem;
+  text-transform: uppercase;
+  color: var(--muted);
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  transform: rotate(180deg);
 }
 
-.contact a:hover {
-  opacity: 1;
+.scrollHintLine {
+  width: 0.5px;
+  height: 48px;
+  background: var(--rule);
+  position: relative;
+  overflow: hidden;
+}
+
+.scrollHintLine::after {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--muted);
+  animation: scrollPulse 1.8s ease infinite;
+}
+
+/* ─── Animations ─── */
+@keyframes titleReveal {
+  from { transform: translateY(110%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes lineRevealV {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes scrollPulse {
+  0%   { top: -100%; }
+  100% { top: 100%; }
+}
+
+/* ─── Image size breakpoints ─── */
+@media (min-width: 1800px) {
+  .backgroundImage { background-size: auto 100vh; }
+}
+
+@media (min-width: 1400px) and (max-width: 1799px) {
+  .backgroundImage { background-size: auto 95vh; }
+}
+
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .backgroundImage { background-size: auto 90vh; }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  .backgroundImage { background-size: auto 85vh; }
+}
+
+@media (max-width: 991px) {
+  .backgroundImage {
+    background-size: cover;
+    background-position: center center;
+  }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 991px) {
+  .siteHeader { padding: 1.8rem 2rem; }
+  .siteHeader::after { left: 2rem; right: 2rem; }
+
+  section { padding: 0 2.5rem; }
+
+  .sectionContent h1 {
+    font-size: clamp(4rem, 11vw, 6.5rem);
+  }
+}
+
+@media (max-width: 768px) {
+  body { cursor: auto; }
+  .cursor-dot, .cursor-ring { display: none; }
+
+  .sideNav { display: none; }
+  .scrollHint { display: none; }
+  .sectionNumber { display: none; }
+
+  .siteHeader {
+    padding: 1.4rem 1.5rem;
+    align-items: flex-start;
+  }
+  .siteHeader::after { left: 1.5rem; right: 1.5rem; }
+  .headerContact { display: none; }
+
+  section {
+    justify-content: flex-start !important;
+    padding: 0 1.5rem;
+  }
+
+  .sectionContent h1 {
+    font-size: clamp(3.5rem, 13vw, 5rem);
+  }
+
+  .sectionSubtitle { max-width: 100%; }
+
+  .sectionButton {
+    font-size: 0.55rem;
+    letter-spacing: 0.28rem;
+  }
 }

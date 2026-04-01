@@ -10,7 +10,7 @@
   flex-direction: column;
   justify-content: center;
   gap: 0;
-  background: var(--bg);
+  background: var(--scene-surface-bg, var(--bg));
   min-height: clamp(120px, 20vh, 200px);
 }
 
@@ -86,12 +86,12 @@
 
 .row::before {
   left: 0;
-  background: linear-gradient(to right, var(--bg), transparent);
+  background: linear-gradient(to right, var(--scene-surface-edge, var(--bg)), transparent);
 }
 
 .row::after {
   right: 0;
-  background: linear-gradient(to left, var(--bg), transparent);
+  background: linear-gradient(to left, var(--scene-surface-edge, var(--bg)), transparent);
 }
 
 /* ─── TRACK ─── */

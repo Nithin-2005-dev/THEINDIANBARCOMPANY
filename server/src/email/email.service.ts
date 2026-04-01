@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { renderEmailTemplate } from './email.templates';
 
 @Injectable()
 export class EmailService {
@@ -14,16 +15,210 @@ export class EmailService {
     variables?: Record<string, unknown>;
   }) {
     const provider = this.configService.get<string>('EMAIL_PROVIDER', 'mock');
-    this.logger.log(
-      JSON.stringify({
-        provider,
-        ...params,
-      }),
-    );
+    const from = this.configService.get<string>('EMAIL_FROM', '');
+    const replyTo =
+      this.configService.get<string>('EMAIL_REPLY_TO') || undefined;
+    const rendered = renderEmailTemplate(params.template, {
+      subject: params.subject,
+      variables: params.variables,
+    });
 
-    return {
-      delivered: true,
-      provider,
-    };
+    if (provider === 'mock') {
+      this.logger.log(
+        JSON.stringify({
+          provider,
+          from,
+          to: params.to,
+          subject: rendered.subject,
+          template: params.template,
+          variables: this.redactSensitiveValues(params.variables),
+        }),
+      );
+
+      return {
+        delivered: true,
+        provider,
+      };
+    }
+
+    if (!from) {
+      throw new Error(
+        'EMAIL_FROM is required when EMAIL_PROVIDER is not mock.',
+      );
+    }
+
+    if (provider === 'resend') {
+      return this.sendWithResend({
+        from,
+        to: params.to,
+        replyTo,
+        subject: rendered.subject,
+        html: rendered.html,
+        text: rendered.text,
+      });
+    }
+
+    if (provider === 'sendgrid') {
+      return this.sendWithSendgrid({
+        from,
+        to: params.to,
+        replyTo,
+        subject: rendered.subject,
+        html: rendered.html,
+        text: rendered.text,
+      });
+    }
+
+    if (provider === 'postmark') {
+      return this.sendWithPostmark({
+        from,
+        to: params.to,
+        replyTo,
+        subject: rendered.subject,
+        html: rendered.html,
+        text: rendered.text,
+      });
+    }
+
+    throw new Error(`Unsupported EMAIL_PROVIDER: ${provider}`);
+  }
+
+  private async sendWithResend(payload: {
+    from: string;
+    to: string;
+    replyTo?: string;
+    subject: string;
+    html: string;
+    text: string;
+  }) {
+    const apiKey = this.configService.getOrThrow<string>('RESEND_API_KEY');
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: payload.from,
+        to: [payload.to],
+        reply_to: payload.replyTo,
+        subject: payload.subject,
+        html: payload.html,
+        text: payload.text,
+      }),
+    });
+
+    await this.ensureProviderSuccess('resend', response);
+    return { delivered: true, provider: 'resend' };
+  }
+
+  private async sendWithSendgrid(payload: {
+    from: string;
+    to: string;
+    replyTo?: string;
+    subject: string;
+    html: string;
+    text: string;
+  }) {
+    const apiKey = this.configService.getOrThrow<string>('SENDGRID_API_KEY');
+    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        personalizations: [{ to: [{ email: payload.to }] }],
+        from: { email: payload.from },
+        reply_to: payload.replyTo ? { email: payload.replyTo } : undefined,
+        subject: payload.subject,
+        content: [
+          { type: 'text/plain', value: payload.text },
+          { type: 'text/html', value: payload.html },
+        ],
+      }),
+    });
+
+    await this.ensureProviderSuccess('sendgrid', response);
+    return { delivered: true, provider: 'sendgrid' };
+  }
+
+  private async sendWithPostmark(payload: {
+    from: string;
+    to: string;
+    replyTo?: string;
+    subject: string;
+    html: string;
+    text: string;
+  }) {
+    const apiKey = this.configService.getOrThrow<string>(
+      'POSTMARK_SERVER_TOKEN',
+    );
+    const response = await fetch('https://api.postmarkapp.com/email', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Postmark-Server-Token': apiKey,
+      },
+      body: JSON.stringify({
+        From: payload.from,
+        To: payload.to,
+        ReplyTo: payload.replyTo,
+        Subject: payload.subject,
+        HtmlBody: payload.html,
+        TextBody: payload.text,
+      }),
+    });
+
+    await this.ensureProviderSuccess('postmark', response);
+    return { delivered: true, provider: 'postmark' };
+  }
+
+  private async ensureProviderSuccess(provider: string, response: Response) {
+    if (response.ok) {
+      return;
+    }
+
+    const body = await response.text().catch(() => '');
+    this.logger.error(
+      `Email provider ${provider} failed: ${response.status} ${body}`,
+    );
+    throw new Error(`Email provider ${provider} failed.`);
+  }
+
+  private redactSensitiveValues(value: unknown): unknown {
+    if (Array.isArray(value)) {
+      return value.map((entry) => this.redactSensitiveValues(entry));
+    }
+
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(
+        Object.entries(value).map(([key, entryValue]) => [
+          key,
+          this.isSensitiveKey(key)
+            ? '[REDACTED]'
+            : this.redactSensitiveValues(entryValue),
+        ]),
+      );
+    }
+
+    return value;
+  }
+
+  private isSensitiveKey(key: string) {
+    const normalizedKey = key.toLowerCase();
+
+    return [
+      'otp',
+      'token',
+      'secret',
+      'password',
+      'authorization',
+      'accesskey',
+      'access_token',
+      'refreshkey',
+      'refresh_token',
+    ].some((fragment) => normalizedKey.includes(fragment));
   }
 }

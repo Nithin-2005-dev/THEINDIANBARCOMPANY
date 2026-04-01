@@ -4,5 +4,7 @@ export interface AuthUser {
   userId: string;
   sessionId: string;
   role: Role;
-  phone: string;
+  name?: string | null;
+  phone?: string | null;
+  email?: string | null;
 }

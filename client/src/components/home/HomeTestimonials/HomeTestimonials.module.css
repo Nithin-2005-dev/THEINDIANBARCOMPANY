@@ -5,7 +5,11 @@
 .section {
   position: relative;
   padding: 160px 0 120px;
-  background: var(--bg);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg) 26%, transparent),
+    color-mix(in srgb, var(--bg) 38%, transparent)
+  );
   color: var(--text-primary);
   overflow: hidden;
 }
@@ -135,12 +139,12 @@
 
 .wrapper::before {
   left: 0;
-  background: linear-gradient(to right, var(--bg), transparent);
+  background: linear-gradient(to right, var(--scene-surface-edge, var(--bg)), transparent);
 }
 
 .wrapper::after {
   right: 0;
-  background: linear-gradient(to left, var(--bg), transparent);
+  background: linear-gradient(to left, var(--scene-surface-edge, var(--bg)), transparent);
 }
 
 /* ─── TRACK ─── */
@@ -161,7 +165,7 @@
   border-radius: 18px;
   flex-shrink: 0;
 
-  background: rgba(255,255,255,0.026);
+  background: var(--scene-panel-bg);
   border: 0.5px solid rgba(255,255,255,0.07);
 
   box-shadow:

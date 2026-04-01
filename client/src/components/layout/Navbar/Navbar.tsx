@@ -1,27 +1,59 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import Link from "next/link"
 import Image from "next/image"
+import Link from "next/link"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { usePathname } from "next/navigation"
+import { fetchSharedAuthSession, getPostLoginRedirectPath } from "@/lib/login-auth"
 import styles from "./Navbar.module.css"
 
 const NAV_LINKS = [
-  { href: "/",            label: "TIB",           theme: "tib",     accent: "#f59e0b" },
-  { href: "/martini",     label: "House Parties", theme: "martini", accent: "#d10f1b" },
-  { href: "/negroni",     label: "Pool Parties",  theme: "negroni", accent: "#2dd4bf" },
-  { href: "/cosmo",       label: "Corporate",     theme: "cosmo",   accent: "#c084fc" },
-  { href: "/bloody-mary", label: "Festivals",     theme: "bm",      accent: "#ef4444" },
+  { href: "/",          label: "Home",     accent: "var(--tib-accent)"     },
+  { href: "/#services", label: "Services", accent: "var(--tib-accent)"     },
+  { href: "/booking",   label: "Booking",  accent: "var(--tib-accent)"     },
+  { href: "/#about",    label: "About",    accent: "var(--tib-accent)"     },
+  { href: "/team",      label: "Team",     accent: "var(--tib-accent)"     },
 ]
 
-export default function Header() {
-  const [open, setOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+function isNavLinkActive(pathname: string, href: string) {
+  if (href === "/") {
+    return pathname === "/"
+  }
 
-  const pathname = usePathname()
+  if (href === "/booking") {
+    return pathname === "/booking" || pathname.startsWith("/booking/")
+  }
 
-  const pillRef = useRef<HTMLSpanElement>(null)
-  const navRef  = useRef<HTMLElement>(null)
+  if (href.startsWith("/#")) {
+    return false
+  }
+
+  return pathname === href
+}
+
+function CloseIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+      <path d="M1 1l9 9M10 1L1 10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+function ChevronRight() {
+  return (
+    <svg width="6" height="10" viewBox="0 0 6 10" fill="none" className={styles.chevron}>
+      <path d="M1 1l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+
+export default function Navbar() {
+  const pathname                    = usePathname()
+  const [open, setOpen]             = useState(false)
+  const [scrolled, setScrolled]     = useState(false)
+  const [dashboardHref, setDashboardHref] = useState<string | null>(null)
+  const pillRef                     = useRef<HTMLSpanElement>(null)
+  const navRef                      = useRef<HTMLElement>(null)
 
   /* Scroll detection */
   useEffect(() => {
@@ -30,12 +62,14 @@ export default function Header() {
     return () => window.removeEventListener("scroll", fn)
   }, [])
 
-  /* Close sheet on desktop resize */
+  /* Auth session */
   useEffect(() => {
-    const fn = () => { if (window.innerWidth > 900) setOpen(false) }
-    window.addEventListener("resize", fn)
-    return () => window.removeEventListener("resize", fn)
-  }, [])
+    let active = true
+    fetchSharedAuthSession()
+      .then(data => { if (active) setDashboardHref(getPostLoginRedirectPath(data.user.role)) })
+      .catch(() => { if (active) setDashboardHref(null) })
+    return () => { active = false }
+  }, [pathname])
 
   /* Body scroll lock */
   useEffect(() => {
@@ -43,15 +77,20 @@ export default function Header() {
     return () => { document.body.style.overflow = "" }
   }, [open])
 
-  /* Glide pill movement */
+  /* Close sheet on resize */
+  useEffect(() => {
+    const fn = () => { if (window.innerWidth > 900) setOpen(false) }
+    window.addEventListener("resize", fn)
+    return () => window.removeEventListener("resize", fn)
+  }, [])
+
+  /* Glide pill */
   const movePill = (el: HTMLElement) => {
-    const nav = navRef.current
+    const nav  = navRef.current
     const pill = pillRef.current
     if (!nav || !pill) return
-
     const navRect = nav.getBoundingClientRect()
     const elRect  = el.getBoundingClientRect()
-
     pill.style.width   = `${elRect.width}px`
     pill.style.left    = `${elRect.left - navRect.left}px`
     pill.style.opacity = "1"
@@ -61,27 +100,33 @@ export default function Header() {
     if (pillRef.current) pillRef.current.style.opacity = "0"
   }
 
-  /* Active check (supports nested routes) */
-  const isActive = (href: string) => {
-    if (href === "/") return pathname === "/"
-    return pathname.startsWith(href)
-  }
+  const utilityLink = useMemo(() => (
+    dashboardHref
+      ? { href: dashboardHref, label: "Dashboard" }
+      : { href: "/login",      label: "Login"     }
+  ), [dashboardHref])
 
   return (
     <>
-      {/* HEADER */}
       <header className={`${styles.wrapper} ${scrolled ? styles.scrolled : ""}`}>
         <div className={styles.island}>
 
           {/* LOGO */}
           <Link href="/" className={styles.logo}>
             <span className={styles.logoRing}>
-              <Image src="/logo.png" alt="TIB" width={16} height={16} priority />
+              <Image
+                src="/logo.png"
+                alt="TIB"
+                width={16}
+                height={16}
+                priority
+                style={{ width: "auto", height: "auto" }}
+              />
             </span>
-            <span className={styles.brand}>TIB</span>
+            <span className={styles.brand}>The Indian Bar</span>
           </Link>
 
-          {/* CENTER NAV */}
+          {/* NAV */}
           <nav
             ref={navRef}
             className={styles.nav}
@@ -89,13 +134,12 @@ export default function Header() {
           >
             <span ref={pillRef} className={styles.glidePill} aria-hidden="true" />
 
-            {NAV_LINKS.map(({ href, label, theme, accent }) => (
+            {NAV_LINKS.map(({ href, label, accent }) => (
               <Link
                 key={href}
                 href={href}
-                className={`${styles.link} ${isActive(href) ? styles.linkActive : ""}`}
+                className={`${styles.link} ${isNavLinkActive(pathname, href) ? styles.linkActive : ""}`}
                 style={{ "--accent": accent } as React.CSSProperties}
-                data-theme={theme}
                 onMouseEnter={e => movePill(e.currentTarget)}
               >
                 {label}
@@ -103,16 +147,25 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* HAMBURGER */}
-          <button
-            className={styles.menuBtn}
-            onClick={() => setOpen(true)}
-            aria-label="Open menu"
-            aria-expanded={open}
-          >
-            <span className={styles.bar} />
-            <span className={styles.bar} />
-          </button>
+          {/* ACTIONS */}
+          <div className={styles.actions}>
+            <Link href={utilityLink.href} className={styles.ctaBtn}>
+              <span className={styles.ctaInner}>
+                {utilityLink.label}
+              </span>
+              <span className={styles.ctaShine} />
+            </Link>
+
+            <button
+              className={styles.menuBtn}
+              onClick={() => setOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={open}
+            >
+              <span className={styles.bar} />
+              <span className={styles.bar} />
+            </button>
+          </div>
 
         </div>
       </header>
@@ -121,16 +174,17 @@ export default function Header() {
       <div
         className={`${styles.backdrop} ${open ? styles.show : ""}`}
         onClick={() => setOpen(false)}
-        aria-hidden
+        aria-hidden="true"
       />
 
-      {/* MOBILE SHEET */}
+      {/* SHEET */}
       <div
         className={`${styles.sheet} ${open ? styles.open : ""}`}
         role="dialog"
         aria-modal="true"
       >
-        {/* Top */}
+
+        {/* Sheet top */}
         <div className={styles.sheetTop}>
           <span className={styles.sheetBrand}>TIB</span>
           <button
@@ -142,13 +196,13 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Links */}
+        {/* Sheet nav */}
         <nav className={styles.sheetNav}>
           {NAV_LINKS.map(({ href, label, accent }, i) => (
             <Link
               key={href}
               href={href}
-              className={`${styles.mobileLink} ${isActive(href) ? styles.mobileLinkActive : ""}`}
+              className={`${styles.mobileLink} ${isNavLinkActive(pathname, href) ? styles.mobileLinkActive : ""}`}
               style={{
                 "--accent": accent,
                 transitionDelay: open ? `${i * 55 + 60}ms` : "0ms",
@@ -162,31 +216,26 @@ export default function Header() {
               <ChevronRight />
             </Link>
           ))}
+
+          {/* Utility link */}
+          <Link
+            href={utilityLink.href}
+            className={styles.sheetCta}
+            style={{
+              transitionDelay: open ? `${NAV_LINKS.length * 55 + 60}ms` : "0ms",
+            }}
+            onClick={() => setOpen(false)}
+          >
+            {utilityLink.label}
+          </Link>
         </nav>
 
-        {/* Ambient footer */}
+        {/* Footer line */}
         <div className={styles.sheetFoot}>
           <span className={styles.footLine} />
         </div>
+
       </div>
     </>
-  )
-}
-
-/* ───────── ICONS ───────── */
-
-function CloseIcon() {
-  return (
-    <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-      <path d="M1 1l9 9M10 1L1 10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-    </svg>
-  )
-}
-
-function ChevronRight() {
-  return (
-    <svg width="6" height="10" viewBox="0 0 6 10" fill="none">
-      <path d="M1 1l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
   )
 }

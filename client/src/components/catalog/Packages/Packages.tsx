@@ -2,6 +2,8 @@
 
 import styles from "./Packages.module.css"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { buildBookingHref } from "@/components/booking/booking-service-config"
 
 type Package = {
   name: string
@@ -15,10 +17,34 @@ type PackagesProps = {
   title: string
   subtitle: string
   packages: Package[]
+  serviceLabel?: string
+  serviceSlug?: string
 }
 
-export default function Packages({ title, subtitle, packages }: PackagesProps) {
+export default function Packages({
+  title,
+  subtitle,
+  packages,
+  serviceLabel = "Private Event",
+  serviceSlug,
+}: PackagesProps) {
   const [hovered, setHovered] = useState<string | null>(null)
+  const router = useRouter()
+
+  const handleQuoteClick = (pkg: Package) => {
+    router.push(
+      buildBookingHref({
+        service: serviceSlug,
+        selection: {
+          serviceLabel,
+          packageName: pkg.name,
+          packageGuests: pkg.guests,
+          packagePrice: pkg.price,
+          packageLabel: pkg.guests,
+        },
+      }),
+    )
+  }
 
   return (
     <section id="packages" className={styles.section}>
@@ -88,9 +114,13 @@ export default function Packages({ title, subtitle, packages }: PackagesProps) {
             </ul>
 
             {/* CTA */}
-            <button className={`${styles.cta} ${pkg.popular ? styles.ctaPrimary : styles.ctaGhost}`}>
+            <button
+              type="button"
+              className={`${styles.cta} ${pkg.popular ? styles.ctaPrimary : styles.ctaGhost}`}
+              onClick={() => handleQuoteClick(pkg)}
+            >
               <span className={styles.ctaInner}>
-                Get Quote
+                Check Availability
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className={styles.ctaArrow}>
                   <path d="M1 6.5h11M7 2l4.5 4.5L7 11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>

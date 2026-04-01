@@ -4,6 +4,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsUrl,
   IsUUID,
   MaxLength,
   Min,
@@ -34,6 +35,12 @@ export class CreateProposalDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsOptional()
+  @IsUrl({
+    require_protocol: true,
+  })
+  documentUrl?: string;
 
   @IsOptional()
   @IsEnum(ProposalStatus)

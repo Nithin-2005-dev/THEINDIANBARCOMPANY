@@ -9,6 +9,7 @@ import { packagesData } from '@/data/packages'
 import { galleriesData } from '@/data/galleries'
 import { addonsData } from '@/data/addons'
 import { buildMetadata } from '@/lib/seo'
+import { buildBookingHref } from '@/components/booking/booking-service-config'
 
 export const metadata: Metadata = buildMetadata({
   title: "Corporate Events",
@@ -25,13 +26,25 @@ export const metadata: Metadata = buildMetadata({
 })
 
 const page = () => {
+  const bookingHref = buildBookingHref({ service: "corporate" })
+
   return (
     <main>
-      <Hero {...heroes.cosmo}/>
-      <Packages {...packagesData.cosmo}/>
+      <Hero
+        {...heroes.cosmo}
+        primaryCta="Check Availability"
+        primaryHref={bookingHref}
+        secondaryCta="Talk to an Expert"
+        secondaryHref={bookingHref}
+      />
+      <Packages
+        {...packagesData.cosmo}
+        serviceLabel="Corporate Event"
+        serviceSlug="corporate"
+      />
       <Gallery {...galleriesData.cosmo}/>
       <Addons {...addonsData.cosmo}/>
-      <FinalCTA/>
+      <FinalCTA serviceLabel="Corporate Event" serviceSlug="corporate" />
     </main>
   )
 }

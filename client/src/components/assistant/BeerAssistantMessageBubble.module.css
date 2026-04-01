@@ -1,0 +1,209 @@
+.message {
+  display: grid;
+  gap: 0.55rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.assistant {
+  justify-items: start;
+}
+
+.user {
+  justify-items: end;
+}
+
+.card {
+  display: grid;
+  gap: 0.8rem;
+  width: min(60rem, 100%);
+  padding: 0.98rem 1.05rem;
+  border-radius: 1.35rem;
+  border: 1px solid rgba(255, 211, 136, 0.12);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.24);
+}
+
+.assistant .card {
+  border-radius: 1.35rem 1.35rem 1.35rem 0.55rem;
+  background:
+    linear-gradient(180deg, rgba(28, 22, 16, 0.98), rgba(17, 14, 10, 0.98));
+}
+
+.user .card {
+  border-radius: 1.35rem 1.35rem 0.55rem 1.35rem;
+  background:
+    linear-gradient(180deg, rgba(255, 196, 92, 0.14), rgba(132, 85, 20, 0.18));
+  border-color: rgba(255, 208, 130, 0.2);
+}
+
+.cardGreeting {
+  border-color: rgba(255, 201, 120, 0.3);
+  box-shadow:
+    0 16px 42px rgba(0, 0, 0, 0.24),
+    0 0 0 1px rgba(255, 201, 120, 0.05) inset;
+}
+
+.cardIdentity {
+  border-color: rgba(255, 217, 152, 0.26);
+}
+
+.cardCapability {
+  border-color: rgba(255, 205, 120, 0.34);
+}
+
+.cardDirectAnswer {
+  border-color: rgba(255, 225, 181, 0.16);
+}
+
+.cardRecommendation {
+  border-color: rgba(168, 122, 32, 0.38);
+}
+
+.cardClarification {
+  border-color: rgba(132, 194, 189, 0.34);
+}
+
+.cardFollowUp {
+  border-color: rgba(255, 188, 98, 0.34);
+}
+
+.cardEscalation {
+  border-color: rgba(220, 122, 92, 0.42);
+}
+
+.cardUnsupported {
+  border-color: rgba(191, 90, 90, 0.38);
+}
+
+.cardSummary {
+  border-color: rgba(255, 214, 140, 0.22);
+}
+
+.cardDraft {
+  border-color: rgba(169, 172, 96, 0.28);
+}
+
+.cardResult {
+  border-color: rgba(181, 188, 194, 0.26);
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.85rem;
+  align-items: center;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 228, 177, 0.62);
+}
+
+.author {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.avatar {
+  position: relative;
+  display: block;
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 0.8rem;
+  background: transparent;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.time {
+  color: rgba(255, 255, 255, 0.42);
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.action {
+  appearance: none;
+  border: 1px solid rgba(255, 208, 130, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffebc3;
+  border-radius: 999px;
+  padding: 0.52rem 0.88rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    background 140ms ease,
+    border-color 140ms ease;
+}
+
+.action:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 204, 122, 0.12);
+  border-color: rgba(255, 208, 130, 0.28);
+}
+
+.actionGreeting {
+  background: rgba(255, 214, 140, 0.12);
+  border-color: rgba(255, 214, 140, 0.28);
+}
+
+.actionIdentity {
+  background: rgba(255, 224, 176, 0.1);
+  border-color: rgba(255, 224, 176, 0.24);
+}
+
+.actionCapability {
+  background: rgba(255, 210, 128, 0.1);
+  border-color: rgba(255, 210, 128, 0.24);
+}
+
+.actionDirectAnswer {
+  background: rgba(255, 245, 229, 0.05);
+  border-color: rgba(255, 228, 177, 0.18);
+}
+
+.actionRecommendation {
+  background: rgba(174, 126, 38, 0.12);
+  border-color: rgba(225, 164, 74, 0.24);
+}
+
+.actionClarification {
+  background: rgba(126, 186, 179, 0.1);
+  border-color: rgba(126, 186, 179, 0.26);
+}
+
+.actionFollowUp {
+  background: rgba(255, 192, 112, 0.12);
+  border-color: rgba(255, 192, 112, 0.26);
+}
+
+.actionEscalation {
+  background: rgba(195, 103, 73, 0.13);
+  border-color: rgba(230, 128, 92, 0.28);
+}
+
+.actionUnsupported {
+  background: rgba(166, 73, 73, 0.12);
+  border-color: rgba(216, 104, 104, 0.26);
+}
+
+.actionSummary {
+  background: rgba(255, 214, 140, 0.1);
+  border-color: rgba(255, 214, 140, 0.22);
+}
+
+.actionDraft {
+  background: rgba(170, 170, 96, 0.12);
+  border-color: rgba(199, 199, 108, 0.24);
+}
+
+.actionResult {
+  background: rgba(188, 188, 188, 0.08);
+  border-color: rgba(196, 196, 196, 0.2);
+}

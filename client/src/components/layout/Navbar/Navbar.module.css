@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   TIB NAVBAR — Liquid Obsidian · World-Class Premium
+   NAVBAR — TIB Liquid Obsidian
    ═══════════════════════════════════════════════════════ */
 
 /* ─── WRAPPER ─── */
@@ -23,7 +23,7 @@
   display: flex;
   align-items: center;
   width: calc(100% - 40px);
-  max-width: 860px;
+  max-width: 900px;
   height: 46px;
   padding: 0 8px 0 14px;
   border-radius: 16px;
@@ -94,10 +94,11 @@
 .brand {
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: rgba(255,255,255,0.88);
   font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
+  white-space: nowrap;
 }
 
 /* ─── NAV ─── */
@@ -140,30 +141,89 @@
   height: 30px;
   padding: 0 13px;
   border-radius: 8px;
-
   font-size: 12.5px;
   font-weight: 400;
   letter-spacing: -0.005em;
   font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-
-  color: rgba(255,255,255,0.68);
+  color: rgba(255,255,255,0.62);
   text-decoration: none;
-
   transition: color 0.25s ease;
   white-space: nowrap;
 }
 
 .link:hover {
-  color: var(--accent);
+  color: var(--accent, rgba(255,255,255,0.92));
 }
 
-/* Active — accent color, slightly bolder */
 .linkActive {
-  color: var(--accent) !important;
+  color: var(--tib-accent) !important;
   font-weight: 500;
 }
 
-/* ─── HAMBURGER ─── */
+/* ─── ACTIONS ─── */
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* CTA */
+
+.ctaBtn {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  background: linear-gradient(135deg, var(--tib-accent), var(--tib-primary));
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.15),
+    0 4px 14px -3px color-mix(in srgb, var(--tib-primary) 55%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ctaBtn:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.2),
+    0 8px 20px -3px color-mix(in srgb, var(--tib-primary) 65%, transparent);
+}
+
+.ctaBtn:active { transform: scale(0.97); }
+
+.ctaInner {
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  color: var(--tib-bg);
+  position: relative;
+  z-index: 1;
+}
+
+.ctaShine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255,255,255,0.2) 50%,
+    transparent 65%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+  pointer-events: none;
+}
+
+.ctaBtn:hover .ctaShine { transform: translateX(100%); }
+
+/* HAMBURGER */
 
 .menuBtn {
   display: none;
@@ -177,7 +237,6 @@
   border: none;
   cursor: pointer;
   padding: 0 2px;
-  margin-left: auto;
 }
 
 .bar {
@@ -233,7 +292,6 @@
     0 0 0 0.5px rgba(255,255,255,0.1),
     0 0 0 1px rgba(0,0,0,0.6),
     0 -8px 60px -10px rgba(0,0,0,0.7),
-    0 40px 80px -20px rgba(0,0,0,0.5),
     inset 0 1px 0 rgba(255,255,255,0.09);
 
   transform: translateY(calc(100% + 14px));
@@ -302,14 +360,12 @@
   border-radius: 14px;
   text-decoration: none;
   cursor: pointer;
-
   opacity: 0;
   transform: translateY(14px) scale(0.98);
   transition:
     opacity     0.38s ease,
     transform   0.38s cubic-bezier(0.22, 0.61, 0.36, 1),
-    background  0.2s ease,
-    box-shadow  0.2s ease;
+    background  0.2s ease;
 }
 
 .sheet.open .mobileLink {
@@ -338,21 +394,20 @@
 .mobileLink:active {
   background: rgba(255,255,255,0.025);
   transform: scale(0.99);
-  transition: transform 0.1s ease, background 0.1s ease;
 }
 
 /* Active mobile link */
 .mobileLinkActive .mobileLinkLabel {
-  color: var(--accent);
+  color: var(--tib-accent);
 }
 
 .mobileLinkActive .mobileDot {
-  background: var(--accent);
-  box-shadow: 0 0 8px 2px color-mix(in srgb, var(--accent) 50%, transparent);
+  background: var(--tib-accent);
+  box-shadow: 0 0 8px 2px color-mix(in srgb, var(--tib-accent) 50%, transparent);
 }
 
 .mobileLinkActive .chevron {
-  color: var(--accent);
+  color: var(--tib-accent);
 }
 
 /* Inner layout */
@@ -387,6 +442,38 @@
   transition: color 0.2s ease, transform 0.2s ease;
 }
 
+/* Sheet CTA */
+
+.sheetCta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  border-radius: 12px;
+  margin-top: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  color: var(--tib-bg);
+  background: linear-gradient(135deg, var(--tib-accent), var(--tib-primary));
+  box-shadow:
+    0 4px 16px -3px color-mix(in srgb, var(--tib-primary) 50%, transparent);
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity   0.38s ease,
+    transform 0.38s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.sheet.open .sheetCta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sheetCta:active { transform: scale(0.98); }
+
 /* SHEET FOOTER */
 
 .sheetFoot {
@@ -412,6 +499,7 @@
 @media (max-width: 900px) {
   .nav     { display: none; }
   .menuBtn { display: flex; }
+  .ctaBtn  { display: none; }
   .island  { padding: 0 10px 0 14px; }
 }
 

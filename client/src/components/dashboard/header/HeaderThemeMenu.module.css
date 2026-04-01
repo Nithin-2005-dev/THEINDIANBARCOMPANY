@@ -1,0 +1,223 @@
+.container {
+  position: relative;
+  min-width: 0;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.45rem;
+  padding: 0.2rem 0.68rem 0.2rem 0.2rem;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 999px;
+  background: var(--dashboard-panel-soft);
+  color: var(--tib-text-primary);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.trigger:hover,
+.triggerOpen {
+  transform: translateY(-1px);
+  border-color: var(--dashboard-border-strong);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.trigger:focus-visible,
+.option:focus-visible {
+  outline: 2px solid rgba(var(--tib-accent-gold-rgb), 0.28);
+  outline-offset: 2px;
+}
+
+.swatch {
+  --theme-accent: var(--dashboard-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.95rem;
+  height: 1.95rem;
+  border: 1px solid color-mix(in srgb, var(--theme-accent) 32%, transparent);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--theme-accent) 28%, white 8%), transparent 68%),
+    rgba(255, 255, 255, 0.03);
+  color: color-mix(in srgb, var(--theme-accent) 58%, white 42%);
+  flex-shrink: 0;
+}
+
+.meta,
+.optionMeta {
+  min-width: 0;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.02rem;
+}
+
+.label,
+.menuLabel {
+  color: var(--dashboard-subtle);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.value {
+  color: var(--tib-text-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.45rem);
+  width: min(22rem, calc(100vw - 2rem));
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.55rem;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 1rem;
+  background: var(--dashboard-panel-strong);
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.24);
+  z-index: 12;
+}
+
+.summary {
+  padding: 0.72rem 0.82rem 0.62rem;
+  border-bottom: 1px solid var(--dashboard-border);
+}
+
+.menuCopy,
+.optionDescription {
+  color: var(--tib-text-secondary);
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+
+.menuCopy {
+  margin-top: 0.24rem;
+}
+
+.options {
+  display: grid;
+  gap: 0.32rem;
+}
+
+.option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 3.15rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid transparent;
+  border-radius: 0.88rem;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.option:hover,
+.optionActive {
+  transform: translateY(-1px);
+  border-color: var(--dashboard-border);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.optionSwatch {
+  --theme-accent: var(--dashboard-accent);
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 999px;
+  background: var(--theme-accent);
+  box-shadow: 0 0 0 0.22rem color-mix(in srgb, var(--theme-accent) 16%, transparent);
+  flex-shrink: 0;
+}
+
+.optionLabel {
+  display: block;
+  color: var(--tib-text-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.optionDescription {
+  display: block;
+  margin-top: 0.12rem;
+}
+
+.optionBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.55rem;
+  padding: 0 0.58rem;
+  border: 1px solid rgba(var(--tib-accent-gold-rgb), 0.18);
+  border-radius: 999px;
+  background: rgba(var(--tib-accent-gold-rgb), 0.08);
+  color: var(--tib-text-primary);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1180px) {
+  .meta {
+    display: none;
+  }
+
+  .trigger {
+    width: 2.45rem;
+    padding-right: 0.2rem;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 767px) {
+  .menu {
+    right: -2.75rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .trigger {
+    width: 2.2rem;
+    min-height: 2.2rem;
+    padding: 0.14rem;
+    border-radius: 0.82rem;
+  }
+
+  .swatch {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .menu {
+    right: 0;
+    width: min(20rem, calc(100vw - 1.6rem));
+  }
+
+  .option {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .optionBadge {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 0.18rem;
+  }
+}

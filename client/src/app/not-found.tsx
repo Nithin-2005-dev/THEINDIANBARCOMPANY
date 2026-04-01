@@ -67,7 +67,7 @@ export default function NotFound() {
         {/* Subtitle */}
         <p className={`${styles.subtitle} ${mounted ? styles.fadeUp : ""}`}
            style={{ animationDelay: "0.46s" }}>
-          The page you are looking for doesn't exist or has been moved.
+          The page you are looking for does not exist or has been moved.
         </p>
 
         {/* Actions */}

@@ -1,0 +1,353 @@
+.root {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012)),
+    rgba(11, 12, 16, 0.94);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 18px 42px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(16px);
+  padding: 1rem;
+}
+
+.root::before {
+  content: "";
+  position: absolute;
+  inset: -15% auto auto -10%;
+  width: 15rem;
+  height: 15rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(var(--booking-accent-rgb), 0.06), transparent 72%);
+  pointer-events: none;
+}
+
+.header {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: color-mix(in srgb, var(--booking-metallic) 84%, white 16%);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0.35rem 0 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-serif);
+  font-size: clamp(1.28rem, 6vw, 1.6rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  padding: 0 0.7rem;
+  border: 1px solid rgba(var(--booking-accent-rgb), 0.14);
+  border-radius: 999px;
+  background: rgba(var(--booking-accent-rgb), 0.05);
+  color: color-mix(in srgb, var(--booking-metallic) 84%, white 16%);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.liveDot {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: rgba(var(--booking-accent-rgb), 0.54);
+}
+
+.previewCard {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 0.9rem;
+  padding: 0.92rem;
+  border: 1px solid rgba(var(--booking-accent-rgb), 0.12);
+  border-radius: 1.2rem;
+  background:
+    linear-gradient(180deg, rgba(var(--booking-accent-rgb), 0.08), rgba(var(--booking-accent-rgb), 0.03)),
+    rgba(255, 255, 255, 0.02);
+}
+
+.previewArt {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 0.45rem;
+  align-content: end;
+  min-height: 6rem;
+  padding: 0.92rem;
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.08), transparent 24%),
+    radial-gradient(circle at 78% 28%, rgba(var(--booking-accent-rgb), 0.12), transparent 28%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(8, 9, 12, 0.1)),
+    rgba(7, 8, 10, 0.68);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.previewArt::after {
+  content: "";
+  position: absolute;
+  inset: auto -10% -40% auto;
+  width: 8rem;
+  height: 8rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(var(--booking-accent-rgb), 0.08), transparent 72%);
+}
+
+.previewArtLabel,
+.previewEyebrow,
+.estimateLabel,
+.reassuranceTitle,
+.label {
+  color: color-mix(in srgb, var(--color-text-secondary) 80%, white 20%);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.previewArtLabel {
+  position: relative;
+  z-index: 1;
+}
+
+.previewArtValue {
+  position: relative;
+  z-index: 1;
+  color: var(--color-text-primary);
+  font-family: var(--font-serif);
+  font-size: clamp(1.12rem, 5vw, 1.4rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+
+.previewCopy {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.previewEyebrow,
+.previewTitle,
+.previewDescription {
+  margin: 0;
+}
+
+.previewTitle {
+  color: var(--color-text-primary);
+  font-size: 0.96rem;
+  font-weight: 700;
+}
+
+.previewDescription {
+  color: color-mix(in srgb, var(--color-text-secondary) 78%, white 22%);
+  font-size: 0.84rem;
+  line-height: 1.64;
+}
+
+.previewPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.12rem;
+}
+
+.previewPill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--color-text-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.grid {
+  display: grid;
+  gap: 0.72rem;
+  margin: 1rem 0 0;
+}
+
+.row {
+  display: grid;
+  gap: 0.48rem;
+  padding: 0.82rem 0.86rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1.08rem;
+  background: rgba(255, 255, 255, 0.02);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.rowChanged {
+  border-color: rgba(var(--booking-accent-rgb), 0.16);
+  background:
+    linear-gradient(180deg, rgba(var(--booking-accent-rgb), 0.06), rgba(var(--booking-accent-rgb), 0.02)),
+    rgba(255, 255, 255, 0.02);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.14);
+  animation: rowFlash 720ms ease;
+}
+
+.rowMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.iconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border: 1px solid rgba(var(--booking-accent-rgb), 0.14);
+  border-radius: 0.85rem;
+  background: rgba(var(--booking-accent-rgb), 0.05);
+  color: color-mix(in srgb, var(--booking-metallic) 84%, white 16%);
+}
+
+.iconWrap svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.label {
+  margin: 0;
+}
+
+.value {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.66;
+}
+
+.estimateCard {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  padding: 0.92rem;
+  border: 1px solid rgba(var(--booking-accent-rgb), 0.12);
+  border-radius: 1.12rem;
+  background:
+    linear-gradient(180deg, rgba(var(--booking-accent-rgb), 0.06), rgba(var(--booking-accent-rgb), 0.02)),
+    rgba(255, 255, 255, 0.02);
+}
+
+.estimateCopy {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.estimateValue {
+  color: var(--color-text-primary);
+  font-size: 0.96rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.estimateHint {
+  margin: 0;
+  color: color-mix(in srgb, var(--booking-metallic) 84%, white 16%);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.reassurance {
+  margin-top: 1rem;
+  padding: 0.92rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1.08rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.list {
+  display: grid;
+  gap: 0.66rem;
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  color: color-mix(in srgb, var(--color-text-secondary) 78%, white 22%);
+  font-size: 0.84rem;
+  line-height: 1.62;
+}
+
+.list li {
+  position: relative;
+  padding-left: 1.18rem;
+}
+
+.list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55rem;
+  width: 0.44rem;
+  height: 0.44rem;
+  border-radius: 999px;
+  background: rgba(var(--booking-accent-rgb), 0.58);
+}
+
+@keyframes rowFlash {
+  0% {
+    transform: translateY(2px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 720px) {
+  .root {
+    padding: 1.1rem;
+    border-radius: 1.5rem;
+  }
+
+  .previewCard,
+  .estimateCard,
+  .reassurance {
+    padding: 1rem;
+  }
+
+  .previewArt {
+    min-height: 6.8rem;
+  }
+
+  .header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .estimateCard {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
+  .estimateHint {
+    text-align: right;
+  }
+}

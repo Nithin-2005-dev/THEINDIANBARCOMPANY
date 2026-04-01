@@ -2,6 +2,7 @@
 
 import styles from "./Gallery.module.css"
 import { useState } from "react"
+import Image from "next/image"
 
 type GalleryProps = {
   title: string
@@ -40,12 +41,22 @@ export default function Gallery({ title, subtitle, images }: GalleryProps) {
       {/* GRID */}
       <div className={styles.grid}>
         {images.map((src, i) => (
-          <div
+          <button
             key={i}
+            type="button"
             className={styles.card}
             onClick={() => setLightbox(i)}
+            aria-label={`Open gallery image ${i + 1}`}
           >
-            <img src={src} alt={`Experience ${i + 1}`} loading="lazy" />
+            <span className={styles.cardMedia}>
+              <Image
+                src={src}
+                alt={`Experience ${i + 1}`}
+                fill
+                sizes="(max-width: 540px) 100vw, (max-width: 900px) 50vw, 33vw"
+                className={styles.cardImage}
+              />
+            </span>
 
             {/* Gradient */}
             <div className={styles.cardOverlay} />
@@ -64,21 +75,26 @@ export default function Gallery({ title, subtitle, images }: GalleryProps) {
 
             {/* Bottom accent line */}
             <span className={styles.cardAccent} />
-          </div>
+          </button>
         ))}
       </div>
 
       {/* LIGHTBOX */}
       {lightbox !== null && (
-        <div className={styles.lightbox} onClick={close}>
+        <div className={styles.lightbox} onClick={close} role="dialog" aria-modal="true" aria-label="Gallery image viewer">
 
           <div className={styles.lightboxInner} onClick={e => e.stopPropagation()}>
 
-            <img
-              src={images[lightbox]}
-              alt={`Experience ${lightbox + 1}`}
-              className={styles.lightboxImg}
-            />
+            <div className={styles.lightboxMedia}>
+              <Image
+                src={images[lightbox]}
+                alt={`Experience ${lightbox + 1}`}
+                fill
+                sizes="90vw"
+                className={styles.lightboxImg}
+                priority
+              />
+            </div>
 
             {/* Vignette */}
             <div className={styles.lightboxVignette} />
@@ -89,21 +105,21 @@ export default function Gallery({ title, subtitle, images }: GalleryProps) {
             </span>
 
             {/* Close */}
-            <button className={styles.closeBtn} onClick={close} aria-label="Close">
+            <button type="button" className={styles.closeBtn} onClick={close} aria-label="Close">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
               </svg>
             </button>
 
             {/* Prev */}
-            <button className={`${styles.navBtn} ${styles.navPrev}`} onClick={prev} aria-label="Previous">
+            <button type="button" className={`${styles.navBtn} ${styles.navPrev}`} onClick={prev} aria-label="Previous">
               <svg width="10" height="16" viewBox="0 0 10 16" fill="none">
                 <path d="M9 1L1 8l8 7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
 
             {/* Next */}
-            <button className={`${styles.navBtn} ${styles.navNext}`} onClick={next} aria-label="Next">
+            <button type="button" className={`${styles.navBtn} ${styles.navNext}`} onClick={next} aria-label="Next">
               <svg width="10" height="16" viewBox="0 0 10 16" fill="none">
                 <path d="M1 1l8 7-8 7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>

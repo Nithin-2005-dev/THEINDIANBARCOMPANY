@@ -19,17 +19,22 @@ import { JwtService } from '@nestjs/jwt';
 import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { QueueService } from '../queue/queue.service';
 import { UsersService } from '../users/users.service';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
+import {
+  AuthWorkspaceRole,
+  matchesAuthWorkspaceRole,
+} from './auth-workspace-role';
 
 interface ClientContext {
   ipAddress?: string;
   deviceFingerprint?: string;
   userAgent?: string;
 }
+
+type OtpDeliveryChannel = 'PHONE' | 'EMAIL';
 
 @Injectable()
 export class AuthService {
@@ -39,34 +44,64 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly auditService: AuditService,
     private readonly notificationsService: NotificationsService,
-    private readonly queueService: QueueService,
     private readonly usersService: UsersService,
   ) {}
 
   async sendOtp(dto: SendOtpDto, client: ClientContext) {
-    const user = await this.prisma.user.upsert({
-      where: { phone: dto.phone },
-      update: {
-        name: dto.name,
-      },
-      create: {
-        phone: dto.phone,
-        name: dto.name,
-        role: Role.CLIENT,
-      },
-    });
+    const target = this.resolveOtpTarget(dto);
+    const requestedRole = dto.roleHint;
+    let user = await this.findUserByTarget(target.phone, target.email);
 
-    await this.enforceOtpRequestPolicies(dto.phone);
+    if (!user) {
+      if (requestedRole !== AuthWorkspaceRole.CLIENT) {
+        throw new NotFoundException('Account not found for selected role.');
+      }
+
+      user = await this.prisma.user.create({
+        data: {
+          phone: target.phone ?? null,
+          email: target.email ?? null,
+          name: dto.name?.trim() || undefined,
+          role: Role.CLIENT,
+        },
+      });
+    } else {
+      if (!matchesAuthWorkspaceRole(user.role, requestedRole)) {
+        throw new ForbiddenException('Invalid role selection.');
+      }
+
+      if (!user.isActive) {
+        throw new ForbiddenException('This account is inactive.');
+      }
+
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          name: dto.name?.trim() || user.name,
+          phone: user.phone ?? target.phone ?? null,
+          email: user.email ?? target.email ?? null,
+        },
+      });
+    }
+
+    await this.enforceOtpRequestPolicies(target.identifier);
 
     const otp = this.generateOtp();
-    const expiryMinutes = this.configService.getOrThrow<number>('OTP_EXPIRY_MINUTES');
-    const cooldownSeconds = this.configService.getOrThrow<number>('OTP_RESEND_COOLDOWN_SECONDS');
-    const maxAttempts = this.configService.getOrThrow<number>('OTP_MAX_FAILURES');
+    const expiryMinutes =
+      this.configService.getOrThrow<number>('OTP_EXPIRY_MINUTES');
+    const cooldownSeconds = this.configService.getOrThrow<number>(
+      'OTP_RESEND_COOLDOWN_SECONDS',
+    );
+    const maxAttempts =
+      this.configService.getOrThrow<number>('OTP_MAX_FAILURES');
 
     const challenge = await this.prisma.otpChallenge.create({
       data: {
         userId: user.id,
-        phone: dto.phone,
+        identifier: target.identifier,
+        channel: target.channel,
+        phone: target.phone ?? null,
+        email: target.email ?? null,
         otpCodeHash: await bcrypt.hash(otp, 10),
         expiresAt: new Date(Date.now() + expiryMinutes * 60 * 1000),
         cooldownUntil: new Date(Date.now() + cooldownSeconds * 1000),
@@ -76,12 +111,31 @@ export class AuthService {
     });
 
     const message = `Your login OTP is ${otp}. It expires in ${expiryMinutes} minutes.`;
-    await this.queueService.queueOtp({
-      phone: dto.phone,
-      message,
-      challengeId: challenge.id,
-    });
-    await this.notificationsService.sendOtp(dto.phone, message);
+    try {
+      await this.notificationsService.sendOtp({
+        channel: target.channel,
+        destination: target.identifier,
+        message,
+        subject: 'Your login OTP',
+        template: 'otp-login',
+        variables: {
+          otp,
+          expiryMinutes,
+          identifier: target.identifier,
+        },
+      });
+    } catch {
+      await this.prisma.otpChallenge.deleteMany({
+        where: {
+          id: challenge.id,
+        },
+      });
+
+      throw new BadRequestException(
+        'We could not send the sign-in code. Please try again.',
+      );
+    }
+
     await this.auditService.log({
       action: AuditAction.OTP_SENT,
       entityType: 'OtpChallenge',
@@ -89,7 +143,8 @@ export class AuthService {
       userId: user.id,
       ipAddress: client.ipAddress,
       metadata: {
-        phone: dto.phone,
+        channel: target.channel,
+        identifier: target.identifier,
       },
     });
 
@@ -98,6 +153,8 @@ export class AuthService {
       message: 'OTP generated successfully.',
       expiresInMinutes: expiryMinutes,
       resendAvailableAt: challenge.cooldownUntil,
+      sentTo: this.maskIdentifier(target.identifier, target.channel),
+      channel: target.channel,
       debugOtp:
         this.configService.getOrThrow<string>('NODE_ENV') === 'production'
           ? undefined
@@ -106,10 +163,11 @@ export class AuthService {
   }
 
   async verifyOtp(dto: VerifyOtpDto, client: ClientContext) {
+    const target = this.resolveOtpTarget(dto);
     const challenge = await this.prisma.otpChallenge.findFirst({
       where: {
         id: dto.challengeId,
-        phone: dto.phone,
+        identifier: target.identifier,
       },
       include: {
         user: true,
@@ -121,6 +179,10 @@ export class AuthService {
     }
 
     const challengeUser = challenge.user;
+
+    if (!matchesAuthWorkspaceRole(challengeUser.role, dto.expectedRole)) {
+      throw new UnauthorizedException('Invalid role selection.');
+    }
 
     if (
       challenge.status !== OtpChallengeStatus.PENDING ||
@@ -139,7 +201,9 @@ export class AuthService {
         where: { id: challenge.id },
         data: {
           attempts: nextAttempts,
-          status: shouldLock ? OtpChallengeStatus.LOCKED : OtpChallengeStatus.FAILED,
+          status: shouldLock
+            ? OtpChallengeStatus.LOCKED
+            : OtpChallengeStatus.FAILED,
           abuseDetectedAt: shouldLock ? new Date() : null,
           abuseReason: shouldLock ? 'too_many_attempts' : null,
           verifyIpAddress: client.ipAddress,
@@ -155,7 +219,8 @@ export class AuthService {
         ipAddress: client.ipAddress,
         metadata: {
           attempts: nextAttempts,
-          phone: dto.phone,
+          channel: target.channel,
+          identifier: target.identifier,
         },
       });
       throw new UnauthorizedException('Invalid or expired OTP.');
@@ -179,7 +244,11 @@ export class AuthService {
         },
       });
 
-      return this.issueSessionTokens(freshUser, client, tx);
+      const tokens = await this.issueSessionTokens(freshUser, client, tx);
+      return {
+        ...tokens,
+        user: this.usersService.serializeUser(freshUser),
+      };
     });
 
     await this.auditService.log({
@@ -192,7 +261,6 @@ export class AuthService {
 
     return {
       ...session,
-      user: this.usersService.serializeUser(challengeUser),
     };
   }
 
@@ -223,13 +291,20 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token expired or revoked.');
     }
 
-    const matches = await bcrypt.compare(dto.refreshToken, session.refreshTokenHash);
+    const matches = await bcrypt.compare(
+      dto.refreshToken,
+      session.refreshTokenHash,
+    );
     if (!matches) {
       await this.revokeSessionInternal(session.id, 'refresh_token_mismatch');
       throw new UnauthorizedException('Refresh token expired or revoked.');
     }
 
-    const suspiciousReason = this.detectSuspiciousActivity(session, dto.deviceFingerprint, client);
+    const suspiciousReason = this.detectSuspiciousActivity(
+      session,
+      dto.deviceFingerprint,
+      client,
+    );
     if (suspiciousReason) {
       await this.prisma.session.update({
         where: { id: session.id },
@@ -358,10 +433,7 @@ export class AuthService {
   private async issueSessionTokens(
     user: User,
     client: ClientContext,
-    tx: Pick<
-      PrismaService,
-      'session'
-    > = this.prisma,
+    tx: Pick<PrismaService, 'session'> = this.prisma,
   ) {
     const sessionId = randomUUID();
     const refreshToken = await this.jwtService.signAsync(
@@ -371,7 +443,9 @@ export class AuthService {
       },
       {
         secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.configService.getOrThrow<string>('JWT_REFRESH_EXPIRES_IN') as never,
+        expiresIn: this.configService.getOrThrow<string>(
+          'JWT_REFRESH_EXPIRES_IN',
+        ) as never,
       },
     );
 
@@ -381,10 +455,13 @@ export class AuthService {
         sid: sessionId,
         role: user.role,
         phone: user.phone,
+        email: user.email,
       },
       {
         secret: this.configService.getOrThrow<string>('JWT_SECRET'),
-        expiresIn: this.configService.getOrThrow<string>('JWT_EXPIRES_IN') as never,
+        expiresIn: this.configService.getOrThrow<string>(
+          'JWT_EXPIRES_IN',
+        ) as never,
       },
     );
 
@@ -414,7 +491,7 @@ export class AuthService {
     };
   }
 
-  private async enforceOtpRequestPolicies(phone: string) {
+  private async enforceOtpRequestPolicies(identifier: string) {
     const activeWindowStart = new Date(
       Date.now() -
         this.configService.getOrThrow<number>('OTP_REQUEST_WINDOW_MINUTES') *
@@ -423,7 +500,7 @@ export class AuthService {
     );
     const recentChallenges = await this.prisma.otpChallenge.findMany({
       where: {
-        phone,
+        identifier,
         createdAt: {
           gte: activeWindowStart,
         },
@@ -441,20 +518,113 @@ export class AuthService {
     );
 
     if (activeChallenge) {
-      throw new BadRequestException('OTP resend cooldown active. Please wait before retrying.');
+      throw new BadRequestException(
+        'OTP resend cooldown active. Please wait before retrying.',
+      );
     }
 
-    const maxRequests = this.configService.getOrThrow<number>('OTP_MAX_REQUESTS_PER_WINDOW');
+    const maxRequests = this.configService.getOrThrow<number>(
+      'OTP_MAX_REQUESTS_PER_WINDOW',
+    );
     if (recentChallenges.length >= maxRequests) {
-      throw new ForbiddenException('OTP request limit exceeded for this phone number.');
+      throw new ForbiddenException(
+        'OTP request limit exceeded for this identifier.',
+      );
     }
 
     const lockedChallenge = recentChallenges.find(
       (challenge) => challenge.status === OtpChallengeStatus.LOCKED,
     );
     if (lockedChallenge) {
-      throw new ForbiddenException('OTP temporarily locked for this phone number.');
+      throw new ForbiddenException(
+        'OTP temporarily locked for this identifier.',
+      );
     }
+  }
+
+  private async findUserByTarget(phone?: string, email?: string) {
+    const clauses = [
+      ...(phone ? [{ phone }] : []),
+      ...(email ? [{ email }] : []),
+    ];
+
+    if (clauses.length === 0) {
+      return null;
+    }
+
+    return this.prisma.user.findFirst({
+      where: {
+        OR: clauses,
+        deletedAt: null,
+      },
+    });
+  }
+
+  private resolveOtpTarget(dto: {
+    identifier?: string;
+    phone?: string;
+    email?: string;
+  }) {
+    const rawIdentifier =
+      dto.identifier?.trim() || dto.phone?.trim() || dto.email?.trim();
+
+    if (!rawIdentifier) {
+      throw new BadRequestException('Provide a phone number or email address.');
+    }
+
+    const normalizedEmail = this.isEmail(rawIdentifier)
+      ? rawIdentifier.toLowerCase()
+      : dto.email?.trim().toLowerCase();
+    const normalizedPhone = this.isPhone(rawIdentifier)
+      ? rawIdentifier.replace(/\s+/g, '')
+      : dto.phone?.trim().replace(/\s+/g, '');
+
+    if (!normalizedPhone && !normalizedEmail) {
+      throw new BadRequestException(
+        'Identifier must be a valid phone number or email address.',
+      );
+    }
+
+    const channel: OtpDeliveryChannel = normalizedEmail ? 'EMAIL' : 'PHONE';
+    const identifier = normalizedEmail ?? normalizedPhone!;
+
+    return {
+      channel,
+      identifier,
+      phone: normalizedPhone,
+      email: normalizedEmail,
+    };
+  }
+
+  private isPhone(value?: string | null) {
+    if (!value) {
+      return false;
+    }
+
+    return /^\+?[1-9]\d{9,14}$/.test(value.replace(/\s+/g, ''));
+  }
+
+  private isEmail(value?: string | null) {
+    if (!value) {
+      return false;
+    }
+
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  private maskIdentifier(identifier: string, channel: OtpDeliveryChannel) {
+    if (channel === 'EMAIL') {
+      const [localPart, domain] = identifier.split('@');
+      if (!localPart || !domain) {
+        return identifier;
+      }
+
+      const visible = localPart.slice(0, 2);
+      return `${visible}${'*'.repeat(Math.max(localPart.length - visible.length, 1))}@${domain}`;
+    }
+
+    const lastFour = identifier.slice(-4);
+    return `${'*'.repeat(Math.max(identifier.length - 4, 4))}${lastFour}`;
   }
 
   private detectSuspiciousActivity(
@@ -466,7 +636,10 @@ export class AuthService {
     deviceFingerprint: string,
     client: ClientContext,
   ) {
-    if (session.deviceFingerprint && session.deviceFingerprint !== deviceFingerprint) {
+    if (
+      session.deviceFingerprint &&
+      session.deviceFingerprint !== deviceFingerprint
+    ) {
       return 'device_fingerprint_changed';
     }
 
@@ -516,11 +689,15 @@ export class AuthService {
   }
 
   private resolveRefreshTokenExpiry() {
-    const expiresIn = this.configService.getOrThrow<string>('JWT_REFRESH_EXPIRES_IN');
+    const expiresIn = this.configService.getOrThrow<string>(
+      'JWT_REFRESH_EXPIRES_IN',
+    );
     const match = /^(\d+)([smhd])$/.exec(expiresIn);
 
     if (!match) {
-      throw new BadRequestException('JWT_REFRESH_EXPIRES_IN must use s, m, h, or d suffix.');
+      throw new BadRequestException(
+        'JWT_REFRESH_EXPIRES_IN must use s, m, h, or d suffix.',
+      );
     }
 
     const value = Number(match[1]);

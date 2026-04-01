@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -15,13 +24,13 @@ import { ProposalsService } from './proposals.service';
 export class ProposalsController {
   constructor(private readonly proposalsService: ProposalsService) {}
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SALES)
   @Post()
-  create(@Body() dto: CreateProposalDto) {
-    return this.proposalsService.create(dto);
+  create(@Body() dto: CreateProposalDto, @CurrentUser() user: AuthUser) {
+    return this.proposalsService.create(dto, user.userId);
   }
 
-  @Roles(Role.CLIENT, Role.ADMIN)
+  @Roles(Role.CLIENT, Role.ADMIN, Role.SALES, Role.OPS, Role.FINANCE)
   @Get()
   list(@CurrentUser() user: AuthUser, @Query() query: ListProposalsQueryDto) {
     return this.proposalsService.listForUser(user, query);
@@ -30,7 +39,7 @@ export class ProposalsController {
   @Roles(Role.CLIENT)
   @Post(':id/decision')
   decide(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ProposalDecisionDto,
     @CurrentUser() user: AuthUser,
   ) {

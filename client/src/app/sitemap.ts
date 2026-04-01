@@ -3,6 +3,7 @@ import { absoluteUrl } from "@/lib/seo";
 
 const routes = [
   "/",
+  "/team",
   "/martini",
   "/negroni",
   "/cosmo",

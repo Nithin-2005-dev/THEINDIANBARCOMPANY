@@ -1,0 +1,236 @@
+.form {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.layout {
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+}
+
+.previewPanel,
+.previewCard,
+.fields,
+.uploadField,
+.toggleCard {
+  border: 1px solid var(--dashboard-border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.022), rgba(255, 255, 255, 0.008)),
+    var(--dashboard-panel-soft);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.previewPanel {
+  display: grid;
+  gap: 0.9rem;
+  align-content: start;
+  border-radius: 1.45rem;
+  padding: 1rem;
+}
+
+.previewCard {
+  display: grid;
+  gap: 0.95rem;
+  border-radius: 1.25rem;
+  padding: 0.9rem;
+}
+
+.previewFrame {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 1.1rem;
+  border: 1px solid var(--dashboard-border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18));
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.previewFallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--dashboard-text);
+  font-family: var(--font-serif);
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  letter-spacing: 0.08em;
+}
+
+.previewMeta {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.previewEyebrow,
+.fieldLabel,
+.uploadLabel {
+  color: rgba(var(--tib-accent-gold-rgb), 0.76);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.previewTitle {
+  color: var(--dashboard-text);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.previewSubtitle {
+  color: var(--dashboard-muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.uploadField {
+  display: grid;
+  gap: 0.45rem;
+  border-radius: 1.2rem;
+  cursor: pointer;
+  padding: 1rem;
+}
+
+.uploadHint {
+  color: var(--dashboard-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.uploadAction,
+.removePhoto {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--tib-accent-gold-rgb), 0.16);
+  background: rgba(var(--tib-accent-gold-rgb), 0.08);
+  color: color-mix(in srgb, var(--dashboard-accent) 72%, white 28%);
+  padding: 0 1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.removePhoto {
+  background: transparent;
+  border-color: var(--dashboard-border);
+  color: color-mix(in srgb, var(--dashboard-muted) 84%, white 16%);
+}
+
+.fileInput {
+  display: none;
+}
+
+.inlineError {
+  margin: -0.2rem 0 0;
+  color: color-mix(in srgb, var(--dashboard-danger) 76%, white 24%);
+  font-size: 0.82rem;
+}
+
+.fields {
+  display: grid;
+  gap: 1rem;
+  border-radius: 1.45rem;
+  padding: 1rem;
+}
+
+.fieldGrid {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.selectField,
+.textareaField {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.selectField select,
+.textareaField textarea {
+  min-height: 3rem;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 1rem;
+  background: var(--dashboard-bg-secondary);
+  color: var(--dashboard-text);
+  padding: 0.85rem 0.95rem;
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.textareaField textarea {
+  min-height: 9rem;
+  resize: vertical;
+  line-height: 1.65;
+}
+
+.selectField select:focus,
+.textareaField textarea:focus {
+  border-color: color-mix(in oklab, var(--dashboard-accent) 40%, white 4%);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--dashboard-accent) 12%, transparent);
+}
+
+.toggleGrid {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.toggleCard {
+  display: flex;
+  align-items: start;
+  gap: 0.85rem;
+  border-radius: 1.15rem;
+  padding: 0.95rem 1rem;
+}
+
+.toggleCard input {
+  margin-top: 0.15rem;
+  accent-color: var(--dashboard-accent);
+}
+
+.toggleCard strong {
+  display: block;
+  color: var(--dashboard-text);
+  font-size: 0.92rem;
+}
+
+.toggleCard span {
+  display: block;
+  margin-top: 0.28rem;
+  color: var(--dashboard-muted);
+  font-size: 0.83rem;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  justify-content: end;
+  gap: 0.75rem;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .fieldGrid,
+  .toggleGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+}

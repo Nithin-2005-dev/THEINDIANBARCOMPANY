@@ -31,7 +31,9 @@ export class RazorpayGateway {
     });
 
     if (!response.ok) {
-      throw new Error(`Razorpay order creation failed with status ${response.status}`);
+      throw new Error(
+        `Razorpay order creation failed with status ${response.status}`,
+      );
     }
 
     return (await response.json()) as {
@@ -43,7 +45,11 @@ export class RazorpayGateway {
     };
   }
 
-  verifyPaymentSignature(orderId: string, paymentId: string, signature: string) {
+  verifyPaymentSignature(
+    orderId: string,
+    paymentId: string,
+    signature: string,
+  ) {
     const digest = createHmac(
       'sha256',
       this.configService.getOrThrow<string>('RAZORPAY_KEY_SECRET'),
@@ -67,5 +73,43 @@ export class RazorpayGateway {
       .digest('hex');
 
     return digest === signature;
+  }
+
+  async refundPayment(payload: {
+    paymentId: string;
+    amount?: number;
+    notes?: Record<string, string>;
+  }) {
+    const auth = Buffer.from(
+      `${this.configService.getOrThrow<string>('RAZORPAY_KEY_ID')}:${this.configService.getOrThrow<string>('RAZORPAY_KEY_SECRET')}`,
+    ).toString('base64');
+
+    const response = await fetch(
+      `https://api.razorpay.com/v1/payments/${payload.paymentId}/refund`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${auth}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...(payload.amount ? { amount: payload.amount * 100 } : {}),
+          notes: payload.notes,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const details = await response.text().catch(() => '');
+      throw new Error(
+        `Razorpay refund failed with status ${response.status}: ${details}`,
+      );
+    }
+
+    return (await response.json()) as {
+      id: string;
+      status: string;
+      amount: number;
+    };
   }
 }

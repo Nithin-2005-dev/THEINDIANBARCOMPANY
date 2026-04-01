@@ -1,0 +1,446 @@
+.filterBar {
+  position: relative;
+  display: grid;
+  gap: 0.9rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--tib-border) 88%, white 12%);
+  border-radius: 1.35rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.008)),
+    var(--dashboard-panel);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 18px 38px rgba(0, 0, 0, 0.18);
+  padding: 1rem 1rem 0.95rem;
+}
+
+.filterBar::before {
+  content: "";
+  position: absolute;
+  inset: auto -8rem -9rem auto;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(var(--tib-accent-gold-rgb), 0.18), transparent 68%);
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.filterRow {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.segmentedGroup {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.segmentButton {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--tib-text-secondary);
+  padding: 0.72rem 0.95rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.segmentButton:hover {
+  color: var(--tib-text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-1px);
+}
+
+.segmentButtonActive {
+  background: color-mix(
+    in srgb,
+    var(--dashboard-accent, var(--tib-accent-gold)) 18%,
+    rgba(255, 255, 255, 0.03)
+  );
+  color: color-mix(in srgb, var(--dashboard-accent, var(--tib-accent-gold)) 72%, white 28%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.searchField {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 18rem;
+  min-width: 15rem;
+}
+
+.selectWrap {
+  position: relative;
+  z-index: 1;
+  flex: 0 1 12rem;
+  min-width: 11rem;
+}
+
+.select {
+  width: 100%;
+  min-height: 2.95rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 1rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.022), rgba(255, 255, 255, 0.01)),
+    rgba(255, 255, 255, 0.02);
+  color: var(--tib-text-primary);
+  padding: 0 2.45rem 0 1rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  outline: none;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--tib-text-secondary) 50%),
+    linear-gradient(135deg, var(--tib-text-secondary) 50%, transparent 50%);
+  background-position: calc(100% - 1.15rem) 1.2rem, calc(100% - 0.9rem) 1.2rem;
+  background-size: 0.42rem 0.42rem;
+  background-repeat: no-repeat;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.select:hover {
+  border-color: color-mix(in srgb, var(--tib-border) 72%, white 28%);
+  transform: translateY(-1px);
+}
+
+.select:focus {
+  border-color: rgba(var(--tib-accent-gold-rgb), 0.24);
+  box-shadow: 0 0 0 3px rgba(var(--tib-accent-gold-rgb), 0.08);
+}
+
+.select option {
+  background: var(--dashboard-panel);
+  color: var(--tib-text-primary);
+}
+
+.filterStatus {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-left: auto;
+}
+
+.filterCopy {
+  position: relative;
+  z-index: 1;
+  color: color-mix(in srgb, var(--tib-text-secondary) 84%, white 16%);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.metricGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.splitGrid {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+}
+
+.splitGrid > * {
+  min-height: 0;
+  align-self: start;
+}
+
+.scrollSurface {
+  max-height: min(64vh, 39rem);
+  overflow: hidden;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.scrollSurface > :last-child {
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+}
+
+.surfacePills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.trendList {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.trendRow {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 1.15rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.008)),
+    rgba(255, 255, 255, 0.018);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    background-color 160ms ease;
+}
+
+.trendRow:hover {
+  border-color: color-mix(in srgb, var(--tib-border) 72%, white 28%);
+  transform: translateY(-1px);
+}
+
+.trendMeta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.trendLabel {
+  color: var(--tib-text-primary);
+  font-size: 0.96rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.trendCopy {
+  margin-top: 0.2rem;
+  color: var(--tib-text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.trendValue {
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--dashboard-accent, var(--tib-accent-gold)) 74%, white 26%);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.barTrack {
+  height: 0.55rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.barFill,
+.barFillMuted {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 220ms ease;
+}
+
+.barFill {
+  background: linear-gradient(
+    90deg,
+    rgba(var(--tib-accent-gold-rgb), 0.45),
+    rgba(var(--tib-accent-gold-rgb), 1)
+  );
+  box-shadow: 0 0 18px rgba(var(--tib-accent-gold-rgb), 0.18);
+}
+
+.barFillMuted {
+  background: linear-gradient(
+    90deg,
+    rgba(var(--tib-accent-gold-rgb), 0.18),
+    rgba(var(--tib-accent-gold-rgb), 0.7)
+  );
+}
+
+.trendStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  color: color-mix(in srgb, var(--tib-text-secondary) 84%, white 16%);
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.mixCards {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.mixCard {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 1.15rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.008)),
+    rgba(255, 255, 255, 0.018);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.mixLabel {
+  color: color-mix(in srgb, var(--dashboard-accent, var(--tib-accent-gold)) 70%, white 30%);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.mixValue {
+  color: var(--tib-text-primary);
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.tableWrap {
+  overflow: hidden;
+  border: 1px solid var(--tib-border);
+  border-radius: 1rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.008)),
+    rgba(255, 255, 255, 0.018);
+}
+
+.tableStrong {
+  color: var(--tib-text-primary);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.tableMuted {
+  color: var(--tib-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.hourList {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.hourRow {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 1.15rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.008)),
+    rgba(255, 255, 255, 0.018);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.hourMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.hourLabel {
+  color: var(--tib-text-primary);
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.hourCount {
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--dashboard-accent, var(--tib-accent-gold)) 72%, white 28%);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 900px) {
+  .metricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mixCards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .splitGrid {
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  }
+}
+
+@media (min-width: 1180px) {
+  .metricGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .filterBar {
+    padding: 0.9rem;
+  }
+
+  .segmentButton {
+    flex: 1 1 0;
+    text-align: center;
+    padding-inline: 0.75rem;
+  }
+
+  .segmentedGroup,
+  .searchField,
+  .selectWrap {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .filterStatus {
+    margin-left: 0;
+  }
+
+  .metricGrid,
+  .mixCards {
+    grid-template-columns: 1fr;
+  }
+
+  .scrollSurface {
+    max-height: 28rem;
+  }
+
+  .scrollSurface > :last-child {
+    padding-right: 0.15rem;
+  }
+
+  .trendMeta,
+  .hourMeta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

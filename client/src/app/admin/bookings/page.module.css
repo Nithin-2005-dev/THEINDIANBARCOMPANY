@@ -1,0 +1,154 @@
+.headerAction {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--dashboard-border);
+  background: var(--dashboard-panel-soft);
+  color: var(--dashboard-text);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  border-color: var(--dashboard-border-strong);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
+}
+
+.secondaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
+.dataPill {
+  display: inline-flex;
+  min-height: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 999px;
+  background: var(--dashboard-panel-soft);
+  padding: 0 0.75rem;
+  color: var(--dashboard-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.filterGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.control {
+  display: flex;
+  min-height: 3rem;
+  width: 100%;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--dashboard-border);
+  background: var(--dashboard-panel-soft);
+  border-radius: 1.125rem;
+  padding: 0 1rem;
+  color: var(--dashboard-muted);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.control:hover {
+  border-color: var(--dashboard-border-strong);
+  transform: translateY(-1px);
+}
+
+.control:focus-within {
+  border-color: color-mix(in oklab, var(--dashboard-accent) 40%, white 4%);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--dashboard-accent) 12%, transparent);
+}
+
+.control > input,
+.control > select,
+.control > textarea,
+select.control,
+input.control {
+  width: 100%;
+  min-width: 0;
+  background: transparent;
+  color: var(--dashboard-text);
+  font-size: 0.875rem;
+  outline: none;
+  appearance: none;
+}
+
+.control option {
+  color: var(--color-accent-contrast);
+}
+
+.listContent {
+  display: grid;
+  gap: 1rem;
+}
+
+.cardFooter {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.statusField {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.statusLabel {
+  color: rgba(var(--tib-accent-gold-rgb), 0.74);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.noteText {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--dashboard-muted);
+  text-wrap: pretty;
+}
+
+.pagination {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--dashboard-muted);
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .pagination {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}

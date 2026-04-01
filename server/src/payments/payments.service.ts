@@ -5,15 +5,19 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuditAction, PaymentStatus, Prisma, Role } from '@prisma/client';
+import { AuditAction, PaymentStatus, Prisma } from '@prisma/client';
 import { AuditService } from '../audit/audit.service';
 import { IdempotencyService } from '../idempotency/idempotency.service';
+import { LeadsService } from '../leads/leads.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { QueueService } from '../queue/queue.service';
 import { AuthUser } from '../common/types/auth-user.type';
+import { isAdminRole, isStaffRole } from '../common/auth/role-helpers';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { CreatePaymentOrderDto } from './dto/create-payment-order.dto';
 import { ListPaymentsQueryDto } from './dto/list-payments-query.dto';
+import { RefundPaymentDto } from './dto/refund-payment.dto';
 import { UpdatePaymentStatusDto } from './dto/update-payment-status.dto';
 import { VerifyPaymentDto } from './dto/verify-payment.dto';
 import { RazorpayGateway } from './gateway/razorpay.gateway';
@@ -26,11 +30,32 @@ export class PaymentsService {
     private readonly auditService: AuditService,
     private readonly queueService: QueueService,
     private readonly idempotencyService: IdempotencyService,
+    private readonly leadsService: LeadsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
-  async create(dto: CreatePaymentDto, idempotencyKey?: string) {
+  async create(
+    dto: CreatePaymentDto,
+    actorId?: string,
+    idempotencyKey?: string,
+  ) {
     const project = await this.prisma.project.findUnique({
       where: { id: dto.projectId },
+      include: {
+        contract: {
+          include: {
+            proposal: {
+              include: {
+                lead: {
+                  include: {
+                    client: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!project) {
@@ -49,7 +74,9 @@ export class PaymentsService {
     });
 
     if (duplicateMilestone) {
-      throw new BadRequestException('A live payment already exists for this project milestone.');
+      throw new BadRequestException(
+        'A live payment already exists for this project milestone.',
+      );
     }
 
     return this.idempotencyService.execute({
@@ -58,18 +85,93 @@ export class PaymentsService {
       userId: project.clientId,
       request: dto,
       execute: () =>
-        this.prisma.payment.create({
-          data: {
-            ...dto,
-            dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
-            status: dto.status ?? PaymentStatus.PENDING,
-            gateway: dto.gateway ?? 'RAZORPAY',
-          },
-        }),
+        this.prisma.payment
+          .create({
+            data: {
+              ...dto,
+              dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+              status: dto.status ?? PaymentStatus.PENDING,
+              gateway: dto.gateway ?? 'RAZORPAY',
+            },
+          })
+          .then(async (payment) => {
+            const leadId = project.contract?.proposal.leadId;
+            if (leadId) {
+              await this.leadsService.recordPaymentCreated(
+                leadId,
+                actorId,
+                payment.id,
+              );
+              await this.notificationsService.createInApp({
+                userId: project.clientId,
+                type: 'PAYMENT',
+                title: 'Payment scheduled',
+                body: `${payment.type} payment of ${payment.currency} ${payment.amount} is now available for payment.`,
+                actionUrl: `/dashboard/events/${leadId}`,
+                metadata: {
+                  paymentId: payment.id,
+                  leadId,
+                  projectId: project.id,
+                },
+              });
+
+              const clientEmail = project.contract?.proposal.lead.client.email;
+              if (clientEmail) {
+                await this.queueService.queueEmail({
+                  to: clientEmail,
+                  subject: `${payment.type} payment scheduled`,
+                  template: 'payment-reminder',
+                  variables: {
+                    paymentType: payment.type.toLowerCase(),
+                    amount: `${payment.currency} ${payment.amount}`,
+                    dueDate: payment.dueDate?.toISOString().slice(0, 10),
+                  },
+                });
+              }
+            }
+
+            if (payment.dueDate && payment.status === PaymentStatus.PENDING) {
+              const dueAt = payment.dueDate.getTime();
+              const now = Date.now();
+              const reminderAt = dueAt - 24 * 60 * 60 * 1000;
+
+              if (reminderAt > now) {
+                await this.queueService.queueReminder(
+                  {
+                    kind: 'payment-due',
+                    paymentId: payment.id,
+                  },
+                  {
+                    delay: reminderAt - now,
+                    jobId: `payment-due:${payment.id}:${payment.dueDate.toISOString()}`,
+                  },
+                );
+              }
+
+              if (dueAt > now) {
+                await this.queueService.queueReminder(
+                  {
+                    kind: 'payment-overdue',
+                    paymentId: payment.id,
+                  },
+                  {
+                    delay: dueAt - now,
+                    jobId: `payment-overdue:${payment.id}:${payment.dueDate.toISOString()}`,
+                  },
+                );
+              }
+            }
+
+            return payment;
+          }),
     });
   }
 
-  async createOrder(dto: CreatePaymentOrderDto, user: AuthUser, idempotencyKey?: string) {
+  async createOrder(
+    dto: CreatePaymentOrderDto,
+    user: AuthUser,
+    idempotencyKey?: string,
+  ) {
     const payment = await this.prisma.payment.findUnique({
       where: { id: dto.paymentId },
       include: {
@@ -81,7 +183,7 @@ export class PaymentsService {
       throw new NotFoundException('Payment not found.');
     }
 
-    if (user.role !== Role.ADMIN && payment.project.clientId !== user.userId) {
+    if (!isAdminRole(user.role) && payment.project.clientId !== user.userId) {
       throw new ForbiddenException('You cannot initiate this payment.');
     }
 
@@ -138,7 +240,7 @@ export class PaymentsService {
       ...(query.type ? { type: query.type } : {}),
       ...(query.status ? { status: query.status } : {}),
       deletedAt: null,
-      ...(user.role === Role.ADMIN ? {} : { project: { clientId: user.userId } }),
+      ...(isStaffRole(user.role) ? {} : { project: { clientId: user.userId } }),
     };
 
     const [items, total] = await this.prisma.$transaction([
@@ -160,23 +262,83 @@ export class PaymentsService {
     };
   }
 
-  async updateStatus(id: string, dto: UpdatePaymentStatusDto) {
-    await this.ensurePayment(id);
+  async updateStatus(
+    id: string,
+    dto: UpdatePaymentStatusDto,
+    actorId?: string,
+  ) {
+    const payment = await this.ensurePayment(id);
 
-    return this.prisma.payment.update({
+    const updated = await this.prisma.payment.update({
       where: { id },
       data: {
         status: dto.status,
         transactionId: dto.transactionId,
         paidAt: dto.status === PaymentStatus.PAID ? new Date() : null,
+        receiptUrl:
+          dto.status === PaymentStatus.PAID
+            ? `/dashboard/receipts/${id}`
+            : null,
       },
       include: {
         project: true,
       },
     });
+
+    const leadId = await this.getLeadIdForProject(payment.projectId);
+    if (leadId) {
+      await this.leadsService.recordPaymentUpdated(
+        leadId,
+        actorId,
+        id,
+        dto.status,
+      );
+      await this.notificationsService.createInApp({
+        userId: updated.project.clientId,
+        type: 'PAYMENT',
+        title: `Payment ${dto.status.toLowerCase()}`,
+        body: `Your ${updated.type.toLowerCase()} milestone is now ${dto.status.toLowerCase()}.`,
+        actionUrl: `/dashboard/events/${leadId}`,
+        metadata: {
+          paymentId: updated.id,
+          leadId,
+          status: dto.status,
+        },
+      });
+
+      const project = await this.prisma.project.findUnique({
+        where: { id: updated.projectId },
+        include: {
+          client: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      });
+
+      if (project?.client.email && dto.status === PaymentStatus.PAID) {
+        await this.queueService.queueEmail({
+          to: project.client.email,
+          subject: 'Payment received',
+          template: 'payment-receipt',
+          variables: {
+            paymentType: updated.type.toLowerCase(),
+            amount: `${updated.currency} ${updated.amount}`,
+            receiptUrl: updated.receiptUrl,
+          },
+        });
+      }
+    }
+
+    return updated;
   }
 
-  async verifyPayment(dto: VerifyPaymentDto, user: AuthUser, idempotencyKey?: string) {
+  async verifyPayment(
+    dto: VerifyPaymentDto,
+    user: AuthUser,
+    idempotencyKey?: string,
+  ) {
     const payment = await this.prisma.payment.findUnique({
       where: { id: dto.paymentId },
       include: {
@@ -188,7 +350,7 @@ export class PaymentsService {
       throw new NotFoundException('Payment not found.');
     }
 
-    if (user.role !== Role.ADMIN && payment.project.clientId !== user.userId) {
+    if (!isAdminRole(user.role) && payment.project.clientId !== user.userId) {
       throw new ForbiddenException('You cannot verify this payment.');
     }
 
@@ -221,6 +383,7 @@ export class PaymentsService {
               transactionId: dto.razorpayPaymentId,
               gatewaySignature: dto.razorpaySignature,
               paidAt: new Date(),
+              receiptUrl: `/dashboard/receipts/${payment.id}`,
             },
           });
         });
@@ -237,6 +400,45 @@ export class PaymentsService {
           projectId: payment.projectId,
           idempotencyKey: dto.razorpayPaymentId,
         });
+        const leadId = await this.getLeadIdForProject(payment.projectId);
+        if (leadId) {
+          await this.leadsService.recordPaymentUpdated(
+            leadId,
+            user.userId,
+            payment.id,
+            PaymentStatus.PAID,
+          );
+          await this.notificationsService.createInApp({
+            userId: payment.project.clientId,
+            type: 'PAYMENT',
+            title: 'Payment received',
+            body: `We received your ${payment.type.toLowerCase()} payment successfully.`,
+            actionUrl: `/dashboard/events/${leadId}`,
+            metadata: {
+              paymentId: payment.id,
+              leadId,
+              status: PaymentStatus.PAID,
+            },
+          });
+
+          const client = await this.prisma.user.findUnique({
+            where: { id: payment.project.clientId },
+            select: { email: true },
+          });
+
+          if (client?.email) {
+            await this.queueService.queueEmail({
+              to: client.email,
+              subject: 'Payment received',
+              template: 'payment-receipt',
+              variables: {
+                paymentType: payment.type.toLowerCase(),
+                amount: `${payment.currency} ${payment.amount}`,
+                receiptUrl: `/dashboard/receipts/${payment.id}`,
+              },
+            });
+          }
+        }
 
         return updatedPayment;
       },
@@ -248,13 +450,19 @@ export class PaymentsService {
     signature: string | undefined,
     payload: Record<string, any>,
   ) {
-    const isValid = this.razorpayGateway.verifyWebhookSignature(rawBody, signature);
+    const isValid = this.razorpayGateway.verifyWebhookSignature(
+      rawBody,
+      signature,
+    );
     if (!isValid) {
       throw new UnauthorizedException('Invalid webhook signature.');
     }
 
-    const eventId = payload.payload?.payment?.entity?.id ?? payload.created_at?.toString();
-    const orderId = payload.payload?.payment?.entity?.order_id as string | undefined;
+    const eventId =
+      payload.payload?.payment?.entity?.id ?? payload.created_at?.toString();
+    const orderId = payload.payload?.payment?.entity?.order_id as
+      | string
+      | undefined;
 
     if (!orderId || !eventId) {
       throw new BadRequestException('Webhook payload missing identifiers.');
@@ -267,10 +475,15 @@ export class PaymentsService {
     });
 
     if (!payment) {
-      throw new NotFoundException('Payment mapping not found for webhook order.');
+      throw new NotFoundException(
+        'Payment mapping not found for webhook order.',
+      );
     }
 
-    if (payment.webhookEventId === eventId || payment.status === PaymentStatus.PAID) {
+    if (
+      payment.webhookEventId === eventId ||
+      payment.status === PaymentStatus.PAID
+    ) {
       return { processed: true, duplicate: true };
     }
 
@@ -283,6 +496,7 @@ export class PaymentsService {
         webhookEventId: eventId,
         gatewayMetadata: payload as Prisma.InputJsonValue,
         paidAt: new Date(),
+        receiptUrl: `/dashboard/receipts/${payment.id}`,
       },
     });
 
@@ -296,6 +510,33 @@ export class PaymentsService {
       },
     });
 
+    const project = await this.prisma.project.findUnique({
+      where: { id: payment.projectId },
+    });
+    const leadId = project
+      ? await this.getLeadIdForProject(payment.projectId)
+      : null;
+    if (leadId && project) {
+      await this.leadsService.recordPaymentUpdated(
+        leadId,
+        undefined,
+        payment.id,
+        PaymentStatus.PAID,
+      );
+      await this.notificationsService.createInApp({
+        userId: project.clientId,
+        type: 'PAYMENT',
+        title: 'Payment received',
+        body: 'A payment has been captured for your event.',
+        actionUrl: `/dashboard/events/${leadId}`,
+        metadata: {
+          paymentId: payment.id,
+          leadId,
+          status: PaymentStatus.PAID,
+        },
+      });
+    }
+
     return { processed: true, payment: updated };
   }
 
@@ -308,7 +549,7 @@ export class PaymentsService {
       throw new NotFoundException('Project not found.');
     }
 
-    if (user.role !== Role.ADMIN && project.clientId !== user.userId) {
+    if (!isAdminRole(user.role) && project.clientId !== user.userId) {
       throw new ForbiddenException('You cannot access this payment history.');
     }
 
@@ -316,6 +557,95 @@ export class PaymentsService {
       where: { projectId, deletedAt: null },
       orderBy: { createdAt: 'asc' },
     });
+  }
+
+  async refundPayment(id: string, dto: RefundPaymentDto, user: AuthUser) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { id },
+      include: {
+        project: {
+          include: {
+            client: {
+              select: {
+                email: true,
+              },
+            },
+            contract: {
+              include: {
+                proposal: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!payment || payment.deletedAt) {
+      throw new NotFoundException('Payment not found.');
+    }
+
+    if (payment.status !== PaymentStatus.PAID || !payment.transactionId) {
+      throw new BadRequestException('Only captured payments can be refunded.');
+    }
+
+    const refund = await this.razorpayGateway.refundPayment({
+      paymentId: payment.transactionId,
+      amount: dto.amount,
+      notes: dto.reason
+        ? {
+            reason: dto.reason,
+          }
+        : undefined,
+    });
+
+    const updated = await this.prisma.payment.update({
+      where: { id },
+      data: {
+        status: PaymentStatus.REFUNDED,
+        notes: dto.reason
+          ? `${payment.notes ? `${payment.notes}\n` : ''}Refunded: ${dto.reason}`
+          : payment.notes,
+        gatewayMetadata: {
+          ...(payment.gatewayMetadata as Record<string, unknown> | null),
+          refund,
+        } as Prisma.InputJsonValue,
+      },
+    });
+
+    await this.auditService.log({
+      action: AuditAction.PAYMENT_CAPTURED,
+      entityType: 'PaymentRefund',
+      entityId: id,
+      userId: user.userId,
+      metadata: refund as unknown as Prisma.InputJsonValue,
+    });
+
+    await this.notificationsService.createInApp({
+      userId: payment.project.clientId,
+      type: 'PAYMENT',
+      title: 'Payment refunded',
+      body: `${payment.type} payment has been refunded.`,
+      actionUrl: `/dashboard/events/${payment.project.contract.proposal.leadId}`,
+      metadata: {
+        paymentId: payment.id,
+        refundId: refund.id,
+      },
+    });
+
+    if (payment.project.client.email) {
+      await this.queueService.queueEmail({
+        to: payment.project.client.email,
+        subject: 'Payment refunded',
+        template: 'payment-receipt',
+        variables: {
+          paymentType: payment.type.toLowerCase(),
+          amount: `${payment.currency} ${dto.amount ?? payment.amount}`,
+          receiptUrl: updated.receiptUrl,
+        },
+      });
+    }
+
+    return updated;
   }
 
   private async ensurePayment(id: string) {
@@ -328,5 +658,20 @@ export class PaymentsService {
     }
 
     return payment;
+  }
+
+  private async getLeadIdForProject(projectId: string) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      include: {
+        contract: {
+          include: {
+            proposal: true,
+          },
+        },
+      },
+    });
+
+    return project?.contract?.proposal?.leadId;
   }
 }

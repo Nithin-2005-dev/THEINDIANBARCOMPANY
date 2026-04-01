@@ -1,0 +1,965 @@
+.page {
+  gap: 1.5rem;
+}
+
+.commandBar,
+.executionSection,
+.emptyBoard {
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--dashboard-border) 84%, white 16%);
+  border-radius: 1.6rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.008)),
+    var(--dashboard-panel);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 24px 56px rgba(0, 0, 0, 0.22);
+}
+
+.commandBar {
+  display: none;
+}
+
+.commandTop,
+.commandBottom {
+  display: contents;
+}
+
+.searchCluster,
+.utilityCluster {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.searchCluster {
+  flex: 0 0 auto;
+}
+
+.commandActions,
+.utilityCluster {
+  margin-left: 0;
+}
+
+.commandActions,
+.filterGroup,
+.viewGroup {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.55rem;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.searchField {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 2.85rem;
+  min-width: 16rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 0.95rem;
+  background: var(--dashboard-panel-soft);
+  padding: 0 0.82rem;
+}
+
+.searchField:focus-within {
+  border-color: rgba(var(--tib-accent-gold-rgb), 0.32);
+  box-shadow: 0 0 0 4px rgba(var(--tib-accent-gold-rgb), 0.08);
+}
+
+.searchIcon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--tib-text-secondary);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--dashboard-text);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.searchInput::placeholder {
+  color: color-mix(in srgb, var(--dashboard-muted) 85%, white 15%);
+}
+
+.shortcutPill,
+.metaLabel,
+.signalPill,
+.executionPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.8rem;
+  border-radius: 999px;
+  padding: 0 0.72rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.shortcutPill,
+.metaLabel {
+  border: 1px solid var(--dashboard-border);
+  background: var(--dashboard-panel-soft);
+  color: color-mix(in srgb, var(--dashboard-muted) 80%, white 20%);
+}
+
+.signalRow,
+.commandActions,
+.viewGroup,
+.filterGroup,
+.commandMeta,
+.executionStats {
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.signalPill,
+.executionPill {
+  border: 1px solid rgba(var(--tib-accent-gold-rgb), 0.14);
+  background: rgba(var(--tib-accent-gold-rgb), 0.07);
+  color: color-mix(in srgb, var(--dashboard-accent) 74%, white 26%);
+}
+
+.ghostAction,
+.viewPill,
+.bulkAction,
+.bulkClear,
+.filterField select,
+.bulkField select {
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.ghostAction,
+.viewPill,
+.bulkAction,
+.bulkClear {
+  min-height: 2.35rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--dashboard-border);
+  background: var(--dashboard-panel-soft);
+  color: var(--dashboard-text);
+  padding: 0 0.82rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.ghostAction:hover,
+.viewPill:hover,
+.bulkAction:hover,
+.bulkClear:hover {
+  transform: translateY(-1px);
+  border-color: var(--dashboard-border-strong);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.primaryAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.5rem;
+  border-radius: 0.92rem;
+  border: 1px solid rgba(var(--tib-accent-gold-rgb), 0.16);
+  background: color-mix(in srgb, var(--dashboard-accent) 88%, #e8d6b0 12%);
+  color: #181207;
+  padding: 0 0.95rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+.primaryAction:hover {
+  transform: translateY(-1px);
+}
+
+.viewPillActive {
+  border-color: rgba(var(--tib-accent-gold-rgb), 0.18);
+  background: rgba(var(--tib-accent-gold-rgb), 0.12);
+  color: #fbf6ea;
+}
+
+.filterGroup {
+  flex: 0 0 auto;
+}
+
+.filterField,
+.bulkField {
+  display: grid;
+  gap: 0.38rem;
+  min-width: 8.5rem;
+}
+
+.filterField span,
+.bulkField span {
+  color: color-mix(in srgb, var(--dashboard-muted) 82%, white 18%);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.filterField select,
+.bulkField select {
+  min-height: 2.65rem;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 0.95rem;
+  background: var(--dashboard-panel-soft);
+  color: var(--dashboard-text);
+  padding: 0 0.8rem;
+  font-size: 0.84rem;
+  outline: 0;
+}
+
+.compactField {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.35rem;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 0.92rem;
+  background: var(--dashboard-panel-soft);
+  padding: 0 0.35rem 0 0.72rem;
+}
+
+.compactFieldLabel {
+  color: color-mix(in srgb, var(--dashboard-muted) 80%, white 20%);
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.compactField select {
+  min-width: 7.3rem;
+  min-height: 2.15rem;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--dashboard-text);
+  padding: 0 0.45rem 0 0;
+  font-size: 0.82rem;
+}
+
+.compactField select:focus {
+  box-shadow: none;
+}
+
+.filterField select:focus,
+.bulkField select:focus {
+  border-color: rgba(var(--tib-accent-gold-rgb), 0.3);
+  box-shadow: 0 0 0 4px rgba(var(--tib-accent-gold-rgb), 0.08);
+}
+
+.bulkBar {
+  display: flex;
+  flex: 1 0 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 0.9rem;
+}
+
+.bulkSummary {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: color-mix(in srgb, var(--dashboard-text) 84%, white 16%);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.bulkCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  border-radius: 999px;
+  background: rgba(var(--tib-accent-gold-rgb), 0.16);
+  color: #f8f1e0;
+}
+
+.bulkControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  align-items: end;
+}
+
+.bulkAction {
+  background: rgba(var(--tib-accent-gold-rgb), 0.1);
+  border-color: rgba(var(--tib-accent-gold-rgb), 0.18);
+  color: #f5e7c9;
+}
+
+.bulkAction:disabled,
+.bulkClear:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.kpiRibbon {
+  display: grid;
+  gap: 0.95rem;
+  grid-template-columns: repeat(6, minmax(11rem, 1fr));
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: thin;
+}
+
+.kpiTile,
+.loadingTile {
+  min-height: 9.6rem;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 1.45rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.012)),
+    var(--dashboard-surface);
+  padding: 1rem 1rem 0.95rem;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 18px 36px rgba(0, 0, 0, 0.16);
+}
+
+.kpiHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.kpiLabel {
+  color: color-mix(in srgb, var(--dashboard-muted) 86%, white 14%);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.trendBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.trendUp {
+  color: var(--tib-success);
+}
+
+.trendDown {
+  color: var(--tib-danger);
+}
+
+.trendFlat {
+  color: color-mix(in srgb, var(--dashboard-muted) 74%, white 26%);
+}
+
+.kpiValueRow {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.kpiValue {
+  color: var(--dashboard-text);
+  font-size: clamp(1.5rem, 2.4vw, 2.15rem);
+  font-weight: 750;
+  letter-spacing: -0.05em;
+}
+
+.sparkline {
+  width: 100%;
+  height: 2.25rem;
+}
+
+.sparkline polyline {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sparklineGold polyline {
+  stroke: rgba(214, 181, 112, 0.92);
+}
+
+.sparklineBlue polyline {
+  stroke: rgba(176, 152, 103, 0.92);
+}
+
+.sparklineGreen polyline {
+  stroke: rgba(102, 160, 128, 0.92);
+}
+
+.sparklineOrange polyline {
+  stroke: rgba(205, 147, 72, 0.92);
+}
+
+.sparklineRed polyline {
+  stroke: rgba(194, 103, 89, 0.92);
+}
+
+.kpiDetail {
+  margin-top: 0.7rem;
+  color: color-mix(in srgb, var(--dashboard-muted) 80%, white 20%);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.loadingCommand,
+.loadingPill,
+.loadingPillWide,
+.loadingLane,
+.loadingTile {
+  position: relative;
+  overflow: hidden;
+}
+
+.loadingCommand::after,
+.loadingPill::after,
+.loadingPillWide::after,
+.loadingLane::after,
+.loadingTile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.loadingCommand {
+  min-height: 3.15rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.loadingFilters {
+  display: flex;
+  gap: 0.65rem;
+}
+
+.loadingPill,
+.loadingPillWide {
+  height: 2.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.loadingPill {
+  width: 7.5rem;
+}
+
+.loadingPillWide {
+  width: 11rem;
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.executionSection {
+  display: grid;
+  gap: 1.15rem;
+  padding: 1.15rem;
+}
+
+.executionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--dashboard-subtle);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.executionTitle {
+  margin: 0.35rem 0 0;
+  color: var(--dashboard-text);
+  font-size: clamp(1.5rem, 2.1vw, 2rem);
+  font-weight: 760;
+  letter-spacing: -0.05em;
+}
+
+.executionCopy,
+.emptyLaneCopy,
+.emptyBoardCopy {
+  margin: 0.55rem 0 0;
+  max-width: 42rem;
+  color: color-mix(in srgb, var(--dashboard-muted) 82%, white 18%);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.boardRail,
+.loadingBoardRail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(22rem, 24rem);
+  gap: 1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 0.45rem;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+
+.loadingLane {
+  min-height: 41rem;
+  border-radius: 1.45rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.lane {
+  --lane-rgb: 214, 181, 112;
+  position: relative;
+  display: flex;
+  min-height: 41rem;
+  max-height: min(74vh, 48rem);
+  flex-direction: column;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 1.45rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.024), rgba(255, 255, 255, 0.008)),
+    var(--dashboard-surface);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 18px 36px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  scroll-snap-align: start;
+}
+
+.lane::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.22rem;
+  background: linear-gradient(90deg, rgba(var(--lane-rgb), 0.95), rgba(var(--lane-rgb), 0.22), transparent);
+}
+
+.laneNew {
+  --lane-rgb: 214, 181, 112;
+}
+
+.laneContacted {
+  --lane-rgb: 176, 152, 103;
+}
+
+.laneQualified {
+  --lane-rgb: 112, 146, 102;
+}
+
+.laneProposalSent {
+  --lane-rgb: 196, 141, 50;
+}
+
+.laneNegotiating {
+  --lane-rgb: 183, 126, 68;
+}
+
+.laneWon {
+  --lane-rgb: 86, 166, 118;
+}
+
+.laneLost {
+  --lane-rgb: 194, 103, 89;
+}
+
+.laneDragTarget {
+  border-color: rgba(var(--lane-rgb), 0.42);
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--lane-rgb), 0.22),
+    0 22px 46px rgba(0, 0, 0, 0.22);
+}
+
+.laneHeader {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem 1rem 0.95rem;
+  border-bottom: 1px solid var(--dashboard-border-soft);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0.006)),
+    var(--dashboard-panel-strong);
+  backdrop-filter: blur(16px);
+}
+
+.laneHeaderTop,
+.laneMetrics,
+.cardHeader,
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.laneHeading,
+.clientBlock,
+.ownerPill {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.laneDot {
+  width: 0.68rem;
+  height: 0.68rem;
+  border-radius: 999px;
+  background: rgba(var(--lane-rgb), 1);
+  box-shadow: 0 0 0 6px rgba(var(--lane-rgb), 0.12);
+  flex-shrink: 0;
+}
+
+.laneTitle,
+.emptyLaneTitle,
+.emptyBoardTitle {
+  margin: 0;
+  color: var(--dashboard-text);
+  font-size: 1rem;
+  font-weight: 720;
+  letter-spacing: -0.03em;
+}
+
+.laneDescription {
+  margin: 0.22rem 0 0;
+  color: color-mix(in srgb, var(--dashboard-muted) 82%, white 18%);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.laneMetrics {
+  color: color-mix(in srgb, var(--dashboard-muted) 76%, white 24%);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.laneMetrics strong {
+  color: var(--dashboard-text);
+  font-size: 0.82rem;
+  font-weight: 760;
+}
+
+.laneBody {
+  display: grid;
+  gap: 0.8rem;
+  align-content: start;
+  padding: 0.9rem;
+  overflow-y: auto;
+}
+
+.dealCard {
+  position: relative;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.026), rgba(255, 255, 255, 0.008)),
+    var(--dashboard-panel);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 12px 30px rgba(0, 0, 0, 0.15);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease,
+    background-color 160ms ease;
+}
+
+.dealCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--lane-rgb), 0.3);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.22);
+}
+
+.dealCardActive {
+  border-color: rgba(var(--tib-accent-gold-rgb), 0.24);
+}
+
+.dealCardRisk {
+  border-color: rgba(205, 147, 72, 0.28);
+}
+
+.dealCardStale {
+  opacity: 0.78;
+}
+
+.dealCardRecent {
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--tib-accent-gold-rgb), 0.14),
+    0 18px 42px rgba(126, 95, 31, 0.18);
+}
+
+.dealCardHighValue {
+  background:
+    linear-gradient(180deg, rgba(var(--tib-accent-gold-rgb), 0.08), rgba(255, 255, 255, 0.008)),
+    var(--dashboard-panel);
+}
+
+.dealCardDragging {
+  transform: scale(1.01);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.28);
+}
+
+.cardLink {
+  display: grid;
+  gap: 0.95rem;
+  padding: 0.9rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardLink:focus-visible {
+  outline: 2px solid rgba(var(--tib-accent-gold-rgb), 0.22);
+  outline-offset: -2px;
+  border-radius: 1.25rem;
+}
+
+.clientBlock,
+.ownerPill {
+  min-width: 0;
+}
+
+.avatar,
+.ownerAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.75rem;
+  background: rgba(var(--tib-accent-gold-rgb), 0.12);
+  color: #f6eee0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+
+.ownerAvatar {
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+}
+
+.clientName {
+  margin: 0;
+  color: var(--dashboard-text);
+  font-size: 0.96rem;
+  font-weight: 680;
+  line-height: 1.35;
+}
+
+.eventName {
+  margin: 0.18rem 0 0;
+  color: color-mix(in srgb, var(--dashboard-muted) 80%, white 20%);
+  font-size: 0.82rem;
+}
+
+.flag,
+.metaChip,
+.inlineSignal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 1.8rem;
+  border-radius: 999px;
+  padding: 0 0.72rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.flagWarning {
+  border: 1px solid rgba(205, 147, 72, 0.18);
+  background: rgba(205, 147, 72, 0.12);
+  color: #f5d8af;
+}
+
+.valueBlock {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.dealValue {
+  color: var(--dashboard-text);
+  font-size: 1.35rem;
+  font-weight: 770;
+  letter-spacing: -0.04em;
+}
+
+.dealRange {
+  color: color-mix(in srgb, var(--dashboard-muted) 78%, white 22%);
+  font-size: 0.78rem;
+}
+
+.cardMeta,
+.signalStack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.metaChip,
+.inlineSignal,
+.ownerPill {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: color-mix(in srgb, var(--dashboard-text) 78%, white 22%);
+}
+
+.priorityCritical {
+  border-color: rgba(205, 147, 72, 0.18);
+  background: rgba(205, 147, 72, 0.1);
+  color: #f3d8af;
+}
+
+.priorityWarning {
+  border-color: rgba(var(--tib-warning-rgb), 0.2);
+  background: rgba(var(--tib-warning-rgb), 0.1);
+  color: #f3d8af;
+}
+
+.priorityNeutral {
+  color: color-mix(in srgb, var(--dashboard-muted) 80%, white 20%);
+}
+
+.inlineSignalFresh {
+  border-color: rgba(102, 160, 128, 0.18);
+  background: rgba(102, 160, 128, 0.1);
+  color: #d6f4e2;
+}
+
+.inlineSignalStale {
+  border-color: rgba(205, 147, 72, 0.18);
+  background: rgba(205, 147, 72, 0.1);
+  color: #f3d8af;
+}
+
+.ownerPill {
+  min-height: 2rem;
+  border-radius: 999px;
+  padding: 0 0.28rem 0 0.28rem;
+  color: color-mix(in srgb, var(--dashboard-text) 84%, white 16%);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.cardArrow {
+  color: color-mix(in srgb, var(--dashboard-muted) 76%, white 24%);
+  flex-shrink: 0;
+}
+
+.emptyLane,
+.emptyBoard {
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.emptyLane {
+  min-height: 12rem;
+  border: 1px dashed var(--dashboard-border);
+  border-radius: 1.25rem;
+  background: var(--dashboard-panel-soft);
+  padding: 1rem;
+}
+
+.emptyBoard {
+  gap: 0.8rem;
+  padding: 2rem;
+}
+
+@media (min-width: 960px) {
+  .commandBar {
+    display: none;
+  }
+
+  .compactField select {
+    min-width: 6.4rem;
+  }
+}
+
+@media (max-width: 959px) {
+  .kpiRibbon {
+    grid-template-columns: repeat(2, minmax(14rem, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    gap: 1rem;
+  }
+
+  .commandBar,
+  .executionSection,
+  .emptyBoard {
+    border-radius: 1.3rem;
+  }
+
+  .commandBar,
+  .executionSection {
+    padding: 1rem;
+  }
+
+  .boardRail,
+  .loadingBoardRail {
+    grid-auto-columns: minmax(18.5rem, 19.5rem);
+  }
+
+  .kpiRibbon {
+    grid-template-columns: repeat(6, minmax(14rem, 1fr));
+  }
+
+  .lane {
+    min-height: 34rem;
+  }
+
+  .laneBody {
+    padding: 0.8rem;
+  }
+
+  .cardHeader,
+  .cardFooter,
+  .laneHeaderTop {
+    align-items: flex-start;
+  }
+}

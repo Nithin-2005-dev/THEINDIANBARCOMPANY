@@ -1,0 +1,173 @@
+.metricGrid,
+.splitGrid,
+.cardGrid,
+.stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.splitGrid,
+.stack {
+  align-content: start;
+}
+
+.splitGrid {
+  align-items: start;
+}
+
+.splitGrid > * {
+  min-height: 0;
+  align-self: start;
+}
+
+.pipelineSurface > :last-child {
+  margin-top: 0;
+}
+
+.pipelineBody {
+  display: grid;
+  gap: 1rem;
+}
+
+.scrollSurface {
+  max-height: min(62vh, 36rem);
+  overflow: hidden;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.scrollSurface > :last-child {
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+}
+
+.itemCard,
+.itemCardCompact {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1.05rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 1.15rem;
+  background: rgba(255, 255, 255, 0.022);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.itemCardCompact {
+  gap: 0.45rem;
+}
+
+.sourceList {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.sourceItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 5.2rem;
+  padding: 1.05rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 1.15rem;
+  background: rgba(255, 255, 255, 0.022);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.sourceName {
+  min-width: 0;
+  color: var(--tib-text-secondary);
+  font-size: 0.96rem;
+  font-weight: 600;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.sourceCount {
+  flex-shrink: 0;
+  color: var(--tib-text-primary);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.itemHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.label {
+  color: color-mix(in srgb, var(--dashboard-accent, var(--tib-accent-gold)) 68%, white 32%);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.title {
+  color: var(--tib-text-primary);
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.copy {
+  color: var(--tib-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.value {
+  color: var(--tib-text-primary);
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.meta {
+  color: color-mix(in srgb, var(--dashboard-accent, var(--tib-accent-gold)) 60%, white 40%);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 900px) {
+  .metricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1180px) {
+  .metricGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .splitGrid {
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .scrollSurface {
+    max-height: 28rem;
+  }
+
+  .scrollSurface > :last-child {
+    padding-right: 0.15rem;
+  }
+
+  .sourceItem {
+    min-height: 4.6rem;
+    padding: 0.9rem;
+  }
+
+  .sourceName {
+    font-size: 0.9rem;
+  }
+}

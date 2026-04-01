@@ -9,6 +9,7 @@ import { packagesData } from '@/data/packages'
 import { galleriesData } from '@/data/galleries'
 import { addonsData } from '@/data/addons'
 import { buildMetadata } from '@/lib/seo'
+import { buildBookingHref } from '@/components/booking/booking-service-config'
 
 export const metadata: Metadata = buildMetadata({
   title: "Pool Parties",
@@ -25,13 +26,21 @@ export const metadata: Metadata = buildMetadata({
 })
 
 const page = () => {
+  const bookingHref = buildBookingHref({ service: "negroni" })
+
   return (
     <main >
-      <Hero {...heroes.negroni}/>
-      <Packages {...packagesData.negroni}/>
+      <Hero
+        {...heroes.negroni}
+        primaryCta="Check Availability"
+        primaryHref={bookingHref}
+        secondaryCta="Talk to an Expert"
+        secondaryHref={bookingHref}
+      />
+      <Packages {...packagesData.negroni} serviceLabel="Pool Party" serviceSlug="negroni" />
       <Gallery {...galleriesData.negroni}/>
       <Addons {...addonsData.negroni}/>
-      <FinalCTA/>
+      <FinalCTA serviceLabel="Pool Party" serviceSlug="negroni" />
     </main>
   )
 }

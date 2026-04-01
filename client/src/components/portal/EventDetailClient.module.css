@@ -1,0 +1,232 @@
+.heroGrid,
+.workspaceGrid,
+.summaryGrid,
+.detailGrid,
+.stageGrid,
+.timelineList,
+.messageList,
+.paymentList,
+.documentList,
+.revisionList,
+.vendorList,
+.actionRow {
+  display: grid;
+  gap: 1rem;
+}
+
+.summaryGrid,
+.detailGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.summaryCard,
+.detailCard,
+.documentCard,
+.timelineCard,
+.paymentCard,
+.messageCard,
+.vendorCard,
+.revisionCard {
+  padding: 1rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 1.2rem;
+  background:
+    radial-gradient(circle at top right, rgba(var(--color-accent-rgb), 0.14), transparent 36%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+    var(--booking-panel, rgba(255, 248, 232, 0.03));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 18px 40px rgba(0, 0, 0, 0.22);
+}
+
+.summaryLabel,
+.subtleLabel,
+.meta {
+  color: color-mix(in srgb, var(--booking-metallic, var(--tib-accent-gold)) 72%, white 28%);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.summaryValue,
+.headline,
+.value {
+  color: #fffaf1;
+  font-weight: 700;
+}
+
+.summaryValue,
+.value {
+  margin-top: 0.45rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.headline {
+  font-size: 1.12rem;
+  line-height: 1.35;
+}
+
+.copy,
+.helper,
+.messageBody {
+  color: color-mix(in srgb, var(--tib-text-secondary) 80%, white 20%);
+  font-size: 0.94rem;
+  line-height: 1.76;
+}
+
+.progressHeader,
+.cardHeader,
+.messageHeader,
+.checkboxRow,
+.inputRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 0.78rem;
+  margin-top: 0.65rem;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 248, 232, 0.06);
+  box-shadow: inset 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+
+.progressBar::-webkit-progress-bar {
+  background: rgba(255, 248, 232, 0.08);
+}
+
+.progressBar::-webkit-progress-value {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tib-accent-gold) 76%, white 24%), var(--tib-accent-gold));
+}
+
+.progressBar::-moz-progress-bar {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tib-accent-gold) 76%, white 24%), var(--tib-accent-gold));
+}
+
+.stage {
+  position: relative;
+  padding: 1rem 0.9rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 1.15rem;
+  text-align: left;
+  color: color-mix(in srgb, var(--tib-text-secondary) 82%, white 18%);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: rgba(255, 255, 255, 0.025);
+  overflow: hidden;
+}
+
+.stageComplete {
+  border-color: rgba(var(--tib-accent-gold-rgb), 0.34);
+  background:
+    linear-gradient(180deg, rgba(var(--tib-accent-gold-rgb), 0.16), rgba(var(--tib-accent-gold-rgb), 0.08));
+  color: #fffaf1;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 24px rgba(var(--tib-accent-gold-rgb), 0.12);
+}
+
+.field,
+.textArea,
+.fileInput {
+  width: 100%;
+  border: 1px solid var(--tib-border);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025));
+  color: #fffaf1;
+  font-size: 0.92rem;
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.field,
+.fileInput {
+  min-height: 3rem;
+  padding: 0.85rem 1rem;
+}
+
+.textArea {
+  min-height: 8.5rem;
+  padding: 1rem;
+  resize: vertical;
+}
+
+.field:focus,
+.textArea:focus {
+  border-color: rgba(var(--tib-accent-gold-rgb), 0.42);
+  box-shadow: 0 0 0 3px rgba(var(--tib-accent-gold-rgb), 0.12);
+}
+
+.checkboxRow {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+}
+
+.checkboxLabel {
+  display: flex;
+  gap: 0.75rem;
+  color: var(--tib-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.scrollArea {
+  max-height: 34rem;
+  overflow-y: auto;
+  padding-right: 0.2rem;
+}
+
+.messageBody {
+  margin-top: 0.85rem;
+  white-space: pre-wrap;
+}
+
+.messageFooter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+}
+
+.documentCard,
+.timelineCard,
+.paymentCard,
+.messageCard,
+.vendorCard,
+.revisionCard {
+  display: grid;
+  gap: 0.65rem;
+}
+
+@media (min-width: 1040px) {
+  .heroGrid {
+    grid-template-columns: minmax(0, 1.12fr) minmax(20rem, 0.88fr);
+    align-items: start;
+  }
+
+  .workspaceGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stageGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .summaryGrid,
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+}

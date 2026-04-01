@@ -5,7 +5,7 @@
 .section {
   position: relative;
   padding: 160px 24px;
-  background: var(--bg);
+  background: var(--scene-surface-bg, var(--bg));
   overflow: hidden;
 }
 
@@ -102,7 +102,7 @@
   border-radius: 20px;
   overflow: hidden;
 
-  background: rgba(255,255,255,0.028);
+  background: var(--scene-panel-bg);
   border: 0.5px solid rgba(255,255,255,0.08);
 
   box-shadow:
@@ -128,7 +128,7 @@
 /* POPULAR CARD */
 
 .popular {
-  background: rgba(255,255,255,0.042);
+  background: var(--scene-panel-raised);
   border-color: color-mix(in srgb, var(--primary) 55%, transparent);
   transform: translateY(-8px);
 

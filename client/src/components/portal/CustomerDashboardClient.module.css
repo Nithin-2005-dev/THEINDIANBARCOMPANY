@@ -1,0 +1,164 @@
+.metricGrid,
+.layout {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.sideStack,
+.bookingList,
+.actionList,
+.notificationList {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.bookingCard,
+.actionCard,
+.notificationCard {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.022);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.025),
+    0 16px 36px rgba(0, 0, 0, 0.18);
+}
+
+.bookingCard:hover,
+.actionCard:hover,
+.notificationCard:hover {
+  transform: translateY(-1px);
+  border-color: var(--tib-border-strong);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 22px 42px rgba(0, 0, 0, 0.2);
+}
+
+.bookingHeader,
+.notificationHeader,
+.actionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.title {
+  color: var(--tib-text-primary);
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.copy,
+.subtle {
+  color: color-mix(in srgb, var(--tib-text-secondary) 84%, white 16%);
+  font-size: 0.88rem;
+  line-height: 1.68;
+}
+
+.metaLine,
+.sectionLink,
+.actionLabel {
+  color: color-mix(in srgb, var(--dashboard-accent, var(--tib-accent-gold)) 68%, white 32%);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.sectionLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  color: var(--tib-text-secondary);
+  transition: color 160ms ease;
+}
+
+.sectionLink:hover {
+  color: var(--tib-text-primary);
+}
+
+.progressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--tib-text-secondary);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.progressBar {
+  width: 100%;
+  height: 0.72rem;
+  margin-top: 0.55rem;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.24);
+}
+
+.progressBar::-webkit-progress-bar {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.progressBar::-webkit-progress-value,
+.progressBar::-moz-progress-bar {
+  background: color-mix(in srgb, var(--dashboard-accent, var(--tib-accent-gold)) 80%, white 20%);
+}
+
+.statGrid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.statCard {
+  padding: 0.8rem;
+  border: 1px solid rgba(149, 164, 183, 0.14);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.statLabel {
+  color: color-mix(in srgb, var(--dashboard-accent, var(--tib-accent-gold)) 66%, white 34%);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.statValue {
+  margin-top: 0.42rem;
+  color: var(--tib-text-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.noticeUnread {
+  border-color: rgba(var(--tib-accent-gold-rgb), 0.2);
+  background: rgba(var(--tib-accent-gold-rgb), 0.06);
+}
+
+@media (min-width: 720px) {
+  .metricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1180px) {
+  .layout {
+    grid-template-columns: minmax(0, 1.14fr) minmax(19rem, 0.86fr);
+    align-items: start;
+  }
+}

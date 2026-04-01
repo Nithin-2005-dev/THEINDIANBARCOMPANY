@@ -1,25 +1,20 @@
-import { Controller, Get, Header, Headers, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Controller, Get, Header, UseGuards } from '@nestjs/common';
+import { ApiExcludeController } from '@nestjs/swagger';
+import { InternalMonitoringGuard } from '../common/guards/internal-monitoring.guard';
 import { MetricsService } from './metrics.service';
 
+@ApiExcludeController()
 @Controller({
   path: 'metrics',
   version: '1',
 })
+@UseGuards(InternalMonitoringGuard)
 export class MetricsController {
-  constructor(
-    private readonly metricsService: MetricsService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly metricsService: MetricsService) {}
 
   @Get()
   @Header('Content-Type', 'text/plain; version=0.0.4')
-  metrics(@Headers('x-metrics-token') token?: string) {
-    const expectedToken = this.configService.get<string>('METRICS_TOKEN');
-    if (expectedToken && token !== expectedToken) {
-      throw new UnauthorizedException('Metrics token is invalid.');
-    }
-
+  metrics() {
     return this.metricsService.getMetrics();
   }
 }

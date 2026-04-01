@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth/jwt-auth.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -27,13 +37,13 @@ export class VendorsController {
 
   @Roles(Role.ADMIN)
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.vendorsService.findOne(id);
   }
 
   @Roles(Role.ADMIN)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateVendorDto) {
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateVendorDto) {
     return this.vendorsService.update(id, dto);
   }
 }

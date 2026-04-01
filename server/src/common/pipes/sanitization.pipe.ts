@@ -12,10 +12,13 @@ export class SanitizationPipe implements PipeTransform {
     }
 
     if (value && typeof value === 'object') {
-      return Object.entries(value).reduce<Record<string, unknown>>((acc, [key, child]) => {
-        acc[key] = this.sanitize(child);
-        return acc;
-      }, {});
+      return Object.entries(value).reduce<Record<string, unknown>>(
+        (acc, [key, child]) => {
+          acc[key] = this.sanitize(child);
+          return acc;
+        },
+        {},
+      );
     }
 
     if (typeof value === 'string') {

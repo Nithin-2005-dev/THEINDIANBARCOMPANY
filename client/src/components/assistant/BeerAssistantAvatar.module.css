@@ -1,0 +1,34 @@
+.avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.placeholder {
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 233, 190, 0.2), transparent 40%),
+    radial-gradient(circle at 50% 60%, rgba(255, 196, 92, 0.18), transparent 60%);
+  opacity: 0.72;
+  animation: placeholderPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes placeholderPulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.985);
+  }
+
+  50% {
+    opacity: 0.86;
+    transform: scale(1);
+  }
+}

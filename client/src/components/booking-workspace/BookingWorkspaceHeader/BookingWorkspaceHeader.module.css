@@ -1,0 +1,124 @@
+.root {
+  display: grid;
+  gap: var(--space-lg);
+  border: 1px solid var(--tib-border);
+  border-radius: calc(var(--radius-lg) + 0.2rem);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.024), rgba(255, 255, 255, 0.012)),
+    var(--booking-panel, var(--dashboard-panel, rgba(13, 19, 27, 0.94)));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 24px 54px rgba(0, 0, 0, 0.22);
+  padding: calc(var(--space-xl) + 0.15rem);
+}
+
+.headerRow {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.copyBlock {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0;
+  color: color-mix(in srgb, var(--booking-metallic, var(--tib-accent-gold)) 72%, white 28%);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.title {
+  margin: 0;
+  color: var(--tib-text-primary);
+  font-size: clamp(1.65rem, 2.6vw, 2.45rem);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.description {
+  margin: var(--space-sm) 0 0;
+  max-width: 48rem;
+  color: color-mix(in srgb, var(--tib-text-secondary) 86%, white 14%);
+  font-size: 0.95rem;
+  line-height: 1.72;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.actionButton {
+  min-height: calc(var(--space-xl) * 2.15);
+}
+
+.metaGrid {
+  display: grid;
+  gap: var(--space-sm);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.metaCard {
+  border: 1px solid var(--tib-border);
+  border-radius: var(--radius-md);
+  background: var(--booking-surface, rgba(255, 255, 255, 0.025));
+  padding: var(--space-md);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.metaLabel {
+  margin: 0;
+  color: color-mix(in srgb, var(--booking-metallic, var(--tib-accent-gold)) 70%, white 30%);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.metaValue {
+  margin: var(--space-xs) 0 0;
+  color: var(--tib-text-primary);
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.supplementary {
+  border-top: 1px solid var(--color-border-soft);
+  padding-top: var(--space-lg);
+}
+
+@media (min-width: 980px) {
+  .headerRow {
+    align-items: flex-start;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .metaGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .metaGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions > * {
+    flex: 1 1 100%;
+  }
+}

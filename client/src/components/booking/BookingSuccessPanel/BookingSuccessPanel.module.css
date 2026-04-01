@@ -1,0 +1,201 @@
+.root {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.orb {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  background: rgba(var(--booking-accent-rgb), 0.58);
+  box-shadow: 0 0 0 0.28rem rgba(var(--booking-accent-rgb), 0.08);
+}
+
+.badge {
+  align-items: center;
+  border: 1px solid rgba(var(--booking-accent-rgb), 0.16);
+  border-radius: 999px;
+  color: var(--color-text-primary);
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 0.45rem 0.85rem;
+  text-transform: uppercase;
+  width: fit-content;
+  background: rgba(var(--booking-accent-rgb), 0.06);
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1.06;
+}
+
+.description {
+  margin: 0;
+  max-width: 44rem;
+  color: color-mix(in srgb, var(--color-text-secondary) 78%, white 22%);
+  font-size: 0.98rem;
+  line-height: 1.76;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.metaItem {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--color-text-secondary) 80%, white 20%);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.45rem 0.8rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.panel {
+  border: 1px solid rgba(var(--booking-accent-rgb), 0.12);
+  border-radius: 1.35rem;
+  background:
+    linear-gradient(180deg, rgba(var(--booking-accent-rgb), 0.07), rgba(var(--booking-accent-rgb), 0.02)),
+    rgba(255, 255, 255, 0.02);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 16px 36px rgba(0, 0, 0, 0.16);
+  padding: 1.2rem;
+}
+
+.panelHeader {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.panelTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 1.08rem;
+}
+
+.panelCopy {
+  margin: 0;
+  color: color-mix(in srgb, var(--color-text-secondary) 78%, white 22%);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.timeline {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.timelineItem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  align-items: start;
+  padding: 0.92rem 0.98rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1.05rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.timelineStep {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid rgba(var(--booking-accent-rgb), 0.16);
+  border-radius: 0.85rem;
+  background: rgba(var(--booking-accent-rgb), 0.06);
+  color: color-mix(in srgb, var(--booking-metallic) 84%, white 16%);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.timelineTitle,
+.timelineText {
+  margin: 0;
+}
+
+.timelineTitle {
+  color: var(--color-text-primary);
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.timelineText {
+  margin-top: 0.28rem;
+  color: color-mix(in srgb, var(--color-text-secondary) 78%, white 22%);
+  font-size: 0.86rem;
+  line-height: 1.62;
+}
+
+.actions {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.secondaryLink,
+.ghostButton,
+.backLink {
+  align-items: center;
+  border-radius: 999px;
+  color: var(--color-text-primary);
+  display: inline-flex;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0 1.1rem;
+  text-decoration: none;
+}
+
+.secondaryLink {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ghostButton {
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.backLink {
+  color: var(--color-text-secondary);
+  justify-content: flex-start;
+  min-height: auto;
+  padding: 0;
+}
+
+@media (min-width: 820px) {
+  .actions {
+    align-items: center;
+    grid-template-columns: repeat(3, max-content);
+  }
+}
+
+@media (max-width: 520px) {
+  .panel,
+  .timelineItem {
+    padding-inline: 0.86rem;
+  }
+
+  .title {
+    font-size: clamp(1.75rem, 9vw, 2.3rem);
+  }
+}

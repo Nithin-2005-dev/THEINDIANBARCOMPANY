@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsDateString,
   IsInt,
   IsOptional,
@@ -34,6 +35,34 @@ export class CreateLeadDto {
   @IsString()
   @MaxLength(80)
   city?: string;
+
+  @ApiPropertyOptional({
+    example: 'Signature Cocktail Service',
+    maxLength: 120,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  packageName?: string;
+
+  @ApiPropertyOptional({
+    example: 'For 50 guests',
+    maxLength: 160,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  packageLabel?: string;
+
+  @ApiPropertyOptional({
+    example: ['Molecular cocktails', 'DJ console'],
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @MaxLength(80, { each: true })
+  addOns?: string[];
 
   @ApiProperty({
     example: '2026-05-10T18:30:00.000Z',
@@ -73,7 +102,8 @@ export class CreateLeadDto {
   budgetMax?: number;
 
   @ApiPropertyOptional({
-    example: 'Need flair bartenders, premium glassware, and a mocktail counter.',
+    example:
+      'Need flair bartenders, premium glassware, and a mocktail counter.',
     maxLength: 2000,
   })
   @IsOptional()

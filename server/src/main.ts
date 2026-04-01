@@ -1,10 +1,11 @@
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import helmet from 'helmet';
-import { json, urlencoded } from 'express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { json, urlencoded } from 'express';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { initSentry } from './common/monitoring/sentry';
 import { SanitizationPipe } from './common/pipes/sanitization.pipe';
 import { PrismaService } from './prisma/prisma.service';
 
@@ -16,8 +17,8 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const prismaService = app.get(PrismaService);
+  initSentry(configService.get<string>('SENTRY_DSN'));
 
-  // ---------- GLOBAL CONFIG ----------
   app.setGlobalPrefix('api');
 
   app.enableVersioning({
@@ -29,8 +30,7 @@ async function bootstrap() {
 
   app.use(helmet());
 
-  const bodyLimit =
-    configService.get<string>('API_BODY_LIMIT') ?? '1mb';
+  const bodyLimit = configService.get<string>('API_BODY_LIMIT') ?? '1mb';
 
   app.use(json({ limit: bodyLimit }));
   app.use(urlencoded({ extended: true, limit: bodyLimit }));
@@ -40,7 +40,7 @@ async function bootstrap() {
       configService
         .get<string>('API_CORS_ORIGINS')
         ?.split(',')
-        .map((o) => o.trim()) ?? '*',
+        .map((origin) => origin.trim()) ?? '*',
     credentials: true,
   });
 
@@ -58,7 +58,6 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
 
-  // ---------- SWAGGER ----------
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Party as a Service API')
     .setDescription(
@@ -82,10 +81,7 @@ async function bootstrap() {
     process.env.SWAGGER_ENABLED === 'true';
 
   if (swaggerEnabled) {
-    const document = SwaggerModule.createDocument(
-      app,
-      swaggerConfig,
-    );
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
 
     SwaggerModule.setup('api/docs', app, document, {
       swaggerOptions: { persistAuthorization: true },
@@ -93,12 +89,12 @@ async function bootstrap() {
     });
   }
 
-  // ---------- PORT (RENDER SAFE) ----------
   const port = Number(process.env.PORT) || 3000;
 
-  await app.listen(port, '0.0.0.0');
+  // Avoid forcing IPv4-only binding so localhost works on both IPv4 and IPv6 stacks.
+  await app.listen(port);
 
-  console.log(`🚀 Server running on port ${port}`);
+  console.log(`Server running on port ${port}`);
 }
 
 void bootstrap();

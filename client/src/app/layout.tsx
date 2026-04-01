@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import BeerAssistant from "@/components/assistant/BeerAssistant";
+import { Geist, Geist_Mono, IBM_Plex_Mono, Manrope } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar/Navbar";
-import Footer from "@/components/layout/Footer/Footer";
+import { ToastProvider } from "@/components/dashboard/ToastProvider";
+import AppShell from "@/components/layout/AppShell";
 import { absoluteUrl, siteConfig } from "@/lib/seo";
+import FloatingCocktail from "@/components/ui/FloatingCocktail ";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,6 +16,17 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const dashboardSans = Manrope({
+  variable: "--font-dashboard-sans",
+  subsets: ["latin"],
+});
+
+const dashboardMono = IBM_Plex_Mono({
+  variable: "--font-dashboard-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -98,7 +112,7 @@ export default function RootLayout({
   return (
     <html lang="en-IN">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased theme-tib`}
+        className={`${geistSans.variable} ${geistMono.variable} ${dashboardSans.variable} ${dashboardMono.variable} antialiased`}
       >
         <script
           type="application/ld+json"
@@ -112,12 +126,13 @@ export default function RootLayout({
             __html: JSON.stringify(websiteSchema),
           }}
         />
-        {/* <FloatingCocktail /> */}
-        <div className="theme-tib">
-          <Navbar/>
-          {children}
-          <Footer/>
-        </div>
+        <ToastProvider>
+          <AppShell>{children}</AppShell>
+          <Suspense fallback={null}>
+            <BeerAssistant />
+          </Suspense>
+          <FloatingCocktail/>
+        </ToastProvider>
       </body>
     </html>
   );

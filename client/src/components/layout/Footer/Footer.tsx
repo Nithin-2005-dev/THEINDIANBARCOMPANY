@@ -12,6 +12,7 @@ const experiences = [
 ]
 
 const company = [
+  { label: "Team",      href: "/team"    },
   { label: "About Us",  href: "/about"   },
   { label: "Contact",   href: "/contact" },
   // { label: "Careers",   href: "/careers" },
@@ -32,7 +33,7 @@ const socials = [
 
 export default function Footer() {
   return (
-    <footer className={styles.footer}>
+    <footer id="contact" className={styles.footer}>
 
       {/* Ambient bloom */}
       <div className={styles.bloom} />
@@ -56,6 +57,7 @@ export default function Footer() {
                   width={18}
                   height={18}
                   className={styles.logo}
+                  style={{ width: "auto", height: "auto" }}
                 />
               </span>
               <span className={styles.brandName}>THE INDIAN BAR</span>

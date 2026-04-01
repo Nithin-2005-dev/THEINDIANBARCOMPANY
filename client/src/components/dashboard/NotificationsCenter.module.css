@@ -1,0 +1,119 @@
+.groups {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.group {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.groupTitle {
+  color: rgba(var(--tib-accent-gold-rgb), 0.82);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.groupCount {
+  display: inline-flex;
+  min-height: 1.7rem;
+  min-width: 1.7rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--tib-accent-gold-rgb), 0.16);
+  background: rgba(var(--tib-accent-gold-rgb), 0.08);
+  color: rgba(var(--tib-accent-gold-rgb), 0.96);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.card {
+  padding: 1rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 1.15rem;
+  background: rgba(255, 248, 232, 0.03);
+}
+
+.cardUnread {
+  border-color: rgba(var(--tib-accent-gold-rgb), 0.24);
+  background: rgba(var(--tib-accent-gold-rgb), 0.06);
+}
+
+.cardHeader,
+.cardFooter {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.title {
+  color: var(--tib-text-primary);
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.body {
+  margin-top: 0.6rem;
+  color: var(--tib-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.meta {
+  margin-top: 0.75rem;
+  color: rgba(var(--tib-accent-gold-rgb), 0.72);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.status {
+  display: inline-flex;
+  min-height: 1.9rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.statusUnread {
+  border: 1px solid rgba(var(--tib-accent-gold-rgb), 0.24);
+  background: rgba(var(--tib-accent-gold-rgb), 0.1);
+  color: rgba(var(--tib-accent-gold-rgb), 0.95);
+}
+
+.statusRead {
+  border: 1px solid var(--tib-border);
+  background: rgba(255, 248, 232, 0.04);
+  color: var(--tib-text-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.9rem;
+}

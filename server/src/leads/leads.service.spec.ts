@@ -1,7 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { AuditService } from '../audit/audit.service';
 import { IdempotencyService } from '../idempotency/idempotency.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { LeadsService } from './leads.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { QueueService } from '../queue/queue.service';
 
 describe('LeadsService', () => {
   let service: LeadsService;
@@ -28,6 +31,24 @@ describe('LeadsService', () => {
           provide: IdempotencyService,
           useValue: {
             execute: jest.fn(),
+          },
+        },
+        {
+          provide: AuditService,
+          useValue: {
+            log: jest.fn(),
+          },
+        },
+        {
+          provide: NotificationsService,
+          useValue: {
+            createInApp: jest.fn(),
+          },
+        },
+        {
+          provide: QueueService,
+          useValue: {
+            queueEmail: jest.fn(),
           },
         },
       ],

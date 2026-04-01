@@ -1,0 +1,41 @@
+.card {
+  position: relative;
+  border: 1px solid var(--dashboard-border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0.008)),
+    var(--dashboard-panel);
+  border-radius: 1.375rem;
+  padding: 1.25rem;
+  box-shadow: var(--dashboard-shadow-soft);
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  inset: auto 1.25rem 0;
+  height: 1px;
+  background: var(--dashboard-border);
+}
+
+.label {
+  color: var(--dashboard-subtle);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.value {
+  margin-top: 1rem;
+  font-size: 1.875rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--dashboard-text);
+}
+
+.hint {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--dashboard-muted);
+}

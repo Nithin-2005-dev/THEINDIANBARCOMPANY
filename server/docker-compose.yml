@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -31,7 +29,27 @@ services:
       timeout: 5s
       retries: 5
 
+  minio:
+    image: minio/minio:latest
+    container_name: tib_minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-minioadmin}
+    command: ['server', '/data', '--console-address', ':9001']
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api:
+    profiles: ['fullstack']
     build:
       context: .
       dockerfile: Dockerfile
@@ -42,14 +60,18 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     env_file:
       - .env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-tib_db}?schema=public
       PORT: 3000
       REDIS_HOST: redis
+      S3_ENDPOINT: http://minio:9000
     ports:
-      - '3000:3000'
+      - '3001:3000'
+    command: ['node', 'dist/main.js']
     healthcheck:
       test: ['CMD-SHELL', 'wget --spider -q http://localhost:3000/api/v1/health || exit 1']
       interval: 20s
@@ -57,6 +79,7 @@ services:
       retries: 5
 
   worker:
+    profiles: ['fullstack']
     build:
       context: .
       dockerfile: Dockerfile
@@ -67,12 +90,25 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     env_file:
       - .env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-tib_db}?schema=public
       REDIS_HOST: redis
+      S3_ENDPOINT: http://minio:9000
     command: ['node', 'dist/worker.js']
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'node -e "const Redis=require(''ioredis''); const client=new Redis({host:process.env.REDIS_HOST, port:Number(process.env.REDIS_PORT), password:process.env.REDIS_PASSWORD || undefined}); client.ping().then((value)=>{client.disconnect(); process.exit(value === ''PONG'' ? 0 : 1);}).catch(()=>process.exit(1));"',
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
+  minio_data:

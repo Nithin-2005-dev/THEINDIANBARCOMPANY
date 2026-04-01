@@ -5,8 +5,11 @@
 /* ─── SECTION ─── */
 
 .section {
+  position: relative;
+  z-index: 2;
+  isolation: isolate;
   padding: 120px 24px;
-  background: var(--bg);
+  background: transparent;
   color: var(--text-primary);
 }
 
@@ -43,6 +46,8 @@
 /* ─── GRID ─── */
 
 .grid {
+  position: relative;
+  z-index: 1;
   max-width: 900px;
   margin: 0 auto;
   display: flex;
@@ -54,11 +59,14 @@
 
 .card {
   position: relative;
+  z-index: 2;
+  isolation: isolate;
   width: 100%;
   height: 420px;
   border-radius: 20px;
   overflow: hidden;
   cursor: pointer;
+  background: var(--scene-panel-bg);
 
   border: 0.5px solid rgba(255,255,255,0.07);
   box-shadow:
@@ -71,6 +79,7 @@
 .video {
   position: absolute;
   inset: 0;
+  z-index: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -88,6 +97,7 @@
 .overlay {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(
     to top,
     rgba(0,0,0,0.92),
@@ -99,6 +109,7 @@
 
 .content {
   position: absolute;
+  z-index: 2;
   top: 36px;
   left: 36px;
   right: 36px;
@@ -148,6 +159,7 @@
 
 .arrow {
   position: absolute;
+  z-index: 3;
   bottom: 28px;
   right: 28px;
   width: 48px;

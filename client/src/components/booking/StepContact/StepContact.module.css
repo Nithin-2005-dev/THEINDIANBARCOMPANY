@@ -1,0 +1,221 @@
+.root {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.header {
+  display: grid;
+  gap: 0.42rem;
+  max-width: 42rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: color-mix(in srgb, var(--booking-metallic) 84%, white 16%);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-serif);
+  font-size: clamp(1.55rem, 7vw, 2rem);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+
+.description {
+  margin: 0;
+  color: color-mix(in srgb, var(--color-text-secondary) 78%, white 22%);
+  font-size: 0.9rem;
+  line-height: 1.76;
+}
+
+.grid {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.field,
+.fieldset {
+  display: grid;
+  gap: 0.62rem;
+  margin: 0;
+  padding: 0.78rem 0.82rem 0.86rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1.05rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012)),
+    rgba(10, 11, 14, 0.84);
+  backdrop-filter: blur(14px);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.fieldset {
+  gap: 0.72rem;
+  border-color: rgba(var(--booking-accent-rgb), 0.12);
+  background:
+    linear-gradient(180deg, rgba(var(--booking-accent-rgb), 0.06), rgba(var(--booking-accent-rgb), 0.02)),
+    rgba(10, 11, 14, 0.84);
+}
+
+.field:hover,
+.fieldset:hover {
+  transform: translateY(-1px);
+  border-color: rgba(var(--booking-accent-rgb), 0.14);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.14);
+}
+
+.label {
+  color: var(--color-text-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.input {
+  min-height: 3.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+  background: rgba(6, 7, 9, 0.72);
+  color: var(--color-text-primary);
+  padding: 0 1rem;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.input:hover {
+  border-color: rgba(var(--booking-accent-rgb), 0.14);
+}
+
+.input::placeholder {
+  color: color-mix(in srgb, var(--color-text-muted) 80%, white 20%);
+}
+
+.input:focus-visible {
+  border-color: rgba(var(--booking-accent-rgb), 0.22);
+  outline: none;
+  box-shadow: 0 0 0 0.18rem rgba(var(--booking-accent-rgb), 0.08);
+}
+
+.inputError {
+  border-color: rgba(var(--color-danger-rgb), 0.52);
+}
+
+.hint {
+  margin: 0;
+  color: color-mix(in srgb, var(--color-text-secondary) 80%, white 20%);
+  font-size: 0.76rem;
+  line-height: 1.62;
+}
+
+.error {
+  color: var(--color-danger);
+}
+
+.options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.72rem;
+  margin-top: 0.1rem;
+}
+
+.option {
+  display: grid;
+  gap: 0.15rem;
+  justify-items: center;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  color: color-mix(in srgb, var(--color-text-secondary) 82%, white 18%);
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.option:hover,
+.option:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(var(--booking-accent-rgb), 0.16);
+  color: var(--color-text-primary);
+  outline: none;
+}
+
+.optionActive {
+  border-color: rgba(var(--booking-accent-rgb), 0.2);
+  background:
+    linear-gradient(180deg, rgba(var(--booking-accent-rgb), 0.08), rgba(var(--booking-accent-rgb), 0.03)),
+    rgba(255, 255, 255, 0.03);
+  color: var(--color-text-primary);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.optionLabel {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.optionNote {
+  border: 1px solid rgba(var(--booking-accent-rgb), 0.14);
+  border-radius: 999px;
+  padding: 0.16rem 0.46rem;
+  color: color-mix(in srgb, var(--booking-metallic) 84%, white 16%);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 521px) {
+  .options {
+    grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  }
+}
+
+@media (min-width: 720px) {
+  .root {
+    gap: 1.45rem;
+  }
+
+  .title {
+    font-size: clamp(1.85rem, 2.2vw, 2.45rem);
+  }
+
+  .description {
+    font-size: 0.96rem;
+  }
+
+  .grid {
+    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .field:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .field,
+  .fieldset {
+    padding: 0.96rem 1rem 1rem;
+    border-radius: 1.2rem;
+  }
+
+  .input {
+    min-height: 3.55rem;
+  }
+}

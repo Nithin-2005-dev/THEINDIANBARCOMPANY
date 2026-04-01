@@ -1,0 +1,39 @@
+.panel {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 208, 130, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.row {
+  height: 0.88rem;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05), rgba(255, 204, 122, 0.14), rgba(255, 255, 255, 0.05));
+  background-size: 220% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+.short {
+  width: 52%;
+}
+
+.medium {
+  width: 68%;
+}
+
+.long {
+  width: 86%;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -20% 0;
+  }
+}

@@ -9,6 +9,9 @@ datasource db {
 
 enum Role {
   ADMIN
+  SALES
+  OPS
+  FINANCE
   CLIENT
   VENDOR
 }
@@ -16,6 +19,8 @@ enum Role {
 enum LeadStatus {
   NEW
   CONTACTED
+  QUALIFIED
+  PROPOSAL_SENT
   NEGOTIATING
   WON
   LOST
@@ -32,6 +37,7 @@ enum ContractStatus {
   DRAFT
   SENT
   SIGNED
+  ARCHIVED
   CANCELLED
 }
 
@@ -56,6 +62,36 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum ProjectStage {
+  PLANNING
+  PREPARATION
+  READY
+  EVENT_DAY
+  COMPLETED
+}
+
+enum MessageType {
+  USER
+  SYSTEM
+}
+
+enum ConversationThreadType {
+  GROUP
+  DIRECT_ADMIN
+  DIRECT_STAFF
+  DIRECT_VENDOR
+}
+
+enum NotificationType {
+  PROPOSAL
+  PAYMENT
+  STATUS
+  MESSAGE
+  EVENT
+  CONTRACT
+  GENERAL
+}
+
 enum AuditAction {
   OTP_SENT
   OTP_VERIFIED
@@ -76,6 +112,41 @@ enum AuditAction {
   PAYMENT_WEBHOOK_PROCESSED
   VENDOR_ASSIGNED
   FILE_UPLOADED
+  LEAD_NOTE_CREATED
+  LEAD_NOTE_UPDATED
+  LEAD_NOTE_DELETED
+  LEAD_STATUS_CHANGED
+  LEAD_MANUAL_ACTIVITY
+  LEAD_ASSIGNED
+  PROJECT_ASSIGNED
+  PROJECT_UPDATED
+  USER_CREATED
+  USER_ROLE_UPDATED
+  USER_STATUS_UPDATED
+  TASK_CREATED
+  TASK_UPDATED
+  TASK_COMMENT_ADDED
+  PROJECT_DOCUMENT_UPLOADED
+  ADMIN_BOOTSTRAPPED
+}
+
+enum LeadActivityType {
+  STATUS_CHANGED
+  NOTE_ADDED
+  NOTE_UPDATED
+  NOTE_DELETED
+  PROPOSAL_CREATED
+  CONTRACT_CREATED
+  PAYMENT_CREATED
+  PAYMENT_UPDATED
+  MANUAL_ACTION
+  OWNER_ASSIGNED
+  SUPPORTING_STAFF_ASSIGNED
+}
+
+enum AssignmentRole {
+  PRIMARY
+  SUPPORTING
 }
 
 enum SessionStatus {
@@ -94,15 +165,46 @@ enum OtpChallengeStatus {
   CONSUMED
 }
 
+enum OtpChannel {
+  PHONE
+  EMAIL
+}
+
+enum ProjectTaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  BLOCKED
+}
+
+enum ProjectTaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 enum IdempotencyStatus {
   PROCESSING
   COMPLETED
   FAILED
 }
 
+enum TeamCategory {
+  CORE
+  TRUSTEE
+  INFLUENCERS
+}
+
+enum AiMessageActor {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
 model User {
   id                    String     @id @default(uuid())
-  phone                 String     @unique
+  phone                 String?    @unique
   email                 String?    @unique
   name                  String?
   role                  Role       @default(CLIENT)
@@ -115,6 +217,27 @@ model User {
   sessions              Session[]
   otpChallenges         OtpChallenge[]
   idempotencyKeys       IdempotencyKey[]
+  notifications         Notification[]
+  messages              Message[]
+  projectUpdates        ProjectUpdate[]
+  authoredLeadNotes     LeadInternalNote[] @relation("LeadNoteAuthor")
+  leadActivities        LeadActivity[]
+  leadStatusChanges     LeadStatusHistory[]
+  leadAssignmentsCreated LeadAssignment[]   @relation("LeadAssignmentCreatedBy")
+  leadAssignmentsUpdated LeadAssignment[]   @relation("LeadAssignmentUpdatedBy")
+  projectAssignmentsCreated ProjectAssignment[] @relation("ProjectAssignmentCreatedBy")
+  projectAssignmentsUpdated ProjectAssignment[] @relation("ProjectAssignmentUpdatedBy")
+  assignedLeads         LeadAssignment[]    @relation("AssignedLeadUser")
+  assignedProjects      ProjectAssignment[] @relation("AssignedProjectUser")
+  assignedProjectTasks  ProjectTask[]       @relation("AssignedProjectTaskUser")
+  createdProjectTasks   ProjectTask[]       @relation("CreatedProjectTaskUser")
+  projectTaskComments   ProjectTaskComment[] @relation("ProjectTaskCommentAuthor")
+  uploadedTaskAttachments ProjectTaskAttachment[] @relation("ProjectTaskAttachmentUploader")
+  taskActivities        ProjectTaskActivity[] @relation("ProjectTaskActivityActor")
+  uploadedProjectDocuments ProjectDocument[] @relation("ProjectDocumentUploader")
+  vendorProfile         Vendor?
+  aiConversations       AiConversation[]
+  assistantEvents       AiAssistantEvent[]
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
 
@@ -126,6 +249,9 @@ model Lead {
   eventType  String
   location   String
   city       String?
+  packageName String?
+  packageLabel String?
+  addOns     String[]
   eventDate  DateTime
   guestCount Int?
   budgetMin  Int?
@@ -135,6 +261,11 @@ model Lead {
   clientId   String
   client     User       @relation(fields: [clientId], references: [id], onDelete: Restrict)
   proposals  Proposal[]
+  threads    ConversationThread[]
+  internalNotes LeadInternalNote[]
+  activities LeadActivity[]
+  statusHistory LeadStatusHistory[]
+  assignments LeadAssignment[]
   deletedAt  DateTime?
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
@@ -142,6 +273,9 @@ model Lead {
   @@index([clientId])
   @@index([deletedAt])
   @@index([status])
+  @@index([eventDate])
+  @@index([location])
+  @@index([budgetMin, budgetMax])
 }
 
 model Proposal {
@@ -154,6 +288,9 @@ model Proposal {
   deliverables String
   timeline     String
   notes        String?
+  documentUrl  String?
+  clientComment String?
+  decidedAt    DateTime?
   status       ProposalStatus @default(DRAFT)
   contract     Contract?
   deletedAt    DateTime?
@@ -172,6 +309,8 @@ model Contract {
   documentUrl String
   status      ContractStatus @default(DRAFT)
   signedAt    DateTime?
+  signedByName String?
+  acceptedTermsAt DateTime?
   project     Project?
   versions    ContractDocumentVersion[]
   deletedAt   DateTime?
@@ -192,6 +331,11 @@ model Project {
   summary    String?
   payments   Payment[]
   vendors    ProjectVendor[]
+  updates    ProjectUpdate[]
+  assignments ProjectAssignment[]
+  tasks      ProjectTask[]
+  documents  ProjectDocument[]
+  feedback   EventFeedback?
   deletedAt  DateTime?
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
@@ -199,24 +343,52 @@ model Project {
   @@index([clientId])
   @@index([deletedAt])
   @@index([status])
+  @@index([progress])
 }
 
 model Vendor {
   id          String          @id @default(uuid())
   name        String
   serviceType String
+  userId      String?         @unique
+  user        User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
   phone       String?
   email       String?
   pricingInfo String?
   isAvailable Boolean         @default(true)
   notes       String?
   assignments ProjectVendor[]
+  tasks       ProjectTask[]
   deletedAt   DateTime?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
   @@index([deletedAt])
   @@index([serviceType])
+}
+
+model TeamMember {
+  id           String       @id @default(uuid())
+  name         String
+  designation  String
+  category     TeamCategory
+  bio          String?
+  photoUrl     String?
+  photoPublicId String?
+  instagramUrl String?
+  linkedInUrl  String?
+  websiteUrl   String?
+  email        String?
+  isActive     Boolean      @default(true)
+  isVisible    Boolean      @default(true)
+  sortOrder    Int          @default(0)
+  deletedAt    DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([deletedAt])
+  @@index([category, sortOrder])
+  @@index([isActive, isVisible])
 }
 
 model ProjectVendor {
@@ -245,6 +417,7 @@ model Payment {
   transactionId  String?
   gatewaySignature String?
   gatewayMetadata Json?
+  receiptUrl      String?
   webhookEventId  String?      @unique
   paidAt         DateTime?
   notes          String?
@@ -255,6 +428,271 @@ model Payment {
   @@index([deletedAt])
   @@index([projectId])
   @@index([status])
+}
+
+model LeadInternalNote {
+  id         String   @id @default(uuid())
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User     @relation("LeadNoteAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  content     String
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([leadId, createdAt])
+  @@index([authorId])
+  @@index([deletedAt])
+}
+
+model LeadActivity {
+  id          String           @id @default(uuid())
+  leadId       String
+  lead         Lead             @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type         LeadActivityType
+  actorId      String?
+  actor        User?            @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  description  String
+  metadata     Json?
+  createdAt    DateTime         @default(now())
+
+  @@index([leadId, createdAt])
+  @@index([actorId])
+  @@index([type])
+}
+
+model LeadStatusHistory {
+  id          String     @id @default(uuid())
+  leadId       String
+  lead         Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  oldStatus    LeadStatus?
+  newStatus    LeadStatus
+  changedById  String?
+  changedBy    User?      @relation(fields: [changedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime   @default(now())
+
+  @@index([leadId, createdAt])
+  @@index([changedById])
+}
+
+model LeadAssignment {
+  id           String         @id @default(uuid())
+  leadId        String
+  lead          Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User           @relation("AssignedLeadUser", fields: [userId], references: [id], onDelete: Restrict)
+  role          AssignmentRole
+  isActive      Boolean        @default(true)
+  assignedById  String?
+  assignedBy    User?          @relation("LeadAssignmentCreatedBy", fields: [assignedById], references: [id], onDelete: SetNull)
+  endedById     String?
+  endedBy       User?          @relation("LeadAssignmentUpdatedBy", fields: [endedById], references: [id], onDelete: SetNull)
+  startedAt     DateTime       @default(now())
+  endedAt       DateTime?
+  notes         String?
+
+  @@index([leadId, isActive])
+  @@index([userId, isActive])
+  @@index([role, isActive])
+}
+
+model ProjectAssignment {
+  id           String         @id @default(uuid())
+  projectId     String
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User           @relation("AssignedProjectUser", fields: [userId], references: [id], onDelete: Restrict)
+  role          AssignmentRole
+  isActive      Boolean        @default(true)
+  assignedById  String?
+  assignedBy    User?          @relation("ProjectAssignmentCreatedBy", fields: [assignedById], references: [id], onDelete: SetNull)
+  endedById     String?
+  endedBy       User?          @relation("ProjectAssignmentUpdatedBy", fields: [endedById], references: [id], onDelete: SetNull)
+  startedAt     DateTime       @default(now())
+  endedAt       DateTime?
+  notes         String?
+
+  @@index([projectId, isActive])
+  @@index([userId, isActive])
+  @@index([role, isActive])
+}
+
+model ConversationThread {
+  id         String   @id @default(uuid())
+  leadId     String
+  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type       ConversationThreadType @default(GROUP)
+  messages   Message[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([leadId, type])
+  @@index([leadId, type])
+}
+
+model Message {
+  id             String             @id @default(uuid())
+  threadId       String
+  thread         ConversationThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  senderId       String?
+  sender         User?              @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  type           MessageType        @default(USER)
+  body           String
+  attachmentName String?
+  attachmentKey  String?
+  attachmentUrl  String?
+  readAt         DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([threadId, createdAt])
+  @@index([senderId])
+  @@index([readAt])
+}
+
+model ProjectUpdate {
+  id          String       @id @default(uuid())
+  projectId   String
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stage       ProjectStage
+  title       String
+  body        String?
+  createdById String?
+  createdBy   User?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  isInternal  Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+
+  @@index([projectId, createdAt])
+  @@index([stage])
+}
+
+model ProjectTask {
+  id               String              @id @default(uuid())
+  projectId        String
+  project          Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title            String
+  description      String?
+  status           ProjectTaskStatus   @default(PENDING)
+  priority         ProjectTaskPriority @default(MEDIUM)
+  dueDate          DateTime?
+  completedAt      DateTime?
+  blockedReason    String?
+  dependencyIds    String[]
+  checklist        Json?
+  assignedUserId   String?
+  assignedUser     User?               @relation("AssignedProjectTaskUser", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  assignedVendorId String?
+  assignedVendor   Vendor?             @relation(fields: [assignedVendorId], references: [id], onDelete: SetNull)
+  createdById      String?
+  createdBy        User?               @relation("CreatedProjectTaskUser", fields: [createdById], references: [id], onDelete: SetNull)
+  attachments      ProjectTaskAttachment[]
+  comments         ProjectTaskComment[]
+  activities       ProjectTaskActivity[]
+  deletedAt        DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@index([projectId, status])
+  @@index([assignedUserId, status])
+  @@index([assignedVendorId, status])
+  @@index([dueDate])
+  @@index([deletedAt])
+}
+
+model ProjectTaskAttachment {
+  id           String      @id @default(uuid())
+  taskId        String
+  task          ProjectTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  fileKey      String
+  fileName     String
+  fileUrl      String
+  contentType  String
+  sizeBytes    Int
+  uploadedById String?
+  uploadedBy   User?       @relation("ProjectTaskAttachmentUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime    @default(now())
+
+  @@index([taskId, createdAt])
+  @@index([uploadedById])
+}
+
+model ProjectTaskComment {
+  id         String      @id @default(uuid())
+  taskId      String
+  task        ProjectTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId    String?
+  author      User?       @relation("ProjectTaskCommentAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  body       String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([taskId, createdAt])
+  @@index([authorId])
+}
+
+model ProjectTaskActivity {
+  id          String      @id @default(uuid())
+  taskId       String
+  task         ProjectTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  actorId      String?
+  actor        User?       @relation("ProjectTaskActivityActor", fields: [actorId], references: [id], onDelete: SetNull)
+  type         String
+  description  String
+  metadata     Json?
+  createdAt    DateTime    @default(now())
+
+  @@index([taskId, createdAt])
+  @@index([actorId])
+  @@index([type])
+}
+
+model ProjectDocument {
+  id           String   @id @default(uuid())
+  projectId    String
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fileKey      String
+  fileName     String
+  fileUrl      String
+  contentType  String
+  sizeBytes    Int
+  category     String   @default("GENERAL")
+  uploadedById String?
+  uploadedBy   User?    @relation("ProjectDocumentUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+
+  @@index([projectId, createdAt])
+  @@index([uploadedById])
+}
+
+model Notification {
+  id         String           @id @default(uuid())
+  userId     String
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       NotificationType
+  title      String
+  body       String
+  actionUrl  String?
+  metadata   Json?
+  readAt     DateTime?
+  createdAt  DateTime         @default(now())
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+  @@index([type])
+}
+
+model EventFeedback {
+  id               String   @id @default(uuid())
+  projectId        String   @unique
+  project          Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  rating           Int
+  testimonial      String?
+  comments         String?
+  allowMediaUsage  Boolean  @default(false)
+  submittedAt      DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model ContractDocumentVersion {
@@ -313,7 +751,10 @@ model OtpChallenge {
   id                 String             @id @default(uuid())
   userId             String?
   user               User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
-  phone              String
+  identifier         String
+  channel            OtpChannel
+  phone              String?
+  email              String?
   otpCodeHash        String
   status             OtpChallengeStatus @default(PENDING)
   expiresAt          DateTime
@@ -328,7 +769,7 @@ model OtpChallenge {
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
-  @@index([phone, status, createdAt])
+  @@index([identifier, status, createdAt])
   @@index([expiresAt])
 }
 
@@ -349,4 +790,98 @@ model IdempotencyKey {
   @@unique([key, scope])
   @@index([userId, scope])
   @@index([expiresAt])
+}
+
+model AiConversation {
+  id            String                  @id @default(uuid())
+  userId        String
+  user          User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String                  @default("New Concierge Thread")
+  isArchived    Boolean                 @default(false)
+  archivedAt    DateTime?
+  isPinned      Boolean                 @default(false)
+  pinnedAt      DateTime?
+  lastMessageAt DateTime?
+  deletedAt     DateTime?
+  messages      AiMessage[]
+  contexts      AiConversationContext[]
+  events        AiAssistantEvent[]
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  @@index([userId, deletedAt, updatedAt])
+  @@index([userId, lastMessageAt])
+  @@index([userId, isArchived, isPinned, updatedAt])
+}
+
+model AiMessage {
+  id             String          @id @default(uuid())
+  conversationId String
+  conversation   AiConversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  actor          AiMessageActor
+  role           Role?
+  content        String
+  metadata       Json?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([conversationId, createdAt])
+  @@index([actor, createdAt])
+}
+
+model AiConversationContext {
+  id             String          @id @default(uuid())
+  conversationId String
+  conversation   AiConversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userRole       Role
+  pagePath       String?
+  pageTitle      String?
+  bookingId      String?
+  leadId         String?
+  projectId      String?
+  metadata       Json?
+  createdAt      DateTime        @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([bookingId, createdAt])
+  @@index([leadId, createdAt])
+  @@index([projectId, createdAt])
+}
+
+model AiPromptSuggestion {
+  id          String    @id @default(uuid())
+  role        Role?
+  pageKey     String?
+  title       String
+  prompt      String
+  description String?
+  rank        Int       @default(0)
+  isActive    Boolean   @default(true)
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([role, pageKey, isActive, rank])
+}
+
+model AiAssistantEvent {
+  id             String          @id @default(uuid())
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversationId String?
+  conversation   AiConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  messageId      String?
+  role           Role
+  eventType      String
+  pageKey        String?
+  section        String?
+  intent         String?
+  label          String?
+  contentSnippet String?
+  metadata       Json?
+  createdAt      DateTime        @default(now())
+
+  @@index([userId, createdAt])
+  @@index([role, eventType, createdAt])
+  @@index([conversationId, createdAt])
 }

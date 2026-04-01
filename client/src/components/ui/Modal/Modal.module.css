@@ -1,0 +1,127 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: rgba(6, 5, 4, 0.78);
+  padding: var(--space-lg);
+}
+
+.panel {
+  width: min(100%, var(--modal-width, 48rem));
+  max-height: calc(100vh - (var(--space-lg) * 2));
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-glass);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-lg);
+}
+
+.danger {
+  border-color: rgba(var(--color-danger-rgb), 0.3);
+}
+
+.sizeSm {
+  --modal-width: 32rem;
+}
+
+.sizeMd {
+  --modal-width: 48rem;
+}
+
+.sizeLg {
+  --modal-width: 64rem;
+}
+
+.sizeXl {
+  --modal-width: 72rem;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.eyebrow {
+  margin: 0;
+  color: rgba(var(--color-accent-rgb), 0.86);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.eyebrowDanger {
+  color: var(--color-danger);
+}
+
+.title {
+  margin: var(--space-xs) 0 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.description {
+  margin: var(--space-xs) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.closeButton {
+  display: inline-flex;
+  min-height: calc(var(--space-lg) + var(--space-md));
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  padding: 0 var(--space-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid rgba(var(--color-accent-rgb), 0.42);
+  outline-offset: 2px;
+}
+
+.closeButton:disabled {
+  opacity: 0.56;
+}
+
+.content {
+  margin-top: var(--space-lg);
+}
+
+.footer {
+  margin-top: var(--space-lg);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+}
+
+@media (max-width: 640px) {
+  .overlay {
+    padding: var(--space-md);
+  }
+
+  .panel {
+    max-height: calc(100vh - (var(--space-md) * 2));
+    padding: var(--space-md);
+  }
+
+  .header {
+    flex-direction: column;
+  }
+}

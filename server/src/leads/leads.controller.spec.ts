@@ -13,6 +13,7 @@ describe('LeadsController', () => {
           provide: LeadsService,
           useValue: {
             create: jest.fn(),
+            createOfflineBooking: jest.fn(),
             findMine: jest.fn(),
             findAll: jest.fn(),
             findOneForUser: jest.fn(),

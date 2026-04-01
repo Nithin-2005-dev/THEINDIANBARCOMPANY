@@ -4,12 +4,14 @@
 
 .hero {
   position: relative;
+  z-index: 1;
+  isolation: isolate;
   height: 100svh;
   min-height: 720px;
   width: 100%;
   overflow: hidden;
   color: var(--text-primary);
-  background: var(--bg);
+  background: var(--scene-surface-bg, var(--bg));
 }
 
 /* ─── VIDEO ─── */

@@ -1,0 +1,48 @@
+.container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.header {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.body tr:last-child {
+  border-bottom: 0;
+}
+
+.row {
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 160ms ease;
+}
+
+.row:hover {
+  background: var(--color-surface-subtle);
+}
+
+.head {
+  padding: var(--space-sm) var(--space-md);
+  text-align: left;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.cell {
+  padding: var(--space-md);
+  vertical-align: middle;
+}
+
+.footer {
+  background: var(--color-surface-subtle);
+  font-weight: 700;
+}

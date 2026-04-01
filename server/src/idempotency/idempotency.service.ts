@@ -26,7 +26,9 @@ export class IdempotencyService {
     const requestHash = createHash('sha256')
       .update(JSON.stringify(params.request))
       .digest('hex');
-    const expiresAt = new Date(Date.now() + (params.ttlMinutes ?? 60) * 60 * 1000);
+    const expiresAt = new Date(
+      Date.now() + (params.ttlMinutes ?? 60) * 60 * 1000,
+    );
 
     const existing = await this.prisma.idempotencyKey.findUnique({
       where: {
@@ -49,7 +51,9 @@ export class IdempotencyService {
       }
 
       if (existing.status === IdempotencyStatus.PROCESSING) {
-        throw new ConflictException('A request with this idempotency key is already in progress.');
+        throw new ConflictException(
+          'A request with this idempotency key is already in progress.',
+        );
       }
     }
 

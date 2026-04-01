@@ -1,0 +1,68 @@
+.markdown {
+  display: grid;
+  gap: 0.75rem;
+  color: inherit;
+}
+
+.section {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.summary {
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 208, 130, 0.1);
+  background: rgba(255, 204, 122, 0.06);
+}
+
+.sectionLabel {
+  margin: 0;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 226, 180, 0.58);
+}
+
+.summaryText {
+  margin: 0;
+  line-height: 1.68;
+  color: rgba(255, 248, 232, 0.92);
+  overflow-wrap: anywhere;
+}
+
+.paragraph {
+  margin: 0;
+  line-height: 1.68;
+  color: rgba(255, 255, 255, 0.86);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.list {
+  margin: 0;
+  padding-left: 1.05rem;
+  display: grid;
+  gap: 0.42rem;
+  line-height: 1.62;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.code {
+  border-radius: 0.55rem;
+  background: rgba(255, 224, 163, 0.12);
+  padding: 0.05rem 0.38rem;
+  font-size: 0.9em;
+  font-family: var(--font-dashboard-mono), monospace;
+}
+
+.link {
+  color: #f2c777;
+  text-decoration: underline;
+  text-underline-offset: 0.18rem;
+}
+
+.strong {
+  font-weight: 600;
+  color: #fff7e5;
+}

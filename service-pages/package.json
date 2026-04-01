@@ -1,0 +1,36 @@
+{
+  "name": "service-pages",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "martini",
+    "negroni",
+    "cosmopolitan",
+    "bloody-mary",
+    "rocket-fuel"
+  ],
+  "scripts": {
+    "dev:martini": "npm run dev --workspace martini -- --port 3101",
+    "dev:negroni": "npm run dev --workspace negroni -- --port 3102",
+    "dev:cosmopolitan": "npm run dev --workspace cosmopolitan -- --port 3103",
+    "dev:bloody-mary": "npm run dev --workspace bloody-mary -- --port 3104",
+    "dev:rocket-fuel": "npm run dev --workspace rocket-fuel -- --port 3105",
+    "build:all": "npm run build --workspaces",
+    "lint:all": "npm run lint --workspaces"
+  },
+  "dependencies": {
+    "next": "16.1.7",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.7",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -25,7 +34,9 @@ export class AuthController {
   private getClientContext(request: Request) {
     return {
       ipAddress: request.ip,
-      deviceFingerprint: String(request.headers['x-device-fingerprint'] ?? 'unknown'),
+      deviceFingerprint: String(
+        request.headers['x-device-fingerprint'] ?? 'unknown',
+      ),
       userAgent: request.headers['user-agent'],
     };
   }
@@ -71,13 +82,17 @@ export class AuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'OTP is invalid, expired, or already consumed' })
+  @ApiUnauthorizedResponse({
+    description: 'OTP is invalid, expired, or already consumed',
+  })
   verifyOtp(@Body() dto: VerifyOtpDto, @Req() request: Request) {
     return this.authService.verifyOtp(dto, this.getClientContext(request));
   }
 
   @Post('refresh')
-  @ApiOperation({ summary: 'Rotate refresh token and issue a new session token pair' })
+  @ApiOperation({
+    summary: 'Rotate refresh token and issue a new session token pair',
+  })
   @ApiBody({ type: RefreshTokenDto })
   @ApiOkResponse({ description: 'Refresh token rotated successfully' })
   refresh(@Body() dto: RefreshTokenDto, @Req() request: Request) {
@@ -96,7 +111,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('sessions')
   @ApiBearerAuth('bearer')
-  @ApiOperation({ summary: 'List active and historical sessions for the current user' })
+  @ApiOperation({
+    summary: 'List active and historical sessions for the current user',
+  })
   @ApiOkResponse({ description: 'Session list returned successfully' })
   sessions(@CurrentUser() user: AuthUser) {
     return this.authService.listSessions(user.userId);
@@ -108,7 +125,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Revoke a specific session for the current user' })
   @ApiParam({ name: 'id', description: 'Session identifier to revoke' })
   @ApiOkResponse({ description: 'Session revoked successfully' })
-  revokeSession(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+  revokeSession(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.authService.revokeSession(user.userId, id, 'user_requested');
   }
 

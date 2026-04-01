@@ -1,0 +1,387 @@
+.page {
+  min-height: 100vh;
+  background: var(--tib-bg);
+  color: var(--tib-text-primary);
+  padding: 32px 20px;
+}
+
+.shell {
+  margin: 0 auto;
+  display: grid;
+  min-height: calc(100vh - 64px);
+  max-width: 1120px;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  gap: 24px;
+}
+
+.sidebar,
+.panel {
+  border: 1px solid var(--tib-border);
+  background: var(--tib-surface);
+  border-radius: 24px;
+}
+
+.sidebar {
+  display: grid;
+  align-content: space-between;
+  gap: 24px;
+  padding: 24px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.brandMark {
+  display: inline-flex;
+  min-width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--tib-border);
+  border-radius: 14px;
+  background: var(--tib-surface-2);
+  color: var(--tib-accent-gold);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.brandText {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.sidebarBlock {
+  display: grid;
+  gap: 12px;
+}
+
+.sidebarLabel {
+  color: var(--tib-text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.sidebarCopy {
+  color: var(--tib-text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.stepList {
+  display: grid;
+  gap: 10px;
+}
+
+.stepItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--tib-text-secondary);
+  font-size: 14px;
+}
+
+.stepItemActive,
+.stepItemComplete {
+  color: var(--tib-text-primary);
+}
+
+.stepDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--tib-border);
+  background: transparent;
+}
+
+.stepItemActive .stepDot,
+.stepItemComplete .stepDot {
+  border-color: rgba(var(--tib-accent-gold-rgb), 0.36);
+  background: var(--tib-accent-gold);
+}
+
+.panel {
+  display: grid;
+  gap: 24px;
+  padding: 32px;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.kicker {
+  color: var(--tib-text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin-top: 8px;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+}
+
+.description {
+  margin-top: 12px;
+  max-width: 620px;
+  color: var(--tib-text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.roleGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.roleCard {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--tib-border);
+  border-radius: 20px;
+  background: var(--tib-surface-2);
+  color: inherit;
+  text-align: left;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    background-color 160ms ease;
+}
+
+.roleCard:hover,
+.roleCard:focus-visible {
+  border-color: rgba(var(--tib-accent-gold-rgb), 0.28);
+  background: color-mix(in srgb, var(--tib-surface-2) 90%, var(--tib-accent-gold) 10%);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.roleBadge {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  border: 1px solid var(--tib-border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: var(--tib-text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.roleTitle {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.roleSummary {
+  color: var(--tib-text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.form {
+  display: grid;
+  gap: 18px;
+  max-width: 520px;
+}
+
+.infoRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.inlineCopy {
+  color: var(--tib-text-secondary);
+  font-size: 14px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.fieldLabel {
+  color: var(--tib-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.input {
+  min-height: 52px;
+  border: 1px solid var(--tib-border);
+  border-radius: 16px;
+  background: #0d0c09;
+  padding: 0 16px;
+  color: var(--tib-text-primary);
+  font-size: 15px;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.input:focus {
+  border-color: rgba(var(--tib-accent-gold-rgb), 0.32);
+  box-shadow: 0 0 0 3px rgba(var(--tib-accent-gold-rgb), 0.12);
+  outline: none;
+}
+
+.input[readonly] {
+  color: var(--tib-text-secondary);
+}
+
+.successText,
+.errorText {
+  font-size: 14px;
+}
+
+.successText {
+  color: var(--tib-success);
+}
+
+.errorText {
+  color: var(--tib-danger);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.primaryButton,
+.secondaryButton,
+.footerLink {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.primaryButton {
+  border: 1px solid rgba(var(--tib-accent-gold-rgb), 0.36);
+  background: var(--tib-accent-gold);
+  color: #201807;
+}
+
+.primaryButton:hover,
+.primaryButton:focus-visible {
+  background: #dfbc4b;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.primaryButton:disabled {
+  cursor: wait;
+  opacity: 0.68;
+  transform: none;
+}
+
+.secondaryButton,
+.footerLink {
+  border: 1px solid var(--tib-border);
+  background: transparent;
+  color: var(--tib-text-primary);
+}
+
+.secondaryButton:hover,
+.secondaryButton:focus-visible,
+.footerLink:hover,
+.footerLink:focus-visible {
+  border-color: rgba(var(--tib-accent-gold-rgb), 0.22);
+  background: rgba(var(--tib-accent-gold-rgb), 0.06);
+  outline: none;
+}
+
+.panelFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid var(--tib-border);
+  color: var(--tib-text-secondary);
+  font-size: 13px;
+}
+
+@media (max-width: 960px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    align-content: start;
+  }
+
+  .roleGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 16px;
+  }
+
+  .shell {
+    min-height: calc(100vh - 32px);
+    gap: 16px;
+  }
+
+  .sidebar,
+  .panel {
+    border-radius: 20px;
+    padding: 20px;
+  }
+
+  .panelHeader,
+  .panelFooter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .actions {
+    width: 100%;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+}

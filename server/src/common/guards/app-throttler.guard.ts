@@ -7,7 +7,11 @@ export class AppThrottlerGuard extends ThrottlerGuard {
     return req.user?.userId ?? req.ip ?? req.ips?.[0] ?? 'anonymous';
   }
 
-  protected generateKey(context: ExecutionContext, suffix: string, name: string): string {
+  protected generateKey(
+    context: ExecutionContext,
+    suffix: string,
+    name: string,
+  ): string {
     const request = context.switchToHttp().getRequest<Record<string, any>>();
     return `${name}:${request.method}:${request.route?.path ?? request.url}:${suffix}`;
   }

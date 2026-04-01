@@ -2,6 +2,7 @@
 
 import styles from "./Hero.module.css"
 import Image from "next/image"
+import Link from "next/link"
 import { useEffect, useState } from "react"
 
 export default function Hero() {
@@ -122,11 +123,11 @@ export default function Hero() {
             <span className={styles.btnShine} />
           </button>
 
-          <button className={styles.secondaryBtn}>
+          <Link href="/booking" className={styles.secondaryBtn}>
             <span className={styles.btnInner}>
               Book Now
             </span>
-          </button>
+          </Link>
 
         </div>
 

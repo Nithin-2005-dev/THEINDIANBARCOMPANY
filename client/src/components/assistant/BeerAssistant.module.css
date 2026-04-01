@@ -1,0 +1,183 @@
+.root {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1300;
+  pointer-events: none;
+  --assistant-panel-top: 0.6rem;
+  --assistant-panel-edge: 0.6rem;
+}
+
+.welcome {
+  position: absolute;
+  right: 0.35rem;
+  bottom: calc(100% + 0.85rem);
+  width: 16rem;
+  padding: 1rem 1.05rem;
+  border-radius: 1.2rem;
+  border: 1px solid rgba(255, 208, 130, 0.16);
+  background:
+    radial-gradient(circle at top right, rgba(194, 128, 36, 0.18), transparent 38%),
+    linear-gradient(180deg, rgba(26, 21, 17, 0.98), rgba(13, 11, 9, 0.98));
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.34);
+  pointer-events: none;
+}
+
+.welcome::after {
+  content: "";
+  position: absolute;
+  right: 1.2rem;
+  bottom: -0.4rem;
+  width: 0.82rem;
+  height: 0.82rem;
+  border-right: 1px solid rgba(255, 208, 130, 0.16);
+  border-bottom: 1px solid rgba(255, 208, 130, 0.16);
+  background: rgba(20, 17, 13, 0.98);
+  transform: rotate(45deg);
+}
+
+.welcomeTitle {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 216, 149, 0.72);
+}
+
+.welcomeCopy {
+  margin: 0.42rem 0 0;
+  color: #fff0cf;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.trigger {
+  appearance: none;
+  position: relative;
+  width: 4.5rem;
+  height: 4.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.triggerGlow {
+  position: absolute;
+  inset: 0.85rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(255, 196, 89, 0.22), rgba(255, 196, 89, 0));
+  filter: blur(18px);
+  opacity: 0.34;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.triggerInner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  background: transparent;
+  transition:
+    transform 180ms ease;
+}
+
+.trigger:hover .triggerGlow,
+.triggerActive .triggerGlow {
+  opacity: 0.56;
+  transform: scale(1.04);
+}
+
+.trigger:hover .triggerInner,
+.triggerActive .triggerInner {
+  transform: translateY(-2px) scale(1.015);
+}
+
+.trigger:focus-visible .triggerInner {
+  outline: 2px solid rgba(255, 219, 155, 0.65);
+  outline-offset: 3px;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 4, 0.42);
+  backdrop-filter: blur(12px);
+  pointer-events: auto;
+}
+
+.panel {
+  position: fixed;
+  top: var(--assistant-panel-top);
+  right: var(--assistant-panel-edge);
+  bottom: var(--assistant-panel-edge);
+  left: var(--assistant-panel-edge);
+  width: auto;
+  display: grid;
+  grid-template-columns: clamp(23rem, 26vw, 30rem) minmax(0, 1fr);
+  border-radius: 1.8rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 208, 130, 0.14);
+  background:
+    radial-gradient(circle at top right, rgba(180, 117, 31, 0.16), transparent 30%),
+    linear-gradient(180deg, rgba(14, 12, 10, 0.98), rgba(8, 8, 7, 0.98));
+  box-shadow:
+    0 42px 120px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+  backdrop-filter: blur(18px);
+  pointer-events: auto;
+  isolation: isolate;
+}
+
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.04), transparent 18%),
+    linear-gradient(315deg, transparent 74%, rgba(255, 255, 255, 0.02));
+}
+
+@media (max-width: 960px) {
+  .panel {
+    left: 0.5rem;
+    right: 0.5rem;
+    width: auto;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .root {
+    right: 0.5rem;
+    bottom: 0.5rem;
+    --assistant-panel-top: 0.35rem;
+    --assistant-panel-edge: 0.35rem;
+  }
+
+  .welcome {
+    right: 0.1rem;
+    width: min(15rem, calc(100vw - 1.7rem));
+  }
+
+  .trigger {
+    width: 3.95rem;
+    height: 3.95rem;
+  }
+
+  .panel {
+    top: var(--assistant-panel-top);
+    left: var(--assistant-panel-edge);
+    right: var(--assistant-panel-edge);
+    width: auto;
+    min-height: calc(100dvh - (var(--assistant-panel-edge) * 2));
+    border-radius: 1.25rem 1.25rem 1rem 1rem;
+  }
+}

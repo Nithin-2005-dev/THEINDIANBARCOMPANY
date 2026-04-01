@@ -1,0 +1,270 @@
+.root {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.header {
+  display: grid;
+  gap: 0.42rem;
+  max-width: 44rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: color-mix(in srgb, var(--booking-metallic) 84%, white 16%);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-serif);
+  font-size: clamp(1.55rem, 7vw, 2rem);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+
+.description {
+  margin: 0;
+  color: color-mix(in srgb, var(--color-text-secondary) 78%, white 22%);
+  font-size: 0.9rem;
+  line-height: 1.76;
+}
+
+.serviceCard,
+.packageCard,
+.recommendationCard {
+  border: 1px solid rgba(var(--booking-accent-rgb), 0.12);
+  border-radius: 1.05rem;
+  background:
+    linear-gradient(180deg, rgba(var(--booking-accent-rgb), 0.06), rgba(var(--booking-accent-rgb), 0.02)),
+    rgba(10, 11, 14, 0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 16px 34px rgba(0, 0, 0, 0.14);
+  padding: 0.78rem 0.82rem 0.86rem;
+}
+
+.recommendationCard {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.serviceLabel {
+  color: color-mix(in srgb, var(--color-text-secondary) 80%, white 20%);
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.serviceValue {
+  color: var(--color-text-primary);
+  display: block;
+  font-size: 1.08rem;
+  font-weight: 700;
+  margin-top: 0.42rem;
+}
+
+.serviceCopy {
+  color: color-mix(in srgb, var(--color-text-secondary) 78%, white 22%);
+  font-size: 0.9rem;
+  line-height: 1.68;
+  margin: 0.45rem 0 0;
+}
+
+.recommendationMeta {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.recommendationBadge,
+.recommendationPrice {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.26rem 0.7rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.recommendationBadge {
+  border: 1px solid rgba(var(--booking-accent-rgb), 0.14);
+  color: color-mix(in srgb, var(--booking-metallic) 84%, white 16%);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.recommendationPrice {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.recommendationButton {
+  min-height: 2.85rem;
+  width: 100%;
+  border: 1px solid rgba(var(--booking-accent-rgb), 0.16);
+  border-radius: 999px;
+  background: rgba(var(--booking-accent-rgb), 0.06);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0 1rem;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.recommendationButton:hover,
+.recommendationButton:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(var(--booking-accent-rgb), 0.22);
+  background: rgba(var(--booking-accent-rgb), 0.08);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+  outline: none;
+}
+
+.grid {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.62rem;
+  padding: 0.78rem 0.82rem 0.86rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1.05rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012)),
+    rgba(10, 11, 14, 0.84);
+  backdrop-filter: blur(14px);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.field:hover {
+  transform: translateY(-1px);
+  border-color: rgba(var(--booking-accent-rgb), 0.14);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.14);
+}
+
+.label {
+  color: var(--color-text-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.input,
+.textarea {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+  background: rgba(6, 7, 9, 0.72);
+  color: var(--color-text-primary);
+  padding: 0.95rem 1rem;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.input {
+  min-height: 3.2rem;
+}
+
+.textarea {
+  min-height: 7.3rem;
+  resize: vertical;
+}
+
+.input:hover,
+.textarea:hover {
+  border-color: rgba(var(--booking-accent-rgb), 0.14);
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: color-mix(in srgb, var(--color-text-muted) 80%, white 20%);
+}
+
+.input:focus-visible,
+.textarea:focus-visible {
+  border-color: rgba(var(--booking-accent-rgb), 0.22);
+  outline: none;
+  box-shadow: 0 0 0 0.18rem rgba(var(--booking-accent-rgb), 0.08);
+}
+
+.inputError {
+  border-color: rgba(var(--color-danger-rgb), 0.52);
+}
+
+.hint {
+  margin: 0;
+  color: color-mix(in srgb, var(--color-text-secondary) 80%, white 20%);
+  font-size: 0.76rem;
+  line-height: 1.62;
+}
+
+.error {
+  color: var(--color-danger);
+}
+
+@media (min-width: 720px) {
+  .root {
+    gap: 1.45rem;
+  }
+
+  .title {
+    font-size: clamp(1.85rem, 2.2vw, 2.45rem);
+  }
+
+  .description {
+    font-size: 0.96rem;
+  }
+
+  .grid {
+    gap: 1rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .field:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .field,
+  .serviceCard,
+  .packageCard,
+  .recommendationCard {
+    padding: 0.96rem 1rem 1rem;
+    border-radius: 1.2rem;
+  }
+
+  .recommendationCard {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .recommendationButton {
+    width: fit-content;
+  }
+
+  .input {
+    min-height: 3.55rem;
+  }
+
+  .textarea {
+    min-height: 9rem;
+  }
+}

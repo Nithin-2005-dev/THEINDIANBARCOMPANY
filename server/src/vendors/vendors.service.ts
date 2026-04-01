@@ -1,5 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma, Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import { ListVendorsQueryDto } from './dto/list-vendors-query.dto';
@@ -9,9 +13,63 @@ import { UpdateVendorDto } from './dto/update-vendor.dto';
 export class VendorsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(dto: CreateVendorDto) {
-    return this.prisma.vendor.create({
-      data: dto,
+  async create(dto: CreateVendorDto) {
+    if (dto.enablePortalAccess && !dto.phone && !dto.email) {
+      throw new BadRequestException(
+        'Phone or email is required to enable vendor portal access.',
+      );
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      let userId: string | undefined;
+
+      if (dto.enablePortalAccess) {
+        const existingUser = await tx.user.findFirst({
+          where: {
+            OR: [
+              ...(dto.phone ? [{ phone: dto.phone }] : []),
+              ...(dto.email ? [{ email: dto.email }] : []),
+            ],
+            deletedAt: null,
+          },
+        });
+
+        if (existingUser && existingUser.role !== Role.VENDOR) {
+          throw new BadRequestException(
+            'This phone or email is already linked to a non-vendor account.',
+          );
+        }
+
+        const vendorUser =
+          existingUser ??
+          (await tx.user.create({
+            data: {
+              name: dto.name,
+              phone: dto.phone ?? null,
+              email: dto.email ?? null,
+              role: Role.VENDOR,
+              isActive: true,
+            },
+          }));
+
+        userId = vendorUser.id;
+      }
+
+      return tx.vendor.create({
+        data: {
+          name: dto.name,
+          serviceType: dto.serviceType,
+          phone: dto.phone,
+          email: dto.email,
+          pricingInfo: dto.pricingInfo,
+          isAvailable: dto.isAvailable,
+          notes: dto.notes,
+          userId,
+        },
+        include: {
+          user: true,
+        },
+      });
     });
   }
 
@@ -20,7 +78,9 @@ export class VendorsService {
     const limit = query.limit ?? 20;
     const where: Prisma.VendorWhereInput = {
       ...(query.serviceType ? { serviceType: query.serviceType } : {}),
-      ...(query.isAvailable !== undefined ? { isAvailable: query.isAvailable === 'true' } : {}),
+      ...(query.isAvailable !== undefined
+        ? { isAvailable: query.isAvailable === 'true' }
+        : {}),
       deletedAt: null,
     };
 
@@ -28,6 +88,7 @@ export class VendorsService {
       this.prisma.vendor.findMany({
         where,
         include: {
+          user: true,
           assignments: {
             include: {
               project: true,
@@ -52,6 +113,9 @@ export class VendorsService {
     return this.prisma.vendor.update({
       where: { id },
       data: dto,
+      include: {
+        user: true,
+      },
     });
   }
 
@@ -60,6 +124,7 @@ export class VendorsService {
     return this.prisma.vendor.findUnique({
       where: { id },
       include: {
+        user: true,
         assignments: {
           include: {
             project: true,

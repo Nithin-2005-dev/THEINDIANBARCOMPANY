@@ -1,0 +1,33 @@
+.root {
+  display: block;
+  width: var(--skeleton-width, 100%);
+  height: var(--skeleton-height, calc(var(--space-lg) + var(--space-xs)));
+  border-radius: var(--skeleton-radius, var(--radius-sm));
+  background: var(--color-surface-subtle);
+  overflow: hidden;
+  position: relative;
+}
+
+.root::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 248, 232, 0.12),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+.circle {
+  --skeleton-radius: var(--radius-pill);
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}

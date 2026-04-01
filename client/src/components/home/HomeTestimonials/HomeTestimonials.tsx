@@ -60,7 +60,7 @@ export default function HomeTestimonials() {
               <div className={styles.cardGlow} />
 
               {/* Quote mark */}
-              <span className={styles.quoteMark}>"</span>
+              <span className={styles.quoteMark}>&ldquo;</span>
 
               {/* Quote */}
               <p className={styles.quote}>{t.quote}</p>

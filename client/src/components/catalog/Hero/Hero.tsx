@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import styles from "./Hero.module.css"
 import { useEffect, useState } from "react"
 
@@ -9,7 +10,9 @@ type HeroProps = {
   subtitle: string
   video: string
   primaryCta?: string
+  primaryHref?: string
   secondaryCta?: string
+  secondaryHref?: string
 }
 
 function SplitTitle({ text }: { text: string }) {
@@ -28,8 +31,10 @@ export default function Hero({
   title,
   subtitle,
   video,
-  primaryCta   = "Explore Packages",
+  primaryCta = "Explore Packages",
+  primaryHref,
   secondaryCta = "Get Custom Quote",
+  secondaryHref,
 }: HeroProps) {
   const [mounted, setMounted] = useState(false)
 
@@ -41,11 +46,6 @@ export default function Hero({
   const handleExplorePackages = () => {
     const packagesSection = document.getElementById("packages")
     packagesSection?.scrollIntoView({ behavior: "smooth", block: "start" })
-  }
-
-  const handleCustomQuote = () => {
-    const finalCtaSection = document.getElementById("final-cta")
-    finalCtaSection?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
   return (
@@ -111,29 +111,49 @@ export default function Hero({
           style={{ animationDelay: "0.6s" }}
         >
 
-          <button
-            type="button"
-            className={styles.primaryBtn}
-            onClick={handleExplorePackages}
-          >
-            <span className={styles.btnInner}>
-              {primaryCta}
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className={styles.btnArrow}>
-                <path d="M1 7h12M8 2l5 5-5 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
-            <span className={styles.btnShine} />
-          </button>
+          {primaryHref ? (
+            <Link href={primaryHref} className={styles.primaryBtn}>
+              <span className={styles.btnInner}>
+                {primaryCta}
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className={styles.btnArrow}>
+                  <path d="M1 7h12M8 2l5 5-5 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+              <span className={styles.btnShine} />
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className={styles.primaryBtn}
+              onClick={handleExplorePackages}
+            >
+              <span className={styles.btnInner}>
+                {primaryCta}
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className={styles.btnArrow}>
+                  <path d="M1 7h12M8 2l5 5-5 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+              <span className={styles.btnShine} />
+            </button>
+          )}
 
-          <button
-            type="button"
-            className={styles.secondaryBtn}
-            onClick={handleCustomQuote}
-          >
-            <span className={styles.btnInner}>
-              {secondaryCta}
-            </span>
-          </button>
+          {secondaryHref ? (
+            <Link href={secondaryHref} className={styles.secondaryBtn}>
+              <span className={styles.btnInner}>
+                {secondaryCta}
+              </span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className={styles.secondaryBtn}
+              onClick={handleExplorePackages}
+            >
+              <span className={styles.btnInner}>
+                {secondaryCta}
+              </span>
+            </button>
+          )}
 
         </div>
 

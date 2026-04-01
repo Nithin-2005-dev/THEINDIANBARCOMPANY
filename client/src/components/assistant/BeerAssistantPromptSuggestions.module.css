@@ -1,0 +1,62 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.7rem;
+}
+
+.card {
+  appearance: none;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  width: 100%;
+  min-height: 4.4rem;
+  padding: 0.86rem 0.95rem;
+  border: 1px solid rgba(255, 208, 130, 0.14);
+  border-radius: 1.1rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 208, 130, 0.28);
+  background: rgba(255, 214, 140, 0.1);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.2);
+}
+
+.spark {
+  width: 0.46rem;
+  height: 0.46rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffd790, #b7771f);
+  box-shadow: 0 0 14px rgba(255, 190, 97, 0.55);
+  flex-shrink: 0;
+  margin-top: 0.22rem;
+}
+
+.copy {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: rgba(255, 222, 166, 0.94);
+}
+
+.description {
+  font-size: 0.73rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.54);
+}
