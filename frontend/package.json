@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed:team": "node scripts/seed-team.mjs"
   },
   "dependencies": {
+    "mongodb": "^6.21.0",
     "next": "16.1.7",
     "react": "19.2.3",
     "react-dom": "19.2.3"

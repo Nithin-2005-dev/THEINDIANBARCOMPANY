@@ -2,6 +2,7 @@
 
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 const announcedExperienceCount = 7;
@@ -158,7 +159,7 @@ export default function HomePage() {
   const currentAccent = sections[active].accent;
 
   return (
-    <main className="page">
+    <main className="landingPage">
       {/* Custom Cursor */}
       <div ref={dotRef} className="cursor-dot" />
       <div
@@ -189,9 +190,9 @@ export default function HomePage() {
         <a href="#home" className="siteLogo">
           the<span style={{ color: currentAccent }}>indian</span>bar
         </a>
-        <a href="mailto:hello@theindianbar.com" className="headerContact">
-          Reserve an experience
-        </a>
+        <Link href="/team" className="headerContact">
+          Team
+        </Link>
       </header>
 
       {/* Side navigation */}

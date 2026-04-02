@@ -50,6 +50,17 @@
     0 0 24px rgba(0, 0, 0, 0.18);
   --display: 'Ahsing', 'Cormorant Garamond', 'Didot', 'Bodoni MT', Georgia, serif;
   --body: 'Glacial Indifference', 'Montserrat', 'Helvetica Neue', sans-serif;
+  --shadow-sm: 0 16px 40px rgba(0, 0, 0, 0.22);
+  --shadow-md: 0 24px 70px rgba(0, 0, 0, 0.38);
+  --shadow-lg: 0 36px 120px rgba(0, 0, 0, 0.52);
+  --tib-bg: #020202;
+  --tib-surface: #0c0c0c;
+  --tib-surface-2: #141414;
+  --tib-text-primary: #ffffff;
+  --tib-text-secondary: #dfdfdf;
+  --tib-accent: #ff7a1a;
+  --tib-accent-gold-rgb: 255, 122, 26;
+  --tib-shadow-soft: var(--shadow-md);
   --scrollbar-size: 0.82rem;
   --scrollbar-track: rgba(255, 255, 255, 0.025);
   --scrollbar-track-border: rgba(255, 255, 255, 0.045);
@@ -79,9 +90,14 @@ body {
   color: var(--text);
   font-family: var(--body);
   overflow-x: hidden;
-  cursor: none;
+  cursor: auto;
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
+}
+
+.landingPage,
+.landingPage * {
+  cursor: none;
 }
 
 * {
@@ -160,7 +176,7 @@ body:has(.sectionButton:hover) .cursor-ring {
 }
 
 /* ─── Page ─── */
-.page {
+.landingPage {
   position: relative;
 }
 
@@ -371,7 +387,7 @@ body:has(.sectionButton:hover) .cursor-ring {
 }
 
 /* ─── Sections ─── */
-section {
+.landingPage section {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -776,7 +792,7 @@ section {
   .siteHeader { padding: 1.8rem 2rem; }
   .siteHeader::after { left: 2rem; right: 2rem; }
 
-  section { padding: 0 2.5rem; }
+  .landingPage section { padding: 0 2.5rem; }
 
   .sectionContentHome {
     max-width: 680px;
@@ -794,6 +810,7 @@ section {
 
 @media (max-width: 768px) {
   body { cursor: auto; }
+  .landingPage, .landingPage * { cursor: auto; }
   .cursor-dot, .cursor-ring { display: none; }
 
   .sideNav { display: none; }
@@ -807,7 +824,7 @@ section {
   .siteHeader::after { left: 1.5rem; right: 1.5rem; }
   .headerContact { display: none; }
 
-  section {
+  .landingPage section {
     justify-content: flex-start !important;
     padding: 0 1.5rem;
   }

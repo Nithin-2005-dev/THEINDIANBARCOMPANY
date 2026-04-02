@@ -36,6 +36,7 @@ const buildMarqueeBlinkStyle = (index: number, word: string): CSSProperties => {
 };
 
 export default function Home() {
+  const teamPageUrl = process.env.NEXT_PUBLIC_TEAM_URL ?? "http://localhost:3000/team";
   const [reachOpen, setReachOpen] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const dotRef = useRef<HTMLDivElement>(null);
@@ -128,8 +129,8 @@ export default function Home() {
           <span>India</span>
         </nav>
         <div className="headerRight">
-          <a href="mailto:support@theindianbarcompany.com" className="headerLink">
-            Contact
+          <a href={teamPageUrl} className="headerLink">
+            Team
           </a>
         </div>
       </header>
