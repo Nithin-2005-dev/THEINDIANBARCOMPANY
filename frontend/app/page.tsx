@@ -1,16 +1,19 @@
-// app/page.tsx — The Indian Bar Company · Premium Redesign
+// app/page.tsx - The Indian Bar Company Premium Redesign
 
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
+const announcedExperienceCount = 7;
 
 const sections = [
   {
     id: "home",
     label: "Your dream weekend is our weekday",
-    title: "Five",
+    title: String(announcedExperienceCount),
     titleCont: "Experiences",
-    subtitle: "Grinding the social spice into your life.",
+    subtitle:
+      "Five signature experiences are live now, with two more luxury experiences arriving soon.",
     image: "/tib.png",
     imagePosition: "center center",
     accent: "#FF6B00",
@@ -89,6 +92,11 @@ export default function HomePage() {
   const [active, setActive] = useState(0);
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
+  const liveExperienceCount = sections.length - 1;
+  const remainingExperienceCount = Math.max(
+    announcedExperienceCount - liveExperienceCount,
+    0,
+  );
 
   // Scroll tracking
   useEffect(() => {
@@ -104,8 +112,10 @@ export default function HomePage() {
         }
       });
     };
+
     window.addEventListener("scroll", handleScroll);
     handleScroll();
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -115,27 +125,30 @@ export default function HomePage() {
     const ring = ringRef.current;
     if (!dot || !ring) return;
 
-    let mouseX = 0, mouseY = 0;
-    let ringX = 0, ringY = 0;
+    let mouseX = 0;
+    let mouseY = 0;
+    let ringX = 0;
+    let ringY = 0;
     let raf: number;
 
-    const moveCursor = (e: MouseEvent) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      dot.style.left = mouseX + "px";
-      dot.style.top = mouseY + "px";
+    const moveCursor = (event: MouseEvent) => {
+      mouseX = event.clientX;
+      mouseY = event.clientY;
+      dot.style.left = `${mouseX}px`;
+      dot.style.top = `${mouseY}px`;
     };
 
     const animateRing = () => {
       ringX += (mouseX - ringX) * 0.12;
       ringY += (mouseY - ringY) * 0.12;
-      ring.style.left = ringX + "px";
-      ring.style.top = ringY + "px";
+      ring.style.left = `${ringX}px`;
+      ring.style.top = `${ringY}px`;
       raf = requestAnimationFrame(animateRing);
     };
 
     window.addEventListener("mousemove", moveCursor);
     raf = requestAnimationFrame(animateRing);
+
     return () => {
       window.removeEventListener("mousemove", moveCursor);
       cancelAnimationFrame(raf);
@@ -181,7 +194,7 @@ export default function HomePage() {
         </a>
       </header>
 
-      {/* Side navigation — vertical bar */}
+      {/* Side navigation */}
       <nav className="sideNav">
         {sections.map((section, index) => (
           <a key={section.id} href={`#${section.id}`} aria-label={section.label}>
@@ -201,13 +214,11 @@ export default function HomePage() {
 
       {/* Section index display */}
       <div className="sectionIndex">
-        {String(active).padStart(2, "0")} — {String(sections.length - 1).padStart(2, "0")}
+        {String(active).padStart(2, "0")} - {String(announcedExperienceCount).padStart(2, "0")}
       </div>
 
-      {/* Active section slug — single fixed vertical label */}
-      <div className="sectionNumber">
-        {sections[active].slug}
-      </div>
+      {/* Active section slug */}
+      <div className="sectionNumber">{sections[active].slug}</div>
 
       {/* Sections */}
       {sections.map((section, index) => (
@@ -217,7 +228,11 @@ export default function HomePage() {
           data-section
           className={index % 2 === 0 ? "leftAlign" : "rightAlign"}
         >
-          <div className="sectionContent">
+          <div
+            className={`sectionContent ${
+              section.id === "home" ? "sectionContentHome" : ""
+            }`.trim()}
+          >
             {/* Vertical rule line */}
             <span
               className="sectionLine"
@@ -236,7 +251,10 @@ export default function HomePage() {
                 {section.titleCont && (
                   <>
                     <br />
-                    <span className="titleDotSuffix" style={{ color: section.accent }}>
+                    <span
+                      className="titleDotSuffix"
+                      style={{ color: section.accent }}
+                    >
                       {section.titleCont}
                     </span>
                   </>
@@ -253,13 +271,30 @@ export default function HomePage() {
               className="sectionButton"
               style={{ color: section.accent }}
             >
-              <span>Explore experience</span>
-              <span className="arrow">→</span>
+              <span>Tap to book luxury</span>
+              <span className="arrow">&rarr;</span>
             </a>
-
           </div>
         </section>
       ))}
+
+      {remainingExperienceCount > 0 && (
+        <section className="comingSoonSection" aria-labelledby="coming-soon-title">
+          <div className="comingSoonPanel">
+            <p className="comingSoonLabel">Coming Soon</p>
+            <h2 id="coming-soon-title" className="comingSoonTitle">
+              {remainingExperienceCount === 1
+                ? "One more luxury experience is on the way."
+                : `${remainingExperienceCount} more luxury experiences are on the way.`}
+            </h2>
+            <p className="comingSoonCopy">
+              The remaining signature services are being carefully curated and
+              will be introduced soon, with the same elevated attention to
+              detail that defines every The Indian Bar Company experience.
+            </p>
+          </div>
+        </section>
+      )}
     </main>
   );
 }
