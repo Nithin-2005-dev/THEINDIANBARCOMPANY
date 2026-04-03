@@ -3,27 +3,41 @@ import "./globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3105";
 const metadataBase = new URL(siteUrl);
-const logoUrl = new URL("/logo.png", metadataBase).toString();
-const title = "RocketFuel.tib | After Dark | The Indian Bar Company";
+const serviceName = "RocketFuel.tib";
+const title = "RocketFuel.tib | After Party Bartending Services in India";
 const description =
-  "RocketFuel.tib by The Indian Bar Company. After-dark cocktails, night launches, and premium late-night hospitality experiences. Coming soon.";
+  "RocketFuel.tib by The Indian Bar Company delivers after-dark bartending, nightlife cocktail service, and premium late-night hospitality for elevated celebrations in India.";
+const ogImage = "/rocket-fuel-poster.jpeg";
+const logoUrl = new URL("/logo.png", metadataBase).toString();
+const imageUrl = new URL(ogImage, metadataBase).toString();
 
 export const metadata: Metadata = {
   metadataBase,
   title,
   description,
   applicationName: "The Indian Bar Company",
+  referrer: "origin-when-cross-origin",
+  category: "event services",
   keywords: [
+    "after party bartending services India",
+    "late night cocktail service",
+    "nightlife bartenders India",
+    "after dark event bartenders",
+    "launch party cocktail catering",
     "RocketFuel.tib",
     "The Indian Bar Company",
-    "after dark",
-    "night launches",
-    "late night cocktails",
-    "premium hospitality",
+    "premium nightlife hospitality",
+    "bartenders for late night events",
+    "cocktail service for after parties",
   ],
   authors: [{ name: "The Indian Bar Company" }],
   creator: "The Indian Bar Company",
   publisher: "The Indian Bar Company",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   alternates: {
     canonical: "/",
   },
@@ -52,18 +66,16 @@ export const metadata: Metadata = {
     description,
     images: [
       {
-        url: "/logo.png",
-        width: 512,
-        height: 512,
-        alt: "The Indian Bar Company logo",
+        url: ogImage,
+        alt: "RocketFuel.tib after-dark bartending by The Indian Bar Company",
       },
     ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title,
     description,
-    images: ["/logo.png"],
+    images: [ogImage],
   },
 };
 
@@ -74,37 +86,58 @@ export default function RootLayout({
 }>) {
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: title,
-    description,
-    url: siteUrl,
-    image: logoUrl,
-    about: {
-      "@type": "Service",
-      name: "RocketFuel.tib",
-      serviceType: "After-dark bartending and night event cocktail hospitality",
-      provider: {
+    "@graph": [
+      {
         "@type": "Organization",
+        "@id": `${siteUrl}#organization`,
         name: "The Indian Bar Company",
         url: siteUrl,
-        logo: {
-          "@type": "ImageObject",
-          url: logoUrl,
+        logo: logoUrl,
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}#website`,
+        url: siteUrl,
+        name: serviceName,
+        publisher: {
+          "@id": `${siteUrl}#organization`,
         },
+        inLanguage: "en-IN",
       },
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "The Indian Bar Company",
-      logo: {
-        "@type": "ImageObject",
-        url: logoUrl,
+      {
+        "@type": "Service",
+        "@id": `${siteUrl}#service`,
+        name: serviceName,
+        description,
+        serviceType: "After-dark bartending and nightlife cocktail hospitality",
+        areaServed: {
+          "@type": "Country",
+          name: "India",
+        },
+        provider: {
+          "@id": `${siteUrl}#organization`,
+        },
+        image: imageUrl,
       },
-    },
+      {
+        "@type": "WebPage",
+        "@id": `${siteUrl}#webpage`,
+        url: siteUrl,
+        name: title,
+        description,
+        isPartOf: {
+          "@id": `${siteUrl}#website`,
+        },
+        about: {
+          "@id": `${siteUrl}#service`,
+        },
+        primaryImageOfPage: imageUrl,
+      },
+    ],
   };
 
   return (
-    <html lang="en">
+    <html lang="en-IN">
       <body>
         {children}
         <script
