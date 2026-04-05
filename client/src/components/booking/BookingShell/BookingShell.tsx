@@ -66,7 +66,7 @@ function getQueryValue(
 
 const STEP_FIELDS: Array<Array<keyof BookingFlowValues>> = [
   ["name", "phone", "email", "preferredContact"],
-  ["eventType", "location", "eventDate", "guestCount"],
+  ["location", "eventDate", "guestCount"],
   ["budgetMin", "budgetMax"],
   [],
 ]
@@ -85,6 +85,14 @@ function getValidationValues(values: BookingFlowValues) {
 
 function getFriendlyBookingError(error: unknown) {
   if (error instanceof ApiError) {
+    if (
+      /unique constraint failed|invalid `prisma|p2002|already belongs to/i.test(
+        error.message,
+      )
+    ) {
+      return "That phone number or email is already linked to another booking profile. Please use one existing contact detail or call our concierge team."
+    }
+
     return error.message
   }
 
@@ -158,6 +166,13 @@ export default function BookingShell({
       }
     }
 
+    if (service?.defaultEventType) {
+      nextValues = {
+        ...nextValues,
+        eventType: service.defaultEventType,
+      }
+    }
+
     setValues(nextValues)
     setErrors({})
     setTouched({})
@@ -170,7 +185,7 @@ export default function BookingShell({
     startedAtRef.current = Date.now()
     hasStartedAnalyticsRef.current = false
     lastFingerprintRef.current = null
-  }, [requestSnapshot, storageKey])
+  }, [requestSnapshot, service?.defaultEventType, storageKey])
 
   useEffect(() => {
     if (submittedPayload) return
@@ -288,6 +303,11 @@ export default function BookingShell({
   }
 
   const handleNext = () => {
+    if (!service) {
+      setStatusMessage("Choose your service first so we can tailor the booking brief.")
+      return
+    }
+
     const stepErrors = validateFields(STEP_FIELDS[currentStep] ?? [])
     if (Object.keys(stepErrors).length > 0) {
       setErrors((currentErrors) => ({ ...currentErrors, ...stepErrors }))
@@ -318,6 +338,11 @@ export default function BookingShell({
   }
 
   const handleSubmit = async () => {
+    if (!service) {
+      setStatusMessage("Choose your service first so we can tailor the booking brief.")
+      return
+    }
+
     const validationErrors = validateFields(STEP_FIELDS.flat())
 
     if (Object.keys(validationErrors).length > 0) {
@@ -412,6 +437,13 @@ export default function BookingShell({
     statusMessage ??
     saveMessage ??
     "Secure, private, and no obligation."
+  const formStatusTone = statusMessage ? "error" : saveMessage ? "success" : "neutral"
+  const formStatusLabel =
+    formStatusTone === "error"
+      ? "Action needed"
+      : formStatusTone === "success"
+        ? "Saved"
+        : "Booking note"
 
   const compactResponseLabel = getCompactResponseLabel(service?.responseTime)
   const heroTrustSignals = [
@@ -426,6 +458,8 @@ export default function BookingShell({
   ]
   const currentStepNumber = currentStep + 1
   const heroSecondaryLabel = service?.marketingPath ? "View service page" : "Back to homepage"
+  const heroPrimaryHref = service ? "#booking-form" : "#service-selector-panel"
+  const heroPrimaryLabel = service ? "Begin concierge brief" : "Choose your service"
   const mobileSummaryPreview =
     [
       service?.shortLabel ?? "Custom request",
@@ -488,8 +522,8 @@ export default function BookingShell({
                 </div>
 
                 <div className={styles.heroActions}>
-                  <a href="#booking-form" className={styles.primaryHeroCta}>
-                    Begin concierge brief
+                  <a href={heroPrimaryHref} className={styles.primaryHeroCta}>
+                    {heroPrimaryLabel}
                   </a>
                   <Link
                     href={service?.marketingPath ?? "/"}
@@ -560,181 +594,231 @@ export default function BookingShell({
           </div>
         </section>
 
-        <ProgressBar currentStep={currentStep} />
+        {service ? <ProgressBar currentStep={currentStep} /> : null}
 
-        <div className={styles.layout}>
-          <section id="booking-form" className={styles.contentPanel}>
-            {submittedPayload ? (
-              <div className={styles.successWrap}>
-                <BookingSuccessPanel
-                  leadId={submittedLeadId}
-                  onStartAnother={handleStartAnother}
-                  payload={submittedPayload}
-                />
-              </div>
-            ) : (
-              <form
-                ref={formRef}
-                className={styles.form}
-                noValidate
-                onSubmit={(event) => {
-                  event.preventDefault()
-
-                  if (currentStep < BOOKING_STEPS.length - 1) {
-                    handleNext()
-                    return
-                  }
-
-                  void handleSubmit()
-                }}
-              >
-                <div className={styles.contentHeader}>
-                  <div>
-                    <p className={styles.sectionEyebrow}>Concierge brief</p>
-                    <h2 className={styles.sectionTitle}>
-                      Tell us a few essentials, and we will shape the rest.
-                    </h2>
-                  </div>
-                  <p className={styles.sectionCopy}>
-                    This is designed to feel like a premium planning handoff, not a cold form.
-                    Private, quick, and no payment required today.
-                  </p>
+        {service ? (
+          <div className={styles.layout}>
+            <section id="booking-form" className={styles.contentPanel}>
+              {submittedPayload ? (
+                <div className={styles.successWrap}>
+                  <BookingSuccessPanel
+                    leadId={submittedLeadId}
+                    onStartAnother={handleStartAnother}
+                    payload={submittedPayload}
+                  />
                 </div>
+              ) : (
+                <form
+                  ref={formRef}
+                  className={styles.form}
+                  noValidate
+                  onSubmit={(event) => {
+                    event.preventDefault()
 
-                <input
-                  aria-hidden="true"
-                  autoComplete="off"
-                  className={styles.honeypot}
-                  suppressHydrationWarning
-                  tabIndex={-1}
-                  value={values.website}
-                  onChange={(event) => updateField("website", event.target.value)}
-                />
+                    if (currentStep < BOOKING_STEPS.length - 1) {
+                      handleNext()
+                      return
+                    }
 
-                <details className={styles.mobileSummaryShell}>
-                  <summary className={styles.mobileSummaryToggle}>
-                    <span className={styles.mobileSummaryLabelWrap}>
-                      <strong className={styles.mobileSummaryTitle}>Live concierge preview</strong>
-                      <span className={styles.mobileSummaryPreview}>{mobileSummaryPreview}</span>
-                    </span>
-                    <span className={styles.mobileSummaryAction}>Expand</span>
-                  </summary>
-
-                  <div className={styles.mobileSummaryBody}>
-                    <BookingSummary service={service} values={values} />
-                  </div>
-                </details>
-
-                <div key={currentStep} className={styles.stepFrame}>
-                  {currentStep === 0 ? (
-                    <StepContact
-                      errors={errors}
-                      onBlur={handleBlur}
-                      onChange={(field, value) => updateField(field, value)}
-                      values={values}
-                    />
-                  ) : null}
-
-                  {currentStep === 1 ? (
-                    <StepEvent
-                      errors={errors}
-                      onBlur={handleBlur}
-                      onChange={(field, value) => updateField(field, value)}
-                      values={values}
-                    />
-                  ) : null}
-
-                  {currentStep === 2 ? (
-                    <StepPreferences
-                      errors={errors}
-                      onBlur={handleBlur}
-                      onChange={(field, value) => updateField(field, value)}
-                      service={service}
-                      values={values}
-                    />
-                  ) : null}
-
-                  {currentStep === 3 ? (
-                    <StepReview service={service} values={values} />
-                  ) : null}
-                </div>
-
-                <div className={styles.footerBar}>
-                  <div className={styles.statusBlock}>
-                    <p className={styles.statusLine} aria-live="polite">
-                      {formStatusCopy}
-                    </p>
-                    <p className={styles.statusHint}>
-                      Step {currentStepNumber} of {BOOKING_STEPS.length} / {STEP_TIME_HINTS[currentStep]}
+                    void handleSubmit()
+                  }}
+                >
+                  <div className={styles.contentHeader}>
+                    <div>
+                      <p className={styles.sectionEyebrow}>Concierge brief</p>
+                      <h2 className={styles.sectionTitle}>
+                        Tell us a few essentials, and we will shape the rest.
+                      </h2>
+                    </div>
+                    <p className={styles.sectionCopy}>
+                      This is designed to feel like a premium planning handoff, not a cold form.
+                      Private, quick, and no payment required today.
                     </p>
                   </div>
 
-                  <div className={styles.footerActions}>
-                    <button
-                      type="button"
-                      className={styles.utilityButton}
-                      suppressHydrationWarning
-                      onClick={handleSaveDraft}
+                  <input
+                    aria-hidden="true"
+                    autoComplete="off"
+                    className={styles.honeypot}
+                    suppressHydrationWarning
+                    tabIndex={-1}
+                    value={values.website}
+                    onChange={(event) => updateField("website", event.target.value)}
+                  />
+
+                  <details className={styles.mobileSummaryShell}>
+                    <summary className={styles.mobileSummaryToggle}>
+                      <span className={styles.mobileSummaryLabelWrap}>
+                        <strong className={styles.mobileSummaryTitle}>Live concierge preview</strong>
+                        <span className={styles.mobileSummaryPreview}>{mobileSummaryPreview}</span>
+                      </span>
+                      <span className={styles.mobileSummaryAction}>Expand</span>
+                    </summary>
+
+                    <div className={styles.mobileSummaryBody}>
+                      <BookingSummary service={service} values={values} />
+                    </div>
+                  </details>
+
+                  <div key={currentStep} className={styles.stepFrame}>
+                    {currentStep === 0 ? (
+                      <StepContact
+                        errors={errors}
+                        onBlur={handleBlur}
+                        onChange={(field, value) => updateField(field, value)}
+                        values={values}
+                      />
+                    ) : null}
+
+                    {currentStep === 1 ? (
+                      <StepEvent
+                        errors={errors}
+                        onBlur={handleBlur}
+                        onChange={(field, value) => updateField(field, value)}
+                        values={values}
+                      />
+                    ) : null}
+
+                    {currentStep === 2 ? (
+                      <StepPreferences
+                        errors={errors}
+                        onBlur={handleBlur}
+                        onChange={(field, value) => updateField(field, value)}
+                        service={service}
+                        values={values}
+                      />
+                    ) : null}
+
+                    {currentStep === 3 ? (
+                      <StepReview service={service} values={values} />
+                    ) : null}
+                  </div>
+
+                  <div className={styles.footerBar}>
+                    <div
+                      className={`${styles.statusBlock} ${
+                        formStatusTone === "error"
+                          ? styles.statusBlockError
+                          : formStatusTone === "success"
+                            ? styles.statusBlockSuccess
+                            : styles.statusBlockNeutral
+                      }`}
+                      role={formStatusTone === "error" ? "alert" : "status"}
                     >
-                      Save for later
-                    </button>
+                      <div className={styles.statusMeta}>
+                        <span className={styles.statusBadge}>{formStatusLabel}</span>
+                        <p className={styles.statusHint}>
+                          Step {currentStepNumber} of {BOOKING_STEPS.length} / {STEP_TIME_HINTS[currentStep]}
+                        </p>
+                      </div>
+                      <p className={styles.statusLine} aria-live="polite">
+                        {formStatusCopy}
+                      </p>
+                    </div>
 
-                    {currentStep > 0 ? (
+                    <div className={styles.footerActions}>
                       <button
                         type="button"
                         className={styles.utilityButton}
                         suppressHydrationWarning
-                        onClick={handleBack}
+                        onClick={handleSaveDraft}
                       >
-                        Back
+                        Save for later
                       </button>
-                    ) : null}
 
-                    <Button
-                      className={styles.primaryCta}
-                      loading={currentStep === BOOKING_STEPS.length - 1 ? isSubmitting : false}
-                      size="lg"
-                      suppressHydrationWarning
-                      type="submit"
-                    >
-                      {STEP_CTA_LABELS[currentStep]}
-                    </Button>
-                  </div>
+                      {currentStep > 0 ? (
+                        <button
+                          type="button"
+                          className={styles.utilityButton}
+                          suppressHydrationWarning
+                          onClick={handleBack}
+                        >
+                          Back
+                        </button>
+                      ) : null}
 
-                  <div className={styles.footerTrust}>
-                    {footerTrustSignals.map((signal) => (
-                      <span key={signal} className={styles.footerTrustPill}>
-                        {signal}
-                      </span>
-                    ))}
+                      <Button
+                        className={styles.primaryCta}
+                        loading={currentStep === BOOKING_STEPS.length - 1 ? isSubmitting : false}
+                        size="lg"
+                        suppressHydrationWarning
+                        type="submit"
+                      >
+                        {STEP_CTA_LABELS[currentStep]}
+                      </Button>
+                    </div>
+
+                    <div className={styles.footerTrust}>
+                      {footerTrustSignals.map((signal) => (
+                        <span key={signal} className={styles.footerTrustPill}>
+                          {signal}
+                        </span>
+                      ))}
+                    </div>
                   </div>
+                </form>
+              )}
+            </section>
+
+            <aside className={styles.sidebar}>
+              <BookingSummary service={service} values={values} />
+
+              <div className={styles.helpCard}>
+                <p className={styles.helpEyebrow}>Need a faster handoff?</p>
+                <p className={styles.helpTitle}>Speak with our concierge team.</p>
+                <p className={styles.helpCopy}>
+                  Call us if you want help shaping the brief while you book.
+                </p>
+                <div className={styles.helpMeta}>
+                  <span className={styles.helpMetaPill}>{compactResponseLabel} response</span>
+                  <span className={styles.helpMetaPill}>Private support</span>
                 </div>
-              </form>
-            )}
-          </section>
-
-          <aside className={styles.sidebar}>
-            <BookingSummary service={service} values={values} />
-
-            <div className={styles.helpCard}>
-              <p className={styles.helpEyebrow}>Need a faster handoff?</p>
-              <p className={styles.helpTitle}>Speak with our concierge team.</p>
-              <p className={styles.helpCopy}>
-                Call us if you want help shaping the brief while you book.
-              </p>
-              <div className={styles.helpMeta}>
-                <span className={styles.helpMetaPill}>{compactResponseLabel} response</span>
-                <span className={styles.helpMetaPill}>Private support</span>
+                <a href={supportHref} className={styles.helpLink}>
+                  Call concierge
+                </a>
+                <Link href="/booking" className={styles.helpLinkSecondary}>
+                  Start a different request
+                </Link>
               </div>
-              <a href={supportHref} className={styles.helpLink}>
-                Call concierge
-              </a>
-              <Link href="/booking" className={styles.helpLinkSecondary}>
-                Start a different request
-              </Link>
+            </aside>
+          </div>
+        ) : (
+          <section id="service-selector-panel" className={styles.contentPanel}>
+            <div className={styles.selectionGate}>
+              <div className={styles.contentHeader}>
+                <div>
+                  <p className={styles.sectionEyebrow}>Choose a service first</p>
+                  <h2 className={styles.sectionTitle}>
+                    Pick the service lane before we open the brief.
+                  </h2>
+                </div>
+                <p className={styles.sectionCopy}>
+                  We use your service choice to tailor the questions, package guidance, and quote
+                  direction. Once you choose one, the brief opens with the right defaults.
+                </p>
+              </div>
+
+              <div className={styles.serviceSwitchCard}>
+                <p className={styles.heroCardEyebrow}>Available services</p>
+                <p className={styles.selectionCopy}>
+                  You should not have to type the service again inside the form. Choose it once and
+                  we will handle the rest.
+                </p>
+                <div className={styles.serviceSwitch}>
+                  {bookingServices.map((item) => (
+                    <Link
+                      key={item.slug}
+                      href={`/booking/${item.slug}`}
+                      className={styles.serviceLink}
+                    >
+                      {item.shortLabel}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </div>
-          </aside>
-        </div>
+          </section>
+        )}
       </main>
     </BookingThemeScope>
   )

@@ -112,7 +112,7 @@
   color: var(--color-danger);
 }
 
-@media (min-width: 720px) {
+@container (min-width: 42rem) {
   .root {
     gap: 1.45rem;
   }

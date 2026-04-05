@@ -2,11 +2,10 @@ import styles from "./StepEvent.module.css"
 
 type StepEventProps = {
   errors: Record<string, string | undefined>
-  onBlur: (field: "eventType" | "location" | "eventDate" | "guestCount") => void
-  onChange: (field: "eventType" | "location" | "eventDate" | "guestCount", value: string) => void
+  onBlur: (field: "location" | "eventDate" | "guestCount") => void
+  onChange: (field: "location" | "eventDate" | "guestCount", value: string) => void
   values: {
     eventDate: string
-    eventType: string
     guestCount: string
     location: string
   }
@@ -23,31 +22,14 @@ export default function StepEvent({
       <div className={styles.header}>
         <p className={styles.eyebrow}>Step 2</p>
         <h2 id="booking-event-heading" className={styles.title}>
-          What are you planning?
+          Lock the event essentials
         </h2>
         <p className={styles.description}>
-          Share the essentials and we will size the bar, staffing, and flow around your event.
+          Your selected service already defines the service lane. Now we just need the date, venue, and guest count.
         </p>
       </div>
 
       <div className={styles.grid}>
-        <label className={styles.field}>
-          <span className={styles.label}>What kind of event is this?</span>
-          <input
-            className={`${styles.input} ${errors.eventType ? styles.inputError : ""}`}
-            data-field="eventType"
-            name="eventType"
-            placeholder="House party, launch night, sundowner..."
-            suppressHydrationWarning
-            value={values.eventType}
-            onBlur={() => onBlur("eventType")}
-            onChange={(event) => onChange("eventType", event.target.value)}
-          />
-          <span className={`${styles.hint} ${errors.eventType ? styles.error : ""}`}>
-            {errors.eventType ?? "A simple description is enough. We can refine the brief with you later."}
-          </span>
-        </label>
-
         <label className={styles.field}>
           <span className={styles.label}>Where is it happening?</span>
           <input

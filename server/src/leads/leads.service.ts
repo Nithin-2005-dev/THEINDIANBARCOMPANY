@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   AssignmentRole,
   AuditAction,
@@ -16,6 +17,7 @@ import {
 import { AuditService } from '../audit/audit.service';
 import { isAdminRole, isStaffRole } from '../common/auth/role-helpers';
 import type { AuthUser } from '../common/types/auth-user.type';
+import { buildClientPortalLoginUrl } from '../common/utils/client-portal-url';
 import { IdempotencyService } from '../idempotency/idempotency.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -43,6 +45,7 @@ export class LeadsService {
     private readonly auditService: AuditService,
     private readonly notificationsService: NotificationsService,
     private readonly queueService: QueueService,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(dto: CreateLeadDto, userId: string, idempotencyKey?: string) {
@@ -277,7 +280,7 @@ export class LeadsService {
             ? [
                 this.queueService.queueEmail({
                   to: client.email,
-                  subject: 'Your event brief has been prepared',
+                  subject: 'Thank you for your event request',
                   template: 'lead-confirmation',
                   variables: {
                     clientName,
@@ -287,6 +290,9 @@ export class LeadsService {
                     service:
                       dto.packageLabel ?? dto.packageName ?? dto.eventType,
                     leadId: lead.id,
+                    accessEmail: client.email ?? clientEmail,
+                    accessPhone: client.phone ?? clientPhone ?? '',
+                    portalUrl: this.buildClientPortalUrl(lead.id),
                   },
                 }),
               ]
@@ -1202,6 +1208,14 @@ export class LeadsService {
 
   private formatEventDate(date: Date) {
     return date.toISOString().slice(0, 10);
+  }
+
+  private buildClientPortalUrl(leadId: string) {
+    const siteUrl =
+      this.configService.get<string>('NEXT_PUBLIC_SITE_URL')?.trim() ||
+      this.configService.get<string>('FRONTEND_APP_URL')?.trim();
+
+    return buildClientPortalLoginUrl(siteUrl, `/dashboard/events/${leadId}`);
   }
 
   private createLeadActivityRecord(

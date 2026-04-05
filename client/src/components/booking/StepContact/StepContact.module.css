@@ -181,13 +181,13 @@
   text-transform: uppercase;
 }
 
-@media (min-width: 521px) {
+@container (min-width: 30rem) {
   .options {
     grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
   }
 }
 
-@media (min-width: 720px) {
+@container (min-width: 42rem) {
   .root {
     gap: 1.45rem;
   }

@@ -11,6 +11,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { QueueService } from '../queue/queue.service';
 import type { AuthUser } from '../common/types/auth-user.type';
+import { buildClientPortalLoginUrl } from '../common/utils/client-portal-url';
 import { CreateProposalDto } from './dto/create-proposal.dto';
 import { ListProposalsQueryDto } from './dto/list-proposals-query.dto';
 import { ProposalDecisionDto } from './dto/proposal-decision.dto';
@@ -326,18 +327,6 @@ export class ProposalsService {
       this.configService.get<string>('NEXT_PUBLIC_SITE_URL')?.trim() ||
       this.configService.get<string>('FRONTEND_APP_URL')?.trim();
 
-    if (!siteUrl) {
-      return '';
-    }
-
-    try {
-      const nextPath = `/dashboard/events/${leadId}`;
-      const url = new URL('/login', siteUrl);
-      url.searchParams.set('role', 'client');
-      url.searchParams.set('next', nextPath);
-      return url.toString();
-    } catch {
-      return '';
-    }
+    return buildClientPortalLoginUrl(siteUrl, `/dashboard/events/${leadId}`);
   }
 }

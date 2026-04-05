@@ -221,7 +221,7 @@
   color: var(--color-danger);
 }
 
-@media (min-width: 720px) {
+@container (min-width: 42rem) {
   .root {
     gap: 1.45rem;
   }
@@ -236,7 +236,7 @@
 
   .grid {
     gap: 1rem;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .field:first-child {

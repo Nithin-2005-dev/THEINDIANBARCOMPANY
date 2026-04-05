@@ -321,12 +321,7 @@
   }
 }
 
-@media (min-width: 720px) {
-  .root {
-    padding: 1.1rem;
-    border-radius: 1.5rem;
-  }
-
+@container (min-width: 36rem) {
   .previewCard,
   .estimateCard,
   .reassurance {
@@ -335,6 +330,13 @@
 
   .previewArt {
     min-height: 6.8rem;
+  }
+}
+
+@container (min-width: 42rem) {
+  .root {
+    padding: 1.1rem;
+    border-radius: 1.5rem;
   }
 
   .header {

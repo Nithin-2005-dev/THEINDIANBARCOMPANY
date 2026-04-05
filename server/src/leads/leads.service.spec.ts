@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { AuditService } from '../audit/audit.service';
 import { IdempotencyService } from '../idempotency/idempotency.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -49,6 +50,12 @@ describe('LeadsService', () => {
           provide: QueueService,
           useValue: {
             queueEmail: jest.fn(),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn(),
           },
         },
       ],

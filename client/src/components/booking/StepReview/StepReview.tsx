@@ -18,10 +18,6 @@ export default function StepReview({ service, values }: StepReviewProps) {
       value: service?.label ?? "Custom event request",
     },
     {
-      label: "Event type",
-      value: values.eventType.trim() || "Not shared yet",
-    },
-    {
       label: "Date and time",
       value: formatDisplayDate(values.eventDate),
     },

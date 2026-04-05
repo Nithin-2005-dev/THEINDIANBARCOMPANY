@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { AssignmentRole, AuditAction, LeadStatus, Role } from '@prisma/client';
 import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -49,6 +50,16 @@ describe('PublicBookingsService', () => {
     queueEmail: jest.fn(),
   };
 
+  const configService = {
+    get: jest.fn((key: string) => {
+      if (key === 'NEXT_PUBLIC_SITE_URL') {
+        return 'https://example.com';
+      }
+
+      return undefined;
+    }),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -71,6 +82,10 @@ describe('PublicBookingsService', () => {
           provide: QueueService,
           useValue: queueService,
         },
+        {
+          provide: ConfigService,
+          useValue: configService,
+        },
       ],
     }).compile();
 
@@ -86,11 +101,13 @@ describe('PublicBookingsService', () => {
       email: 'riya@example.com',
       role: Role.CLIENT,
     });
-    prisma.user.findMany.mockResolvedValue([
-      { id: 'admin-1', email: 'admin@example.com' },
-      { id: 'admin-2', email: 'ADMIN@example.com' },
-      { id: 'admin-3', email: 'ops@example.com' },
-    ]);
+    prisma.user.findMany
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        { id: 'admin-1', email: 'admin@example.com' },
+        { id: 'admin-2', email: 'ADMIN@example.com' },
+        { id: 'admin-3', email: 'ops@example.com' },
+      ]);
     const leadAssignmentCreateMany = jest.fn().mockResolvedValue(undefined);
     prisma.$transaction.mockImplementation(
       (callback: (tx: PublicBookingTransaction) => Promise<unknown>) =>
@@ -197,19 +214,34 @@ describe('PublicBookingsService', () => {
     expect(queueService.queueEmail).toHaveBeenCalledWith(
       expect.objectContaining({
         to: 'riya@example.com',
+        subject: 'Thank you for your event request',
         template: 'lead-confirmation',
+        variables: expect.objectContaining({
+          accessEmail: 'riya@example.com',
+          accessPhone: '+919876543210',
+          portalUrl:
+            'https://example.com/login?role=client&next=%2Fdashboard%2Fevents%2Flead-1',
+        }),
       }),
     );
     expect(queueService.queueEmail).toHaveBeenCalledWith(
       expect.objectContaining({
         to: 'admin@example.com',
         template: 'lead-admin-notification',
+        variables: expect.objectContaining({
+          adminUrl:
+            'https://example.com/login?role=admin&next=%2Fadmin%2Fchat%3FleadId%3Dlead-1%26conversationType%3DGROUP',
+        }),
       }),
     );
     expect(queueService.queueEmail).toHaveBeenCalledWith(
       expect.objectContaining({
         to: 'ops@example.com',
         template: 'lead-admin-notification',
+        variables: expect.objectContaining({
+          adminUrl:
+            'https://example.com/login?role=admin&next=%2Fadmin%2Fchat%3FleadId%3Dlead-1%26conversationType%3DGROUP',
+        }),
       }),
     );
   });

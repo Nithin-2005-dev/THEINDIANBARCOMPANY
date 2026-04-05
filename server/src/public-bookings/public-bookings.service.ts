@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   AssignmentRole,
   AuditAction,
@@ -8,6 +9,7 @@ import {
   Role,
 } from '@prisma/client';
 import { AuditService } from '../audit/audit.service';
+import { buildClientPortalLoginUrl } from '../common/utils/client-portal-url';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { QueueService } from '../queue/queue.service';
@@ -20,6 +22,7 @@ export class PublicBookingsService {
     private readonly auditService: AuditService,
     private readonly notificationsService: NotificationsService,
     private readonly queueService: QueueService,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(dto: CreatePublicBookingDto) {
@@ -33,30 +36,54 @@ export class PublicBookingsService {
       );
     }
 
-    const existingUser = await this.prisma.user.findFirst({
+    const normalizedName = dto.name.trim();
+    const normalizedPhone = dto.phone.trim().replace(/\s+/g, '');
+    const normalizedEmail = dto.email?.trim().toLowerCase();
+
+    const matchingUsers = await this.prisma.user.findMany({
       where: {
         OR: [
-          { phone: dto.phone },
-          ...(dto.email ? [{ email: dto.email }] : []),
+          { phone: normalizedPhone },
+          ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
         ],
         deletedAt: null,
       },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
     });
+
+    const phoneUser =
+      matchingUsers.find((user) => user.phone === normalizedPhone) ?? null;
+    const emailUser =
+      matchingUsers.find((user) => user.email === normalizedEmail) ?? null;
+
+    if (phoneUser && emailUser && phoneUser.id !== emailUser.id) {
+      throw new BadRequestException(
+        'That phone number and email are already linked to different accounts. Please use one existing contact method or call our concierge team.',
+      );
+    }
+
+    const existingUser = phoneUser ?? emailUser;
+
+    if (existingUser && existingUser.role !== Role.CLIENT) {
+      throw new BadRequestException(
+        'That phone number or email is already linked to a non-client account. Please use a different contact detail or call our concierge team.',
+      );
+    }
 
     const user = existingUser
       ? await this.prisma.user.update({
           where: { id: existingUser.id },
           data: {
-            name: dto.name,
-            phone: existingUser.phone ?? dto.phone,
-            email: existingUser.email ?? dto.email,
+            name: normalizedName,
+            phone: existingUser.phone ?? normalizedPhone,
+            email: existingUser.email ?? normalizedEmail,
           },
         })
       : await this.prisma.user.create({
           data: {
-            name: dto.name,
-            phone: dto.phone,
-            email: dto.email,
+            name: normalizedName,
+            phone: normalizedPhone,
+            email: normalizedEmail,
             role: Role.CLIENT,
           },
         });
@@ -196,7 +223,7 @@ export class PublicBookingsService {
         ? [
             this.queueService.queueEmail({
               to: user.email,
-              subject: 'Your event request is in',
+              subject: 'Thank you for your event request',
               template: 'lead-confirmation',
               variables: {
                 clientName: user.name ?? dto.name,
@@ -205,6 +232,9 @@ export class PublicBookingsService {
                 eventDate: this.formatEventDate(eventDate),
                 service: dto.packageLabel ?? dto.packageName ?? dto.eventType,
                 leadId: lead.id,
+                accessEmail: user.email ?? dto.email ?? '',
+                accessPhone: user.phone ?? dto.phone,
+                portalUrl: this.buildPortalUrl(lead.id),
               },
             }),
           ]
@@ -231,6 +261,7 @@ export class PublicBookingsService {
                 : 'None selected',
             notes: dto.notes?.trim() || 'No extra notes',
             leadId: lead.id,
+            adminUrl: this.buildAdminPortalUrl(lead.id),
           },
         }),
       ),
@@ -276,5 +307,35 @@ export class PublicBookingsService {
     }
 
     return 'Not provided';
+  }
+
+  private buildPortalUrl(leadId: string) {
+    const siteUrl =
+      this.configService.get<string>('NEXT_PUBLIC_SITE_URL')?.trim() ||
+      this.configService.get<string>('FRONTEND_APP_URL')?.trim();
+
+    return buildClientPortalLoginUrl(siteUrl, `/dashboard/events/${leadId}`);
+  }
+
+  private buildAdminPortalUrl(leadId: string) {
+    const siteUrl =
+      this.configService.get<string>('NEXT_PUBLIC_SITE_URL')?.trim() ||
+      this.configService.get<string>('FRONTEND_APP_URL')?.trim();
+
+    if (!siteUrl) {
+      return '';
+    }
+
+    try {
+      const url = new URL('/login', siteUrl);
+      url.searchParams.set('role', 'admin');
+      url.searchParams.set(
+        'next',
+        `/admin/chat?leadId=${leadId}&conversationType=GROUP`,
+      );
+      return url.toString();
+    } catch {
+      return '';
+    }
   }
 }
