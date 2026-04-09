@@ -10,6 +10,8 @@ import type {
 import type {
   AdminAssistantAnalytics,
   AdminAnalyticsResponse,
+  AdminEmailDelivery,
+  AdminEmailDeliveryListResponse,
   AdminRole,
   AdminSystemOverview,
   AppNotification,
@@ -112,6 +114,36 @@ export const adminApi = {
   },
   pipeline: () => adminFetch<Lead[]>("/admin/pipeline"),
   systemOverview: () => adminFetch<AdminSystemOverview>("/admin/system/overview"),
+  listEmailDeliveries: (params?: {
+    page?: number
+    limit?: number
+    status?: "PENDING" | "QUEUED" | "PROCESSING" | "RETRYING" | "SENT" | "FAILED"
+    emailType?: string
+    search?: string
+    dateFrom?: string
+    dateTo?: string
+  }) => {
+    const query = new URLSearchParams()
+    if (params?.page) query.set("page", String(params.page))
+    if (params?.limit) query.set("limit", String(params.limit))
+    if (params?.status) query.set("status", params.status)
+    if (params?.emailType?.trim()) query.set("emailType", params.emailType.trim())
+    if (params?.search?.trim()) query.set("search", params.search.trim())
+    if (params?.dateFrom) query.set("dateFrom", params.dateFrom)
+    if (params?.dateTo) query.set("dateTo", params.dateTo)
+    return adminFetch<AdminEmailDeliveryListResponse>(
+      `/admin/email-deliveries${query.toString() ? `?${query.toString()}` : ""}`,
+    )
+  },
+  getEmailDelivery: (id: string) => adminFetch<AdminEmailDelivery>(`/admin/email-deliveries/${id}`),
+  resendEmailDelivery: (id: string) =>
+    adminFetch<AdminEmailDelivery>(`/admin/email-deliveries/${id}/resend`, {
+      method: "POST",
+    }),
+  forceSendEmailDelivery: (id: string) =>
+    adminFetch<AdminEmailDelivery>(`/admin/email-deliveries/${id}/force-send`, {
+      method: "POST",
+    }),
   listLeads: (params: URLSearchParams) =>
     adminFetch<PaginatedResponse<Lead>>(`/leads?${params.toString()}`),
   createOfflineLead: (payload: {

@@ -35,9 +35,21 @@ export class NotificationsService {
       });
     }
 
-    const provider = this.configService.getOrThrow<string>('SMS_PROVIDER');
+    const provider = this.configService
+      .getOrThrow<string>('SMS_PROVIDER')
+      .trim()
+      .toLowerCase();
+    const nodeEnv =
+      this.configService.get<string>('NODE_ENV')?.trim().toLowerCase() ??
+      'development';
 
     if (provider === 'mock') {
+      if (nodeEnv === 'production') {
+        throw new Error(
+          'SMS provider is set to mock in production. Configure a real SMS provider.',
+        );
+      }
+
       this.logger.log(`Mock SMS queued for ${params.destination}`);
       return { provider, delivered: true };
     }
@@ -46,11 +58,9 @@ export class NotificationsService {
       return this.sendTwilioSms(params.destination, params.message);
     }
 
-    // MSG91 / AWS SNS can be added without changing callers.
-    this.logger.log(
-      `Queued SMS delivery via ${provider} for ${params.destination}`,
+    throw new Error(
+      `SMS provider "${provider}" is not implemented for real delivery.`,
     );
-    return { provider, delivered: true };
   }
 
   async sendEmail(params: {
@@ -114,11 +124,20 @@ export class NotificationsService {
   }
 
   private async sendTwilioSms(destination: string, message: string) {
-    const accountSid =
-      this.configService.getOrThrow<string>('TWILIO_ACCOUNT_SID');
-    const authToken =
-      this.configService.getOrThrow<string>('TWILIO_AUTH_TOKEN');
-    const from = this.configService.getOrThrow<string>('SMS_FROM');
+    const accountSid = this.configService
+      .getOrThrow<string>('TWILIO_ACCOUNT_SID')
+      .trim();
+    const authToken = this.configService
+      .getOrThrow<string>('TWILIO_AUTH_TOKEN')
+      .trim();
+    const from = this.configService.getOrThrow<string>('SMS_FROM').trim();
+
+    if (!accountSid || !authToken || !from) {
+      throw new Error(
+        'Twilio SMS is selected but TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, or SMS_FROM is missing.',
+      );
+    }
+
     const auth = Buffer.from(`${accountSid}:${authToken}`).toString('base64');
 
     const body = new URLSearchParams({

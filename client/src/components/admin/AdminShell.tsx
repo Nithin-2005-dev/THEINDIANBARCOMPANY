@@ -15,6 +15,7 @@ import {
   AnalyticsIcon,
   BookingsIcon,
   DocumentsIcon,
+  EmailIcon,
   MessagesIcon,
   NotificationsIcon,
   PaymentsIcon,
@@ -126,6 +127,11 @@ export default function AdminShell({ children }: AdminShellProps) {
         label: "Notifications",
         icon: NotificationsIcon,
         badge: notificationCount || undefined,
+      },
+      {
+        href: "/admin/email-tracking",
+        label: "Email Tracking",
+        icon: EmailIcon,
       },
       {
         href: "/admin/assistant",
@@ -240,6 +246,18 @@ export default function AdminShell({ children }: AdminShellProps) {
         actions: [
           { label: "Bookings", href: "/admin/bookings", tone: "secondary", icon: BookingsIcon },
           { label: "Chat", href: "/admin/chat", tone: "ghost", icon: MessagesIcon },
+        ],
+      }
+    }
+
+    if (pathname.startsWith("/admin/email-tracking")) {
+      return {
+        title: "Email tracking",
+        description:
+          "Monitor queued, retrying, sent, and failed emails with resend controls and delivery history.",
+        actions: [
+          { label: "Settings", href: "/admin/settings", tone: "secondary", icon: NotificationsIcon },
+          { label: "Bookings", href: "/admin/bookings", tone: "ghost", icon: BookingsIcon },
         ],
       }
     }

@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
@@ -17,8 +18,8 @@ import { randomUUID } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AuditService } from '../audit/audit.service';
-import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { QueueService } from '../queue/queue.service';
 import { UsersService } from '../users/users.service';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { SendOtpDto } from './dto/send-otp.dto';
@@ -43,12 +44,13 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly auditService: AuditService,
-    private readonly notificationsService: NotificationsService,
+    private readonly queueService: QueueService,
     private readonly usersService: UsersService,
   ) {}
 
   async sendOtp(dto: SendOtpDto, client: ClientContext) {
     const target = this.resolveOtpTarget(dto);
+    this.assertPhoneOtpDeliveryReady(target.channel);
     const requestedRole = dto.roleHint;
     let user = await this.findUserByTarget(target.phone, target.email);
 
@@ -111,30 +113,16 @@ export class AuthService {
     });
 
     const message = `Your login OTP is ${otp}. It expires in ${expiryMinutes} minutes.`;
-    try {
-      await this.notificationsService.sendOtp({
-        channel: target.channel,
-        destination: target.identifier,
-        message,
-        subject: 'Your login OTP',
-        template: 'otp-login',
-        variables: {
-          otp,
-          expiryMinutes,
-          identifier: target.identifier,
-        },
-      });
-    } catch {
-      await this.prisma.otpChallenge.deleteMany({
-        where: {
-          id: challenge.id,
-        },
-      });
-
-      throw new BadRequestException(
-        'We could not send the sign-in code. Please try again.',
-      );
-    }
+    const deliveryStatus = await this.queueOtpChallenge({
+      challengeId: challenge.id,
+      userId: user.id,
+      channel: target.channel,
+      destination: target.identifier,
+      message,
+      expiryMinutes,
+      otp,
+      roleHint: requestedRole,
+    });
 
     await this.auditService.log({
       action: AuditAction.OTP_SENT,
@@ -145,16 +133,21 @@ export class AuthService {
       metadata: {
         channel: target.channel,
         identifier: target.identifier,
+        deliveryStatus,
       },
     });
 
     return {
       challengeId: challenge.id,
-      message: 'OTP generated successfully.',
+      message:
+        deliveryStatus === 'FAILED'
+          ? 'Verification code request created, but delivery is delayed. Please wait for a retry or request a new code when the cooldown ends.'
+          : 'Verification code queued successfully.',
       expiresInMinutes: expiryMinutes,
       resendAvailableAt: challenge.cooldownUntil,
       sentTo: this.maskIdentifier(target.identifier, target.channel),
       channel: target.channel,
+      deliveryStatus,
       debugOtp:
         this.configService.getOrThrow<string>('NODE_ENV') === 'production'
           ? undefined
@@ -518,8 +511,14 @@ export class AuthService {
     );
 
     if (activeChallenge) {
+      const secondsRemaining = Math.max(
+        1,
+        Math.ceil(
+          (activeChallenge.cooldownUntil!.getTime() - Date.now()) / 1000,
+        ),
+      );
       throw new BadRequestException(
-        'OTP resend cooldown active. Please wait before retrying.',
+        `OTP resend cooldown active. Try again in ${this.formatDurationFromSeconds(secondsRemaining)}.`,
       );
     }
 
@@ -527,8 +526,23 @@ export class AuthService {
       'OTP_MAX_REQUESTS_PER_WINDOW',
     );
     if (recentChallenges.length >= maxRequests) {
+      const oldestChallenge = recentChallenges[recentChallenges.length - 1];
+      const retryAt = oldestChallenge
+        ? new Date(
+            oldestChallenge.createdAt.getTime() +
+              this.configService.getOrThrow<number>(
+                'OTP_REQUEST_WINDOW_MINUTES',
+              ) *
+                60 *
+                1000,
+          )
+        : null;
       throw new ForbiddenException(
-        'OTP request limit exceeded for this identifier.',
+        retryAt && retryAt.getTime() > Date.now()
+          ? `OTP request limit exceeded for this identifier. Try again in about ${this.formatDurationFromSeconds(
+              Math.ceil((retryAt.getTime() - Date.now()) / 1000),
+            )}.`
+          : 'OTP request limit exceeded for this identifier.',
       );
     }
 
@@ -536,10 +550,104 @@ export class AuthService {
       (challenge) => challenge.status === OtpChallengeStatus.LOCKED,
     );
     if (lockedChallenge) {
-      throw new ForbiddenException(
-        'OTP temporarily locked for this identifier.',
-      );
+      const lockUntil = this.resolveOtpLockUntil(lockedChallenge);
+
+      if (lockUntil && lockUntil.getTime() > Date.now()) {
+        throw new ForbiddenException(
+          `Too many incorrect codes. Try again in ${this.formatDurationFromSeconds(
+            Math.ceil((lockUntil.getTime() - Date.now()) / 1000),
+          )}.`,
+        );
+      }
+
+      await this.prisma.otpChallenge.updateMany({
+        where: {
+          id: lockedChallenge.id,
+          status: OtpChallengeStatus.LOCKED,
+        },
+        data: {
+          status: OtpChallengeStatus.EXPIRED,
+        },
+      });
     }
+  }
+
+  private async queueOtpChallenge(input: {
+    challengeId: string;
+    userId: string;
+    channel: OtpDeliveryChannel;
+    destination: string;
+    message: string;
+    expiryMinutes: number;
+    otp: string;
+    roleHint: AuthWorkspaceRole;
+  }) {
+    if (input.channel === 'EMAIL') {
+      const delivery = await this.queueService.queueEmail({
+        to: input.destination,
+        subject: 'Your login OTP',
+        template: 'otp-login',
+        emailType: 'LOGIN_OTP',
+        recipientUserId: input.userId,
+        metadata: {
+          challengeId: input.challengeId,
+          roleHint: input.roleHint,
+          channel: input.channel,
+        },
+        variables: {
+          otp: input.otp,
+          expiryMinutes: input.expiryMinutes,
+          identifier: input.destination,
+        },
+        allowManualResend: false,
+        isSensitive: true,
+      });
+
+      return delivery.status;
+    }
+
+    const queuedOtp = await this.queueService.queueOtp({
+      challengeId: input.challengeId,
+      channel: input.channel,
+      destination: input.destination,
+      message: input.message,
+      subject: 'Your login OTP',
+      template: 'otp-login',
+      variables: {
+        otp: input.otp,
+        expiryMinutes: input.expiryMinutes,
+        identifier: input.destination,
+      },
+    });
+
+    return queuedOtp.queued ? 'QUEUED' : 'FAILED';
+  }
+
+  private resolveOtpLockUntil(challenge: { abuseDetectedAt?: Date | null }) {
+    if (!challenge.abuseDetectedAt) {
+      return null;
+    }
+
+    return new Date(
+      challenge.abuseDetectedAt.getTime() +
+        this.configService.getOrThrow<number>('OTP_LOCK_MINUTES') *
+          60 *
+          1000,
+    );
+  }
+
+  private formatDurationFromSeconds(totalSeconds: number) {
+    if (totalSeconds < 60) {
+      return `${totalSeconds} second${totalSeconds === 1 ? '' : 's'}`;
+    }
+
+    const minutes = Math.ceil(totalSeconds / 60);
+    if (minutes < 60) {
+      return `${minutes} minute${minutes === 1 ? '' : 's'}`;
+    }
+
+    const hours = Math.ceil(minutes / 60);
+    return `${hours} hour${hours === 1 ? '' : 's'}`;
   }
 
   private async findUserByTarget(phone?: string, email?: string) {
@@ -576,8 +684,8 @@ export class AuthService {
       ? rawIdentifier.toLowerCase()
       : dto.email?.trim().toLowerCase();
     const normalizedPhone = this.isPhone(rawIdentifier)
-      ? rawIdentifier.replace(/\s+/g, '')
-      : dto.phone?.trim().replace(/\s+/g, '');
+      ? this.normalizePhoneIdentifier(rawIdentifier)
+      : this.normalizePhoneIdentifier(dto.phone);
 
     if (!normalizedPhone && !normalizedEmail) {
       throw new BadRequestException(
@@ -604,6 +712,29 @@ export class AuthService {
     return /^\+?[1-9]\d{9,14}$/.test(value.replace(/\s+/g, ''));
   }
 
+  private normalizePhoneIdentifier(value?: string | null) {
+    if (!value) {
+      return undefined;
+    }
+
+    const compact = value.replace(/\s+/g, '');
+    const digitsOnly = compact.replace(/[^\d]/g, '');
+
+    if (/^[6-9]\d{9}$/.test(digitsOnly)) {
+      return `+91${digitsOnly}`;
+    }
+
+    if (/^91\d{10}$/.test(digitsOnly)) {
+      return `+${digitsOnly}`;
+    }
+
+    if (/^\+?[1-9]\d{9,14}$/.test(compact)) {
+      return compact.startsWith('+') ? compact : `+${compact}`;
+    }
+
+    return compact;
+  }
+
   private isEmail(value?: string | null) {
     if (!value) {
       return false;
@@ -625,6 +756,51 @@ export class AuthService {
 
     const lastFour = identifier.slice(-4);
     return `${'*'.repeat(Math.max(identifier.length - 4, 4))}${lastFour}`;
+  }
+
+  private assertPhoneOtpDeliveryReady(channel: OtpDeliveryChannel) {
+    if (channel !== 'PHONE') {
+      return;
+    }
+
+    const provider =
+      this.configService.get<string>('SMS_PROVIDER')?.trim().toLowerCase() ??
+      'mock';
+    const nodeEnv =
+      this.configService.get<string>('NODE_ENV')?.trim().toLowerCase() ??
+      'development';
+
+    if (provider === 'mock') {
+      if (nodeEnv === 'production') {
+        throw new ServiceUnavailableException(
+          'Phone OTP is not configured for real delivery. Set SMS_PROVIDER to twilio and add valid SMS credentials.',
+        );
+      }
+
+      return;
+    }
+
+    if (provider === 'twilio') {
+      const accountSid = this.configService
+        .get<string>('TWILIO_ACCOUNT_SID')
+        ?.trim();
+      const authToken = this.configService
+        .get<string>('TWILIO_AUTH_TOKEN')
+        ?.trim();
+      const from = this.configService.get<string>('SMS_FROM')?.trim();
+
+      if (!accountSid || !authToken || !from) {
+        throw new ServiceUnavailableException(
+          'Phone OTP is not configured for real delivery. TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and SMS_FROM are required.',
+        );
+      }
+
+      return;
+    }
+
+    throw new ServiceUnavailableException(
+      `Phone OTP provider "${provider}" is not implemented yet. Configure Twilio for real SMS delivery.`,
+    );
   }
 
   private detectSuspiciousActivity(

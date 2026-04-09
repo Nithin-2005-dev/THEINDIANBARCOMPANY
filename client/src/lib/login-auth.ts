@@ -77,6 +77,7 @@ export async function sendSharedLoginOtp(role: WorkspaceRole, payload: {
     resendAvailableAt?: string
     sentTo?: string
     channel?: "PHONE" | "EMAIL"
+    deliveryStatus?: "QUEUED" | "FAILED" | "SENT" | "PROCESSING" | "RETRYING"
   }>({
     url: `${getRoleApiPrefix(role)}/send-otp`,
     method: "POST",

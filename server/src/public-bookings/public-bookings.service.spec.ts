@@ -245,4 +245,96 @@ describe('PublicBookingsService', () => {
       }),
     );
   });
+
+  it('rejects bookings when the phone is already linked to a different email on the same client account', async () => {
+    prisma.user.findMany.mockResolvedValue([
+      {
+        id: 'client-1',
+        name: 'Existing Client',
+        phone: '+918179133593',
+        email: 'old@example.com',
+        role: Role.CLIENT,
+      },
+    ]);
+
+    await expect(
+      service.create({
+        name: 'New Name',
+        phone: '8179133593',
+        email: 'new@example.com',
+        eventType: 'House Party',
+        location: 'Hyderabad',
+        eventDate: '2026-05-10T18:30:00.000Z',
+      }),
+    ).rejects.toThrow(
+      'That phone number and email must already belong to the same client account.',
+    );
+
+    expect(prisma.user.update).not.toHaveBeenCalled();
+    expect(prisma.user.create).not.toHaveBeenCalled();
+    expect(queueService.queueEmail).not.toHaveBeenCalled();
+  });
+
+  it('fills a missing email on an existing client when the phone matches the same account', async () => {
+    prisma.user.findMany
+      .mockResolvedValueOnce([
+        {
+          id: 'client-1',
+          name: 'Existing Client',
+          phone: '+918179133593',
+          email: null,
+          role: Role.CLIENT,
+        },
+      ])
+      .mockResolvedValueOnce([]);
+    prisma.user.update.mockResolvedValue({
+      id: 'client-1',
+      name: 'Existing Client',
+      phone: '+918179133593',
+      email: 'new@example.com',
+      role: Role.CLIENT,
+    });
+    const leadAssignmentCreateMany = jest.fn().mockResolvedValue(undefined);
+    prisma.$transaction.mockImplementation(
+      (callback: (tx: PublicBookingTransaction) => Promise<unknown>) =>
+        callback({
+          lead: {
+            create: jest.fn().mockResolvedValue({
+              id: 'lead-2',
+              status: LeadStatus.NEW,
+            }),
+          },
+          leadStatusHistory: {
+            create: jest.fn().mockResolvedValue(undefined),
+          },
+          leadActivity: {
+            create: jest.fn().mockResolvedValue(undefined),
+          },
+          conversationThread: {
+            createMany: jest.fn().mockResolvedValue(undefined),
+          },
+          leadAssignment: {
+            createMany: leadAssignmentCreateMany,
+          },
+        }),
+    );
+
+    await service.create({
+      name: 'Existing Client',
+      phone: '8179133593',
+      email: 'new@example.com',
+      eventType: 'House Party',
+      location: 'Hyderabad',
+      eventDate: '2026-05-10T18:30:00.000Z',
+    });
+
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'client-1' },
+      data: {
+        name: 'Existing Client',
+        phone: '+918179133593',
+        email: 'new@example.com',
+      },
+    });
+  });
 });

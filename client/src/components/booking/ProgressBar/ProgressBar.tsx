@@ -35,9 +35,9 @@ export default function ProgressBar({ currentStep }: ProgressBarProps) {
           <p className={styles.eyebrow}>
             Step {currentStepNumber} of {BOOKING_STEPS.length}
           </p>
-          <p className={styles.heading}>A concierge brief in four measured steps</p>
+          <p className={styles.heading}>Booking flow</p>
           <p className={styles.support}>
-            Quick to complete, private by default, and designed for premium event planning.
+            Four short steps. Your draft stays saved on this device while you move through it.
           </p>
         </div>
 

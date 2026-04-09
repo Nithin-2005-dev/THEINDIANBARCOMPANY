@@ -315,6 +315,11 @@ export class ProjectsService {
             to: client.email,
             subject: update.title,
             template: 'project-update',
+            emailType: 'PROJECT_UPDATE',
+            recipientUserId: project.clientId,
+            requestedById: user.userId,
+            leadId,
+            projectId,
             variables: {
               title: update.title,
               body: update.body,

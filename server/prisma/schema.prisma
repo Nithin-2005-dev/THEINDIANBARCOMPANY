@@ -190,6 +190,25 @@ enum IdempotencyStatus {
   FAILED
 }
 
+enum EmailDeliveryStatus {
+  QUEUED
+  PROCESSING
+  RETRYING
+  SENT
+  FAILED
+}
+
+enum EmailDeliveryLogEvent {
+  QUEUED
+  PROCESSING
+  RETRY_SCHEDULED
+  SENT
+  FAILED
+  RESEND_REQUESTED
+  FORCE_SEND_REQUESTED
+  QUEUEING_FAILED
+}
+
 enum TeamCategory {
   CORE
   TRUSTEE
@@ -236,6 +255,8 @@ model User {
   taskActivities        ProjectTaskActivity[] @relation("ProjectTaskActivityActor")
   uploadedProjectDocuments ProjectDocument[] @relation("ProjectDocumentUploader")
   vendorProfile         Vendor?
+  receivedEmailDeliveries EmailDelivery[] @relation("EmailDeliveryRecipientUser")
+  requestedEmailDeliveries EmailDelivery[] @relation("EmailDeliveryRequestedBy")
   aiConversations       AiConversation[]
   assistantEvents       AiAssistantEvent[]
   createdAt             DateTime   @default(now())
@@ -680,6 +701,70 @@ model Notification {
   @@index([userId, createdAt])
   @@index([userId, readAt])
   @@index([type])
+}
+
+model EmailDelivery {
+  id                    String               @id @default(uuid())
+  status                EmailDeliveryStatus  @default(QUEUED)
+  emailType             String               @default("GENERAL")
+  template              String
+  subject               String
+  toEmail               String
+  provider              String?
+  providerMessageId     String?
+  providerAcknowledgedAt DateTime?
+  providerResponse      Json?
+  variables             Json?
+  metadata              Json?
+  recipientUserId       String?
+  recipientUser         User?                @relation("EmailDeliveryRecipientUser", fields: [recipientUserId], references: [id], onDelete: SetNull)
+  requestedById         String?
+  requestedBy           User?                @relation("EmailDeliveryRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+  leadId                String?
+  projectId             String?
+  paymentId             String?
+  proposalId            String?
+  contractId            String?
+  retryCount            Int                  @default(0)
+  maxRetries            Int                  @default(4)
+  lastRetryAt           DateTime?
+  nextRetryAt           DateTime?
+  processingStartedAt   DateTime?
+  sentAt                DateTime?
+  failedAt              DateTime?
+  lastErrorMessage      String?
+  lastErrorAt           DateTime?
+  allowManualResend     Boolean              @default(true)
+  isSensitive           Boolean              @default(false)
+  logs                  EmailDeliveryLog[]
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+
+  @@index([status, createdAt])
+  @@index([status, nextRetryAt])
+  @@index([emailType, status])
+  @@index([toEmail])
+  @@index([recipientUserId, createdAt])
+  @@index([leadId, createdAt])
+  @@index([projectId, createdAt])
+  @@index([paymentId, createdAt])
+  @@index([proposalId, createdAt])
+  @@index([contractId, createdAt])
+}
+
+model EmailDeliveryLog {
+  id              String                @id @default(uuid())
+  emailDeliveryId String
+  emailDelivery   EmailDelivery         @relation(fields: [emailDeliveryId], references: [id], onDelete: Cascade)
+  event           EmailDeliveryLogEvent
+  attemptNumber   Int?
+  jobId           String?
+  message         String?
+  details         Json?
+  createdAt       DateTime              @default(now())
+
+  @@index([emailDeliveryId, createdAt])
+  @@index([event, createdAt])
 }
 
 model EventFeedback {

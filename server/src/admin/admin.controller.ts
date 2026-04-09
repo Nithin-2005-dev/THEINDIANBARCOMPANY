@@ -17,6 +17,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import type { AuthUser } from '../common/types/auth-user.type';
 import { AdminService } from './admin.service';
 import { AssistantAnalyticsQueryDto } from './dto/assistant-analytics-query.dto';
+import { ListEmailDeliveriesQueryDto } from './dto/list-email-deliveries-query.dto';
 import { RevokeSessionDto } from './dto/revoke-session.dto';
 
 @Controller('admin')
@@ -50,6 +51,16 @@ export class AdminController {
     return this.adminService.listNotifications(user.userId);
   }
 
+  @Get('email-deliveries')
+  emailDeliveries(@Query() query: ListEmailDeliveriesQueryDto) {
+    return this.adminService.listEmailDeliveries(query);
+  }
+
+  @Get('email-deliveries/:id')
+  emailDelivery(@Param('id', ParseUUIDPipe) id: string) {
+    return this.adminService.getEmailDelivery(id);
+  }
+
   @Patch('notifications/:id/read')
   markNotificationRead(
     @CurrentUser() user: AuthUser,
@@ -61,5 +72,21 @@ export class AdminController {
   @Post('system/sessions/revoke')
   revokeSession(@Body() dto: RevokeSessionDto) {
     return this.adminService.revokeSession(dto.sessionId, dto.reason);
+  }
+
+  @Post('email-deliveries/:id/resend')
+  resendEmailDelivery(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.adminService.resendEmailDelivery(id, user.userId);
+  }
+
+  @Post('email-deliveries/:id/force-send')
+  forceSendEmailDelivery(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.adminService.forceSendEmailDelivery(id, user.userId);
   }
 }

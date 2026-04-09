@@ -253,6 +253,86 @@ export type AppNotification = {
   createdAt: string
 }
 
+export type EmailDeliveryStatus = "QUEUED" | "PROCESSING" | "RETRYING" | "SENT" | "FAILED"
+
+export type EmailDeliveryLogEvent =
+  | "QUEUED"
+  | "PROCESSING"
+  | "RETRY_SCHEDULED"
+  | "SENT"
+  | "FAILED"
+  | "RESEND_REQUESTED"
+  | "FORCE_SEND_REQUESTED"
+  | "QUEUEING_FAILED"
+
+export type AdminEmailDeliveryLog = {
+  id: string
+  event: EmailDeliveryLogEvent
+  attemptNumber?: number | null
+  jobId?: string | null
+  message?: string | null
+  details?: unknown
+  createdAt: string
+}
+
+export type AdminEmailDelivery = {
+  id: string
+  status: EmailDeliveryStatus
+  emailType: string
+  template: string
+  subject: string
+  toEmail: string
+  provider?: string | null
+  providerMessageId?: string | null
+  providerAcknowledgedAt?: string | null
+  providerResponse?: unknown
+  variables?: unknown
+  metadata?: unknown
+  recipientUserId?: string | null
+  requestedById?: string | null
+  leadId?: string | null
+  projectId?: string | null
+  paymentId?: string | null
+  proposalId?: string | null
+  contractId?: string | null
+  retryCount: number
+  maxRetries: number
+  lastRetryAt?: string | null
+  nextRetryAt?: string | null
+  processingStartedAt?: string | null
+  sentAt?: string | null
+  failedAt?: string | null
+  lastErrorMessage?: string | null
+  lastErrorAt?: string | null
+  allowManualResend: boolean
+  isSensitive: boolean
+  createdAt: string
+  updatedAt: string
+  recipientUser?: AdminUser | null
+  requestedBy?: AdminUser | null
+  logs: AdminEmailDeliveryLog[]
+}
+
+export type AdminEmailDeliverySummary = {
+  total: number
+  queued: number
+  processing: number
+  retrying: number
+  sent: number
+  failed: number
+}
+
+export type AdminEmailDeliveryListResponse = {
+  items: AdminEmailDelivery[]
+  meta: {
+    page: number
+    limit: number
+    total: number
+  }
+  summary: AdminEmailDeliverySummary
+  emailTypes: string[]
+}
+
 export type InboxThread = PortalInboxConversation
 
 export type AdminAssistantInsight = {

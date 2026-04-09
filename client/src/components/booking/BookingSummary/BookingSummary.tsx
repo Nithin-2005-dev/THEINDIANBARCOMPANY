@@ -213,44 +213,38 @@ export default function BookingSummary({
     <section className={styles.root} aria-labelledby="booking-summary-title">
       <div className={styles.header}>
         <div>
-          <p className={styles.eyebrow}>Concierge preview</p>
+          <p className={styles.eyebrow}>Live brief</p>
           <h2 id="booking-summary-title" className={styles.title}>
-            Your event brief
+            Booking snapshot
           </h2>
         </div>
 
         <span className={styles.liveBadge}>
           <span className={styles.liveDot} aria-hidden="true" />
-          Live
+          Auto-updating
         </span>
       </div>
 
       <div className={styles.previewCard}>
-        <div className={styles.previewArt} aria-hidden="true">
-          <span className={styles.previewArtLabel}>{experience.moodLabel}</span>
-          <strong className={styles.previewArtValue}>
-            {recommendation?.name ?? service?.shortLabel ?? "Custom brief"}
-          </strong>
-        </div>
-
         <div className={styles.previewCopy}>
           <p className={styles.previewEyebrow}>
-            {recommendation ? "Recommended package" : "Service mood"}
+            {recommendation ? "Suggested starting point" : "Selected service"}
           </p>
           <h3 className={styles.previewTitle}>
-            {recommendation?.name ?? experience.moodLabel}
+            {recommendation?.name ?? service?.shortLabel ?? "Custom brief"}
           </h3>
           <p className={styles.previewDescription}>
-            {recommendation?.fit ?? experience.moodCopy}
+            {recommendation?.fit ?? service?.description ?? experience.moodCopy}
           </p>
-          <div className={styles.previewPills}>
-            <span className={styles.previewPill}>
-              {recommendation?.badge ?? "Tailored concierge"}
-            </span>
-            <span className={styles.previewPill}>
-              {recommendation?.guestLabel ?? "No payment required today"}
-            </span>
-          </div>
+        </div>
+
+        <div className={styles.previewPills}>
+          <span className={styles.previewPill}>
+            {recommendation?.guestLabel ?? "Tailored concierge"}
+          </span>
+          <span className={styles.previewPill}>
+            {recommendation?.fromPrice ?? "No payment today"}
+          </span>
         </div>
       </div>
 
@@ -271,7 +265,7 @@ export default function BookingSummary({
         ))}
       </dl>
 
-      <div className={styles.estimateCard}>
+      <div className={styles.footerCard}>
         <div className={styles.estimateCopy}>
           <p className={styles.estimateLabel}>
             {values.budgetMin || values.budgetMax
@@ -280,16 +274,9 @@ export default function BookingSummary({
           </p>
           <strong className={styles.estimateValue}>{estimateValue}</strong>
         </div>
-        <p className={styles.estimateHint}>No payment required today</p>
-      </div>
-
-      <div className={styles.reassurance}>
-        <p className={styles.reassuranceTitle}>What happens next</p>
-        <ul className={styles.list}>
-          <li>We review your brief and confirm the best next step.</li>
-          <li>Your details stay private and are only used for this request.</li>
-          <li>Expect a response on your preferred channel within 30 minutes during business hours.</li>
-        </ul>
+        <p className={styles.footerNote}>
+          No payment today. We review the brief first, then reply on your preferred channel.
+        </p>
       </div>
     </section>
   )

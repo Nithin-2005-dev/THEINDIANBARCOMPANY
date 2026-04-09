@@ -54,10 +54,10 @@ export default function StepReview({ service, values }: StepReviewProps) {
       <div className={styles.header}>
         <p className={styles.eyebrow}>Step 4</p>
         <h2 id="booking-review-heading" className={styles.title}>
-          You are one step from your tailored event plan.
+          Review the brief before you send it.
         </h2>
         <p className={styles.description}>
-          Check the brief once more and our concierge team will review it, confirm availability, and follow up on your preferred channel.
+          We review every request before confirming the next step.
         </p>
       </div>
 
@@ -73,9 +73,8 @@ export default function StepReview({ service, values }: StepReviewProps) {
       <div className={styles.note}>
         <p className={styles.noteTitle}>Before you send</p>
         <ul className={styles.list}>
-          <li>Every request is reviewed by our concierge team before availability is confirmed.</li>
-          <li>No payment is required today to submit your brief.</li>
-          <li>Your information stays private and is only used to prepare your quote.</li>
+          <li>No payment is required today.</li>
+          <li>Your details are only used for this request.</li>
         </ul>
       </div>
 

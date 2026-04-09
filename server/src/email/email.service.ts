@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'crypto';
+import type { Prisma } from '@prisma/client';
 import { renderEmailTemplate } from './email.templates';
+import type { EmailDispatchResult } from './email.types';
 
 @Injectable()
 export class EmailService {
@@ -13,7 +16,7 @@ export class EmailService {
     subject: string;
     template: string;
     variables?: Record<string, unknown>;
-  }) {
+  }): Promise<EmailDispatchResult> {
     const provider = this.configService.get<string>('EMAIL_PROVIDER', 'mock');
     const from = this.configService.get<string>('EMAIL_FROM', '');
     const replyTo =
@@ -38,6 +41,11 @@ export class EmailService {
       return {
         delivered: true,
         provider,
+        providerMessageId: `mock_${randomUUID()}`,
+        providerAcknowledgedAt: new Date(),
+        providerResponse: {
+          mode: 'mock',
+        } satisfies Prisma.JsonObject,
       };
     }
 
@@ -90,7 +98,7 @@ export class EmailService {
     subject: string;
     html: string;
     text: string;
-  }) {
+  }): Promise<EmailDispatchResult> {
     const apiKey = this.configService.getOrThrow<string>('RESEND_API_KEY');
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -108,8 +116,14 @@ export class EmailService {
       }),
     });
 
-    await this.ensureProviderSuccess('resend', response);
-    return { delivered: true, provider: 'resend' };
+    const body = await this.ensureProviderSuccess('resend', response);
+    return {
+      delivered: true,
+      provider: 'resend',
+      providerMessageId: this.extractProviderMessageId(body),
+      providerAcknowledgedAt: new Date(),
+      providerResponse: body,
+    };
   }
 
   private async sendWithSendgrid(payload: {
@@ -119,7 +133,7 @@ export class EmailService {
     subject: string;
     html: string;
     text: string;
-  }) {
+  }): Promise<EmailDispatchResult> {
     const apiKey = this.configService.getOrThrow<string>('SENDGRID_API_KEY');
     const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
@@ -139,8 +153,20 @@ export class EmailService {
       }),
     });
 
-    await this.ensureProviderSuccess('sendgrid', response);
-    return { delivered: true, provider: 'sendgrid' };
+    const body = await this.ensureProviderSuccess('sendgrid', response);
+    return {
+      delivered: true,
+      provider: 'sendgrid',
+      providerMessageId:
+        response.headers.get('x-message-id') ??
+        this.extractProviderMessageId(body),
+      providerAcknowledgedAt: new Date(),
+      providerResponse:
+        body ??
+        ({
+          status: response.status,
+        } satisfies Prisma.JsonObject),
+    };
   }
 
   private async sendWithPostmark(payload: {
@@ -150,7 +176,7 @@ export class EmailService {
     subject: string;
     html: string;
     text: string;
-  }) {
+  }): Promise<EmailDispatchResult> {
     const apiKey = this.configService.getOrThrow<string>(
       'POSTMARK_SERVER_TOKEN',
     );
@@ -171,20 +197,87 @@ export class EmailService {
       }),
     });
 
-    await this.ensureProviderSuccess('postmark', response);
-    return { delivered: true, provider: 'postmark' };
+    const body = await this.ensureProviderSuccess('postmark', response);
+    return {
+      delivered: true,
+      provider: 'postmark',
+      providerMessageId: this.extractProviderMessageId(body),
+      providerAcknowledgedAt: this.extractProviderAcknowledgedAt(body),
+      providerResponse: body,
+    };
   }
 
-  private async ensureProviderSuccess(provider: string, response: Response) {
+  private async ensureProviderSuccess(
+    provider: string,
+    response: Response,
+  ): Promise<Prisma.JsonValue | null> {
+    const body = await this.readProviderResponse(response);
+
     if (response.ok) {
-      return;
+      return body;
     }
 
-    const body = await response.text().catch(() => '');
     this.logger.error(
-      `Email provider ${provider} failed: ${response.status} ${body}`,
+      `Email provider ${provider} failed: ${response.status} ${JSON.stringify(body)}`,
     );
     throw new Error(`Email provider ${provider} failed.`);
+  }
+
+  private async readProviderResponse(response: Response) {
+    const contentType = response.headers.get('content-type') ?? '';
+
+    if (contentType.includes('application/json')) {
+      return (await response.json().catch(() => null)) as Prisma.JsonValue | null;
+    }
+
+    const text = await response.text().catch(() => '');
+    return text ? (text as Prisma.JsonValue) : null;
+  }
+
+  private extractProviderMessageId(body: Prisma.JsonValue | null) {
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return null;
+    }
+
+    const record = body as Record<string, unknown>;
+
+    const messageIdCandidates = [
+      record.id,
+      record.messageId,
+      record.MessageID,
+      record.message_id,
+    ];
+
+    for (const candidate of messageIdCandidates) {
+      if (typeof candidate === 'string' && candidate.trim()) {
+        return candidate;
+      }
+    }
+
+    return null;
+  }
+
+  private extractProviderAcknowledgedAt(body: Prisma.JsonValue | null) {
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return new Date();
+    }
+
+    const record = body as Record<string, unknown>;
+    const submittedAt =
+      typeof record.SubmittedAt === 'string'
+        ? record.SubmittedAt
+        : typeof record.submittedAt === 'string'
+          ? record.submittedAt
+          : null;
+
+    if (!submittedAt) {
+      return new Date();
+    }
+
+    const acknowledgedAt = new Date(submittedAt);
+    return Number.isNaN(acknowledgedAt.getTime())
+      ? new Date()
+      : acknowledgedAt;
   }
 
   private redactSensitiveValues(value: unknown): unknown {

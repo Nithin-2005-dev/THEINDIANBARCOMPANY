@@ -1,60 +1,64 @@
 .root {
   display: grid;
-  gap: 1.2rem;
+  gap: 1rem;
 }
 
 .heroCard,
-.timelineCard,
-.accessCard,
-.noteCard {
+.stepsCard,
+.accessCard {
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.6rem;
+  border-radius: 1.45rem;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025)),
-    rgba(8, 8, 8, 0.7);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)),
+    rgba(8, 9, 12, 0.9);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
     0 24px 60px rgba(0, 0, 0, 0.18);
 }
 
-.heroCard {
-  padding: clamp(1.15rem, 2vw, 1.8rem);
-  background:
-    radial-gradient(circle at top right, rgba(var(--booking-accent-rgb), 0.18), transparent 34%),
-    linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
-    rgba(8, 8, 8, 0.76);
+.heroCard::before,
+.stepsCard::before,
+.accessCard::before {
+  content: "";
+  position: absolute;
+  inset: auto -18% -40% auto;
+  width: 15rem;
+  height: 15rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(var(--booking-accent-rgb), 0.08), transparent 72%);
+  pointer-events: none;
 }
 
-.timelineCard,
-.accessCard,
-.noteCard {
-  padding: 1.2rem;
+.heroCard,
+.stepsCard,
+.accessCard {
+  padding: 1rem;
 }
 
-.heroTop,
-.heroGrid,
-.bodyGrid,
-.sideStack,
+.heroHeader,
+.heroBody,
+.heroCopy,
+.heroMeta,
+.contentGrid,
 .cardHeader,
-.timeline,
+.stepList,
 .actions,
 .secondaryActions,
-.accessGrid,
-.noteCard {
+.accessGrid {
   display: grid;
   gap: 1rem;
 }
 
-.heroTop {
+.heroHeader {
   align-items: start;
 }
 
 .heroBadgeRow {
   display: inline-flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
 }
 
@@ -67,180 +71,139 @@
 }
 
 .badge,
-.referenceCard,
-.metaItem,
+.referencePill,
 .sectionEyebrow,
-.accessLabel {
+.accessLabel,
+.metaLabel {
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
-.badge {
-  align-items: center;
-  border: 1px solid rgba(var(--booking-accent-rgb), 0.2);
-  border-radius: 999px;
-  color: var(--color-text-primary);
+.badge,
+.referencePill {
   display: inline-flex;
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0.5rem 0.92rem;
-  background: rgba(var(--booking-accent-rgb), 0.08);
+  align-items: center;
+  width: fit-content;
+  min-height: 2rem;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
 }
 
-.referenceCard {
+.badge {
+  border: 1px solid rgba(var(--booking-accent-rgb), 0.18);
+  background: rgba(var(--booking-accent-rgb), 0.08);
+  color: var(--color-text-primary);
+}
+
+.referencePill {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: color-mix(in srgb, var(--booking-metallic) 82%, white 18%);
+}
+
+.title,
+.cardTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.05em;
+}
+
+.title {
+  max-width: 12ch;
+  font-size: clamp(2.1rem, 5vw, 3.15rem);
+  line-height: 0.96;
+}
+
+.cardTitle {
+  font-size: clamp(1.45rem, 3vw, 1.9rem);
+  line-height: 1.04;
+}
+
+.description,
+.cardCopy,
+.stepText,
+.accountAccess {
+  margin: 0;
+  color: color-mix(in srgb, var(--color-text-secondary) 79%, white 21%);
+  line-height: 1.68;
+}
+
+.description {
+  max-width: 42rem;
+  font-size: 0.96rem;
+}
+
+.heroMeta {
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+}
+
+.metaItem,
+.stepItem,
+.accessItem {
+  position: relative;
+  z-index: 1;
   display: grid;
-  gap: 0.18rem;
-  justify-items: start;
-  padding: 0.75rem 0.95rem;
+  gap: 0.28rem;
+  padding: 0.9rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 1rem;
   background: rgba(255, 255, 255, 0.03);
 }
 
-.referenceLabel,
 .sectionEyebrow,
-.accessLabel {
-  color: color-mix(in srgb, var(--booking-metallic) 76%, white 24%);
+.accessLabel,
+.metaLabel {
+  color: color-mix(in srgb, var(--booking-metallic) 78%, white 22%);
   font-size: 0.68rem;
   font-weight: 800;
 }
 
-.referenceValue {
+.metaValue,
+.accessValue {
   color: var(--color-text-primary);
-  font-size: 0.92rem;
-  letter-spacing: 0.08em;
-}
-
-.heroCopy {
-  display: grid;
-  gap: 0.95rem;
-}
-
-.title {
-  margin: 0;
-  color: var(--color-text-primary);
-  font-family: var(--font-serif);
-  font-size: clamp(2.2rem, 4.4vw, 3.8rem);
-  font-weight: 400;
-  letter-spacing: -0.05em;
-  line-height: 0.98;
-  max-width: 14ch;
-}
-
-.description,
-.cardCopy,
-.responseCopy,
-.timelineText,
-.accountAccess {
-  margin: 0;
-  color: color-mix(in srgb, var(--color-text-secondary) 79%, white 21%);
-  line-height: 1.72;
-}
-
-.description {
-  max-width: 48rem;
-  font-size: 1rem;
-}
-
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-}
-
-.metaItem {
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 999px;
-  color: color-mix(in srgb, var(--color-text-secondary) 72%, white 28%);
-  font-size: 0.72rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  padding: 0.5rem 0.82rem;
-  background: rgba(255, 255, 255, 0.03);
+  line-height: 1.45;
 }
 
-.responseCard {
-  align-self: start;
-  display: grid;
-  gap: 0.35rem;
-  padding: 1.05rem 1.1rem;
-  border: 1px solid rgba(var(--booking-accent-rgb), 0.14);
-  border-radius: 1.25rem;
-  background:
-    linear-gradient(180deg, rgba(var(--booking-accent-rgb), 0.08), rgba(var(--booking-accent-rgb), 0.03)),
-    rgba(255, 255, 255, 0.02);
-}
-
-.responseValue {
-  margin: 0;
-  color: var(--color-text-primary);
-  font-size: clamp(1.35rem, 2.8vw, 2rem);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-}
-
-.bodyGrid {
-  align-items: start;
-}
-
-.cardHeader {
-  gap: 0.45rem;
-}
-
-.cardTitle {
-  margin: 0;
-  color: var(--color-text-primary);
-  font-family: var(--font-serif);
-  font-size: clamp(1.45rem, 2.2vw, 2rem);
-  font-weight: 400;
-  letter-spacing: -0.04em;
-  line-height: 1.05;
-}
-
-.cardCopy {
-  font-size: 0.94rem;
-}
-
-.timelineItem {
-  display: grid;
+.stepItem {
   grid-template-columns: auto 1fr;
-  gap: 0.95rem;
   align-items: start;
-  padding: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 1.2rem;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.032), rgba(255, 255, 255, 0.015)),
-    rgba(255, 255, 255, 0.02);
+  gap: 0.9rem;
 }
 
-.timelineStep {
+.stepNumber {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.9rem;
-  height: 2.9rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border: 1px solid rgba(var(--booking-accent-rgb), 0.14);
-  border-radius: 0.95rem;
+  border-radius: 0.92rem;
   background: rgba(var(--booking-accent-rgb), 0.08);
-  color: color-mix(in srgb, var(--booking-metallic) 84%, white 16%);
+  color: color-mix(in srgb, var(--booking-metallic) 82%, white 18%);
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.16em;
 }
 
-.timelineBody {
+.stepBody {
   display: grid;
-  gap: 0.3rem;
+  gap: 0.28rem;
 }
 
-.timelineTitle {
+.stepTitle {
   margin: 0;
   color: var(--color-text-primary);
   font-size: 1rem;
   font-weight: 700;
 }
 
-.timelineText {
+.stepText {
   font-size: 0.9rem;
 }
 
@@ -248,25 +211,12 @@
   gap: 0.75rem;
 }
 
-.accessItem {
-  display: grid;
-  gap: 0.3rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 1.1rem;
-  background: rgba(255, 255, 255, 0.03);
-}
-
 .accessValue {
-  color: var(--color-text-primary);
-  font-size: 0.98rem;
-  line-height: 1.45;
   word-break: break-word;
 }
 
 .accountAccess {
-  font-size: 0.92rem;
-  color: color-mix(in srgb, var(--color-text-primary) 88%, white 12%);
+  font-size: 0.9rem;
 }
 
 .actions {
@@ -280,13 +230,12 @@
 .secondaryLink,
 .ghostButton,
 .backLink {
-  align-items: center;
-  border-radius: 1rem;
-  color: var(--color-text-primary);
   display: inline-flex;
+  align-items: center;
   justify-content: center;
-  min-height: 3.1rem;
+  min-height: 3rem;
   padding: 0 1rem;
+  border-radius: 0.9rem;
   text-decoration: none;
   transition:
     transform 160ms ease,
@@ -296,37 +245,39 @@
 }
 
 .secondaryLink {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(var(--booking-accent-rgb), 0.16);
+  background: rgba(var(--booking-accent-rgb), 0.06);
+  color: var(--color-text-primary);
 }
 
 .ghostButton {
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: color-mix(in srgb, var(--color-text-secondary) 82%, white 18%);
   cursor: pointer;
 }
 
 .secondaryLink:hover,
 .ghostButton:hover,
-.backLink:hover {
+.backLink:hover,
+.secondaryLink:focus-visible,
+.ghostButton:focus-visible,
+.backLink:focus-visible {
   transform: translateY(-1px);
-}
-
-.noteCard {
-  gap: 0.6rem;
-  align-content: start;
+  outline: none;
 }
 
 .backLink {
   width: fit-content;
   min-height: auto;
   padding: 0;
-  color: color-mix(in srgb, var(--color-text-secondary) 82%, white 18%);
+  color: color-mix(in srgb, var(--color-text-secondary) 80%, white 20%);
 }
 
 @media (min-width: 720px) {
-  .heroTop {
+  .heroHeader {
     grid-template-columns: 1fr auto;
+    align-items: center;
   }
 
   .secondaryActions,
@@ -335,37 +286,14 @@
   }
 }
 
-@media (min-width: 920px) {
-  .heroGrid {
-    grid-template-columns: minmax(0, 1.4fr) minmax(16rem, 0.72fr);
+@media (min-width: 960px) {
+  .heroBody {
+    grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.95fr);
     align-items: end;
   }
 
-  .bodyGrid {
-    grid-template-columns: minmax(0, 1.18fr) minmax(18rem, 0.88fr);
-  }
-}
-
-@media (max-width: 640px) {
-  .heroCard,
-  .timelineCard,
-  .accessCard,
-  .noteCard {
-    border-radius: 1.35rem;
-    padding: 1rem;
-  }
-
-  .title {
-    max-width: none;
-    font-size: clamp(1.9rem, 11vw, 2.7rem);
-  }
-
-  .timelineItem {
-    padding: 0.9rem;
-  }
-
-  .timelineStep {
-    width: 2.55rem;
-    height: 2.55rem;
+  .contentGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.9fr);
+    align-items: start;
   }
 }

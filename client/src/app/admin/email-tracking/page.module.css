@@ -1,0 +1,166 @@
+.metricGrid,
+.contentGrid,
+.listStack,
+.detailStack,
+.filterRow,
+.metaGrid,
+.logList {
+  display: grid;
+  gap: 1rem;
+}
+
+.filterRow {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: end;
+}
+
+.filterField {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.filterLabel {
+  color: color-mix(in srgb, var(--dashboard-accent, var(--tib-accent-gold)) 68%, white 32%);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.filterInput,
+.filterSelect {
+  min-height: 3rem;
+  padding: 0.75rem 0.95rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--tib-text-primary);
+}
+
+.contentGrid {
+  grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr);
+  align-items: start;
+}
+
+.listStack,
+.detailStack {
+  align-content: start;
+}
+
+.listCard {
+  display: grid;
+  gap: 0.8rem;
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.02);
+  text-align: left;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.listCard:hover {
+  border-color: color-mix(in srgb, var(--dashboard-accent, var(--tib-accent-gold)) 32%, var(--tib-border));
+  background: rgba(255, 255, 255, 0.035);
+  transform: translateY(-1px);
+}
+
+.listCardActive {
+  border-color: color-mix(in srgb, var(--dashboard-accent, var(--tib-accent-gold)) 58%, var(--tib-border));
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.cardTop,
+.cardMetaRow,
+.detailHeader,
+.detailActions,
+.logTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.cardMetaRow,
+.detailActions {
+  flex-wrap: wrap;
+}
+
+.title {
+  color: var(--tib-text-primary);
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.copy {
+  color: var(--tib-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.meta {
+  color: color-mix(in srgb, var(--dashboard-accent, var(--tib-accent-gold)) 60%, white 40%);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.metaGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.metaCard,
+.logItem,
+.jsonCard {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.95rem;
+  border: 1px solid var(--tib-border);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.022);
+}
+
+.label {
+  color: color-mix(in srgb, var(--dashboard-accent, var(--tib-accent-gold)) 68%, white 32%);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.value {
+  color: var(--tib-text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.json {
+  overflow: auto;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--tib-text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.65;
+}
+
+.empty {
+  color: var(--tib-text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 1180px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .filterRow,
+  .metaGrid {
+    grid-template-columns: 1fr;
+  }
+}

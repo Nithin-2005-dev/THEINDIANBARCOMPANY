@@ -30,6 +30,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { ProposalsModule } from './proposals/proposals.module';
 import { PublicBookingsModule } from './public-bookings/public-bookings.module';
 import { QueueModule } from './queue/queue.module';
+import { QueueWorkersModule } from './queue/queue-workers.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { StorageModule } from './storage/storage.module';
 import { TeamModule } from './team/team.module';
@@ -149,6 +150,7 @@ import { VendorsModule } from './vendors/vendors.module';
     AssistantModule,
     IdempotencyModule,
     QueueModule,
+    QueueWorkersModule,
     RealtimeModule,
     NotificationsModule,
     EmailModule,

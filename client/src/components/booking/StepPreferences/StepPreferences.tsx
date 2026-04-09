@@ -44,7 +44,7 @@ export default function StepPreferences({
           Shape the service
         </h2>
         <p className={styles.description}>
-          Share the atmosphere, budget, and bar direction you want us to design around.
+          Budget and style help us shape the right proposal faster.
         </p>
       </div>
 
@@ -72,7 +72,7 @@ export default function StepPreferences({
             <span className={styles.serviceLabel}>Recommended starting point</span>
             <strong className={styles.serviceValue}>{recommendation.name}</strong>
             <p className={styles.serviceCopy}>
-              {recommendation.guestLabel} . {recommendation.fit}
+              {recommendation.guestLabel}. {recommendation.fit}
             </p>
           </div>
 
@@ -108,7 +108,7 @@ export default function StepPreferences({
             onChange={(event) => onChange("packageLabel", event.target.value)}
           />
           <span className={styles.hint}>
-            This can be a package name, a mood, or the style of bar experience you want.
+            Package name, mood, or bar style all work here.
           </span>
         </label>
 
@@ -126,7 +126,7 @@ export default function StepPreferences({
             onChange={(event) => onChange("budgetMin", event.target.value)}
           />
           <span className={`${styles.hint} ${errors.budgetMin ? styles.error : ""}`}>
-            {errors.budgetMin ?? "Share the lower end of your comfort range and we will work from there."}
+            {errors.budgetMin ?? "Share the lower end of your comfort range."}
           </span>
         </label>
 
@@ -144,7 +144,7 @@ export default function StepPreferences({
             onChange={(event) => onChange("budgetMax", event.target.value)}
           />
           <span className={`${styles.hint} ${errors.budgetMax ? styles.error : ""}`}>
-            {errors.budgetMax ?? "A ceiling helps us recommend the right service format without overshooting."}
+            {errors.budgetMax ?? "A ceiling helps us keep the recommendation realistic."}
           </span>
         </label>
       </div>
@@ -155,14 +155,14 @@ export default function StepPreferences({
           className={styles.textarea}
           data-field="notes"
           name="notes"
-          placeholder="Tell us about timing, cocktails, mocktails, venue restrictions, VIP guests, or anything your guests should remember."
+          placeholder="Timing, cocktails, mocktails, venue restrictions, VIP guests, or any must-have details."
           rows={6}
           suppressHydrationWarning
           value={values.notes}
           onChange={(event) => onChange("notes", event.target.value)}
         />
         <span className={styles.hint}>
-          Mention bar style, signature drinks, venue restrictions, or a mood reference and we will build around it.
+          Add anything important and we will build around it.
         </span>
       </label>
     </section>

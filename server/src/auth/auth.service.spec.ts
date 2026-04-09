@@ -1,6 +1,7 @@
 import {
   ForbiddenException,
   NotFoundException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
@@ -14,7 +15,9 @@ import { AuthWorkspaceRole } from './auth-workspace-role';
 
 type MockUser = User;
 
-function createAuthServiceHarness() {
+function createAuthServiceHarness(
+  configOverrides?: Partial<Record<string, string | number>>,
+) {
   const users = new Map<string, MockUser>();
   type MockOtpChallenge = {
     id: string;
@@ -60,6 +63,10 @@ function createAuthServiceHarness() {
 
   const configValues = {
     NODE_ENV: 'test',
+    SMS_PROVIDER: 'mock',
+    SMS_FROM: '',
+    TWILIO_ACCOUNT_SID: '',
+    TWILIO_AUTH_TOKEN: '',
     OTP_EXPIRY_MINUTES: 5,
     OTP_RESEND_COOLDOWN_SECONDS: 30,
     OTP_MAX_FAILURES: 5,
@@ -69,6 +76,7 @@ function createAuthServiceHarness() {
     JWT_REFRESH_EXPIRES_IN: '30d',
     JWT_SECRET: 'access-secret-access-secret-access-secret!',
     JWT_EXPIRES_IN: '6h',
+    ...configOverrides,
   } as const;
 
   const prisma = {
@@ -334,8 +342,15 @@ function createAuthServiceHarness() {
     log: jest.fn(async () => undefined),
   };
 
-  const notificationsService = {
-    sendOtp: jest.fn(async () => undefined),
+  const queueService = {
+    queueEmail: jest.fn(async () => ({
+      id: 'email-1',
+      status: 'QUEUED',
+    })),
+    queueOtp: jest.fn(async () => ({
+      queued: true,
+      jobId: 'otp-job-1',
+    })),
   };
 
   const usersService = {
@@ -379,7 +394,7 @@ function createAuthServiceHarness() {
     jwtService as never,
     configService as never,
     auditService as never,
-    notificationsService as never,
+    queueService as never,
     usersService as never,
   );
 
@@ -409,7 +424,7 @@ function createAuthServiceHarness() {
   return {
     authService,
     prisma,
-    notificationsService,
+    queueService,
     clientContext,
     addUser,
   };
@@ -509,6 +524,47 @@ describe('AuthService role enforcement', () => {
 
     expect(harness.prisma.user.create).toHaveBeenCalled();
     expect(verifyResult.user.role).toBe(Role.CLIENT);
+  });
+
+  it('normalizes 10-digit Indian phone numbers to +91 before queueing OTP delivery', async () => {
+    const harness = createAuthServiceHarness();
+
+    const sendResult = await harness.authService.sendOtp(
+      {
+        identifier: '8179133593',
+        roleHint: AuthWorkspaceRole.CLIENT,
+      },
+      harness.clientContext,
+    );
+
+    expect(sendResult.sentTo).toContain('3593');
+    expect(harness.queueService.queueOtp).toHaveBeenCalledWith(
+      expect.objectContaining({
+        destination: '+918179133593',
+        channel: 'PHONE',
+      }),
+    );
+  });
+
+  it('rejects phone OTP in production when SMS provider is still mock', async () => {
+    const harness = createAuthServiceHarness({
+      NODE_ENV: 'production',
+      SMS_PROVIDER: 'mock',
+    });
+
+    await expect(
+      harness.authService.sendOtp(
+        {
+          identifier: '8179133593',
+          roleHint: AuthWorkspaceRole.CLIENT,
+        },
+        harness.clientContext,
+      ),
+    ).rejects.toThrow(
+      new ServiceUnavailableException(
+        'Phone OTP is not configured for real delivery. Set SMS_PROVIDER to twilio and add valid SMS credentials.',
+      ),
+    );
   });
 
   it('rejects OTP verification when the expected workspace role does not match the challenge user', async () => {

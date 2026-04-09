@@ -17,6 +17,11 @@ import {
 import { AuditService } from '../audit/audit.service';
 import { isAdminRole, isStaffRole } from '../common/auth/role-helpers';
 import type { AuthUser } from '../common/types/auth-user.type';
+import {
+  normalizeEmailContact,
+  normalizePhoneContact,
+  resolveClientUserFromContacts,
+} from '../common/utils/contact-identity';
 import { buildClientPortalLoginUrl } from '../common/utils/client-portal-url';
 import { IdempotencyService } from '../idempotency/idempotency.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -116,8 +121,8 @@ export class LeadsService {
   ) {
     this.ensureValidBudgetRange(dto.budgetMin, dto.budgetMax);
 
-    const clientEmail = dto.clientEmail.trim().toLowerCase();
-    const clientPhone = dto.clientPhone?.trim() || undefined;
+    const clientEmail = normalizeEmailContact(dto.clientEmail)!;
+    const clientPhone = normalizePhoneContact(dto.clientPhone);
     const clientName = dto.clientName.trim();
     const eventDate = new Date(dto.eventDate);
 
@@ -127,7 +132,7 @@ export class LeadsService {
       userId: user.userId,
       request: dto,
       execute: async () => {
-        const existingUser = await this.prisma.user.findFirst({
+        const matchingUsers = await this.prisma.user.findMany({
           where: {
             OR: [
               { email: clientEmail },
@@ -135,13 +140,14 @@ export class LeadsService {
             ],
             deletedAt: null,
           },
+          orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
         });
 
-        if (existingUser && existingUser.role !== Role.CLIENT) {
-          throw new BadRequestException(
-            'The provided email or phone already belongs to a non-client account.',
-          );
-        }
+        const existingUser = resolveClientUserFromContacts({
+          matchingUsers,
+          phone: clientPhone,
+          email: clientEmail,
+        });
 
         const client = existingUser
           ? await this.prisma.user.update({
@@ -282,6 +288,10 @@ export class LeadsService {
                   to: client.email,
                   subject: 'Thank you for your event request',
                   template: 'lead-confirmation',
+                  emailType: 'BOOKING_CONFIRMATION',
+                  recipientUserId: client.id,
+                  requestedById: user.userId,
+                  leadId: lead.id,
                   variables: {
                     clientName,
                     eventType: dto.eventType,

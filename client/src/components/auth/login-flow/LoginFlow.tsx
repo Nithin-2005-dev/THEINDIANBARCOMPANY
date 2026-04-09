@@ -33,6 +33,7 @@ type PendingLoginState = {
   identifier?: string
   sentTo?: string
   channel?: "PHONE" | "EMAIL"
+  resendAvailableAt?: string
 }
 
 type RoleMeta = {
@@ -137,6 +138,17 @@ function clearPendingLoginState(role: WorkspaceRole) {
   }
 }
 
+function formatCooldown(secondsRemaining: number) {
+  const minutes = Math.floor(secondsRemaining / 60)
+  const seconds = secondsRemaining % 60
+
+  if (minutes > 0) {
+    return `${minutes}:${String(seconds).padStart(2, "0")}`
+  }
+
+  return `${seconds}s`
+}
+
 export default function LoginFlow() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -157,12 +169,19 @@ export default function LoginFlow() {
   const [name, setName] = useState("")
   const [sentTo, setSentTo] = useState(identifierParam)
   const [challengeId, setChallengeId] = useState("")
+  const [resendAvailableAt, setResendAvailableAt] = useState<string | null>(null)
+  const [nowMs, setNowMs] = useState(() => Date.now())
   const [otp, setOtp] = useState("")
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const roleMeta = selectedRole ? ROLE_META[selectedRole] : null
+  const resendAvailableAtMs = resendAvailableAt ? new Date(resendAvailableAt).getTime() : 0
+  const resendCooldownSeconds = resendAvailableAtMs
+    ? Math.max(0, Math.ceil((resendAvailableAtMs - nowMs) / 1000))
+    : 0
+  const resendCooldownActive = resendCooldownSeconds > 0
 
   const stepStates = useMemo(() => {
     return [
@@ -188,6 +207,20 @@ export default function LoginFlow() {
   }, [step])
 
   useEffect(() => {
+    if (!resendCooldownActive) {
+      return
+    }
+
+    const intervalId = window.setInterval(() => {
+      setNowMs(Date.now())
+    }, 1000)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [resendCooldownActive])
+
+  useEffect(() => {
     let active = true
 
     fetchSharedAuthSession()
@@ -211,6 +244,7 @@ export default function LoginFlow() {
       setSelectedRole(null)
       setStep("role")
       setChallengeId("")
+      setResendAvailableAt(null)
       setOtp("")
       return
     }
@@ -225,11 +259,13 @@ export default function LoginFlow() {
         setChallengeId(pendingState.challengeId)
         setIdentifier(pendingState.identifier)
         setSentTo(pendingState.sentTo ?? pendingState.identifier)
+        setResendAvailableAt(pendingState.resendAvailableAt ?? null)
         return
       }
 
       setStep("details")
       setChallengeId("")
+      setResendAvailableAt(null)
       setOtp("")
       setSentTo(identifierParam)
       setIdentifier(identifierParam)
@@ -239,6 +275,7 @@ export default function LoginFlow() {
 
     setStep("details")
     setChallengeId("")
+    setResendAvailableAt(null)
     setOtp("")
 
     if (identifierParam) {
@@ -277,6 +314,7 @@ export default function LoginFlow() {
     setName("")
     setOtp("")
     setChallengeId("")
+    setResendAvailableAt(null)
     setMessage(null)
     setError(null)
     router.replace(buildLoginUrl(role, nextPath, "details"))
@@ -289,6 +327,7 @@ export default function LoginFlow() {
     setName("")
     setOtp("")
     setChallengeId("")
+    setResendAvailableAt(null)
     setSentTo("")
     setMessage(null)
     setError(null)
@@ -324,12 +363,15 @@ export default function LoginFlow() {
         identifier: normalizedIdentifier,
         sentTo: data.sentTo,
         channel: data.channel,
+        resendAvailableAt: data.resendAvailableAt,
       })
 
       setIdentifier(normalizedIdentifier)
       setSentTo(data.sentTo ?? normalizedIdentifier)
       setChallengeId(data.challengeId)
-      setMessage(`Code sent to your ${describeLoginIdentifier(normalizedIdentifier)}.`)
+      setResendAvailableAt(data.resendAvailableAt ?? null)
+      setNowMs(Date.now())
+      setMessage(data.message || `Code sent to your ${describeLoginIdentifier(normalizedIdentifier)}.`)
       setOtp("")
       setStep("verify")
       router.replace(buildLoginUrl(selectedRole, nextPath, "verify", normalizedIdentifier))
@@ -368,6 +410,43 @@ export default function LoginFlow() {
         nextError instanceof Error ? nextError.message : "Unable to verify your code."
       setError(nextMessage)
       showApiErrorToast({ pushToast }, nextError, "Unable to verify code")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  async function handleResendCode() {
+    if (!selectedRole || resendCooldownActive) {
+      return
+    }
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const data = await sendSharedLoginOtp(selectedRole, {
+        identifier,
+        name: selectedRole === "CLIENT" ? name || undefined : undefined,
+      })
+
+      storePendingLoginState(selectedRole, {
+        challengeId: data.challengeId,
+        identifier,
+        sentTo: data.sentTo,
+        channel: data.channel,
+        resendAvailableAt: data.resendAvailableAt,
+      })
+
+      setChallengeId(data.challengeId)
+      setSentTo(data.sentTo ?? identifier)
+      setResendAvailableAt(data.resendAvailableAt ?? null)
+      setNowMs(Date.now())
+      setMessage(data.message || "A new verification code is on the way.")
+    } catch (nextError) {
+      const nextMessage =
+        nextError instanceof Error ? nextError.message : "Unable to send a new code."
+      setError(nextMessage)
+      showApiErrorToast({ pushToast }, nextError, "Unable to request a new code")
     } finally {
       setIsLoading(false)
     }
@@ -551,14 +630,24 @@ export default function LoginFlow() {
 
               {message ? <p className={styles.successText}>{message}</p> : null}
               {error ? <p className={styles.errorText}>{error}</p> : null}
+              {resendCooldownActive ? (
+                <p className={styles.successText}>
+                  You can request another code in {formatCooldown(resendCooldownSeconds)}.
+                </p>
+              ) : null}
 
               <div className={styles.actions}>
                 <button
                   type="button"
                   className={styles.secondaryButton}
-                  onClick={() => router.replace(buildLoginUrl(selectedRole, nextPath, "details", identifier))}
+                  disabled={isLoading || resendCooldownActive}
+                  onClick={() => void handleResendCode()}
                 >
-                  Send a new code
+                  {resendCooldownActive
+                    ? `Request a new code in ${formatCooldown(resendCooldownSeconds)}`
+                    : isLoading
+                      ? "Requesting code"
+                      : "Request a new code"}
                 </button>
                 <button
                   type="submit"

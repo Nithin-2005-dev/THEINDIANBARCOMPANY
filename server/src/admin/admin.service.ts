@@ -1,5 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { PaymentStatus, Prisma, ProjectTaskStatus, Role } from '@prisma/client';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
+import {
+  EmailDeliveryStatus,
+  PaymentStatus,
+  Prisma,
+  ProjectTaskStatus,
+  Role,
+} from '@prisma/client';
+import { EmailDeliveryService } from '../email/email-delivery.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { QueueService } from '../queue/queue.service';
@@ -8,6 +19,7 @@ import type {
   AssistantAnalyticsRange,
   AssistantAnalyticsRoleFilter,
 } from './dto/assistant-analytics-query.dto';
+import { ListEmailDeliveriesQueryDto } from './dto/list-email-deliveries-query.dto';
 
 type AssistantAnalyticsEventRecord = {
   id: string;
@@ -191,6 +203,7 @@ export class AdminService {
     private readonly prisma: PrismaService,
     private readonly queueService: QueueService,
     private readonly notificationsService: NotificationsService,
+    private readonly emailDeliveryService: EmailDeliveryService,
   ) {}
 
   async analytics() {
@@ -717,6 +730,81 @@ export class AdminService {
   async markNotificationRead(userId: string, notificationId: string) {
     await this.notificationsService.markRead(userId, notificationId);
     return { success: true };
+  }
+
+  async listEmailDeliveries(query: ListEmailDeliveriesQueryDto) {
+    return this.emailDeliveryService.listForAdmin(query);
+  }
+
+  async getEmailDelivery(emailDeliveryId: string) {
+    return this.emailDeliveryService.findForAdmin(emailDeliveryId);
+  }
+
+  async resendEmailDelivery(emailDeliveryId: string, requestedById: string) {
+    const emailDelivery =
+      await this.emailDeliveryService.findByIdOrThrow(emailDeliveryId);
+
+    if (!emailDelivery.allowManualResend) {
+      throw new BadRequestException(
+        'This email must be regenerated from its source workflow.',
+      );
+    }
+
+    if (emailDelivery.status !== EmailDeliveryStatus.FAILED) {
+      throw new BadRequestException('Only failed emails can be resent.');
+    }
+
+    const prepared = await this.emailDeliveryService.prepareManualResend(
+      emailDeliveryId,
+      requestedById,
+      false,
+    );
+
+    await this.queueService.requeueTrackedEmail(prepared, {
+      attemptNumber: 1,
+      delayMs: 0,
+      replaceExisting: true,
+    });
+
+    return this.emailDeliveryService.findForAdmin(emailDeliveryId);
+  }
+
+  async forceSendEmailDelivery(emailDeliveryId: string, requestedById: string) {
+    const emailDelivery =
+      await this.emailDeliveryService.findByIdOrThrow(emailDeliveryId);
+
+    if (!emailDelivery.allowManualResend) {
+      throw new BadRequestException(
+        'This email must be regenerated from its source workflow.',
+      );
+    }
+
+    if (emailDelivery.status === EmailDeliveryStatus.SENT) {
+      throw new BadRequestException('This email has already been sent.');
+    }
+
+    if (emailDelivery.status === EmailDeliveryStatus.PROCESSING) {
+      throw new BadRequestException(
+        'This email is already processing. Wait for the current attempt to finish.',
+      );
+    }
+
+    const prepared = await this.emailDeliveryService.prepareManualResend(
+      emailDeliveryId,
+      requestedById,
+      true,
+    );
+
+    await this.queueService.requeueTrackedEmail(prepared, {
+      attemptNumber:
+        emailDelivery.status === EmailDeliveryStatus.FAILED
+          ? 1
+          : Math.max(emailDelivery.retryCount + 1, 1),
+      delayMs: 0,
+      replaceExisting: true,
+    });
+
+    return this.emailDeliveryService.findForAdmin(emailDeliveryId);
   }
 
   private async findAssistantTelemetryEvents(

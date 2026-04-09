@@ -128,9 +128,9 @@ export default function RootLayout({
         />
         <ToastProvider>
           <AppShell>{children}</AppShell>
-          <Suspense fallback={null}>
+          {/* <Suspense fallback={null}>
             <BeerAssistant />
-          </Suspense>
+          </Suspense> */}
           <FloatingCocktail/>
         </ToastProvider>
       </body>

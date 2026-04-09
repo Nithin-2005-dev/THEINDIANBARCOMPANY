@@ -32,7 +32,7 @@ export default function StepContact({
           Where should we send your plan?
         </h2>
         <p className={styles.description}>
-          A few contact details and we can move like a concierge, not a call center.
+          Share the best details for a quick follow-up.
         </p>
       </div>
 
@@ -51,7 +51,7 @@ export default function StepContact({
             onChange={(event) => onChange("name", event.target.value)}
           />
           <span className={`${styles.hint} ${errors.name ? styles.error : ""}`}>
-            {errors.name ?? "We use this in your proposal and when our concierge team reaches out."}
+            {errors.name ?? "Used in your proposal and follow-up."}
           </span>
         </label>
 
@@ -70,7 +70,7 @@ export default function StepContact({
             onChange={(event) => onChange("phone", event.target.value)}
           />
           <span className={`${styles.hint} ${errors.phone ? styles.error : ""}`}>
-            {errors.phone ?? "We usually confirm availability first on call or WhatsApp."}
+            {errors.phone ?? "Best for quick availability updates."}
           </span>
         </label>
 
@@ -89,7 +89,7 @@ export default function StepContact({
             onChange={(event) => onChange("email", event.target.value)}
           />
           <span className={`${styles.hint} ${errors.email ? styles.error : ""}`}>
-            {errors.email ?? "Ideal for your written proposal, invoice trail, and event documents."}
+            {errors.email ?? "Where we send the written proposal."}
           </span>
         </label>
       </div>
@@ -119,7 +119,7 @@ export default function StepContact({
           })}
         </div>
         <p className={`${styles.hint} ${errors.preferredContact ? styles.error : ""}`}>
-          {errors.preferredContact ?? "Choose the channel you are most likely to answer quickly."}
+          {errors.preferredContact ?? "Pick the channel you check fastest."}
         </p>
       </fieldset>
     </section>

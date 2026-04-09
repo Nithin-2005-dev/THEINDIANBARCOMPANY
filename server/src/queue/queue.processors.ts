@@ -4,6 +4,12 @@ import { Job } from 'bullmq';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PaymentStatus, ProjectTaskStatus } from '@prisma/client';
+import { EmailDeliveryService } from '../email/email-delivery.service';
+import {
+  EmailQueuePayload,
+  getEmailRetryDelayMs,
+} from '../email/email.types';
+import { QueueService } from './queue.service';
 
 type OtpDeliveryChannel = 'PHONE' | 'EMAIL';
 
@@ -62,6 +68,7 @@ export class VendorsProcessor extends LoggedWorkerHost {
   constructor(
     private readonly notificationsService: NotificationsService,
     private readonly prisma: PrismaService,
+    private readonly queueService: QueueService,
   ) {
     super();
   }
@@ -86,10 +93,16 @@ export class VendorsProcessor extends LoggedWorkerHost {
       });
 
       if (vendor?.email) {
-        await this.notificationsService.sendEmail({
+        await this.queueService.queueEmail({
           to: vendor.email,
           subject: String(job.data.title ?? 'New vendor assignment'),
           template: 'project-update',
+          emailType: 'VENDOR_ALERT',
+          recipientUserId: String(job.data.vendorUserId),
+          projectId: String(job.data.projectId ?? ''),
+          metadata: {
+            source: 'vendor-alert',
+          },
           variables: {
             title: job.data.title ?? 'New vendor assignment',
             body: job.data.body ?? 'You have a new project assignment.',
@@ -109,6 +122,7 @@ export class RemindersProcessor extends LoggedWorkerHost {
   constructor(
     private readonly notificationsService: NotificationsService,
     private readonly prisma: PrismaService,
+    private readonly queueService: QueueService,
   ) {
     super();
   }
@@ -258,10 +272,15 @@ export class RemindersProcessor extends LoggedWorkerHost {
     );
 
     if (payment.project.client.email) {
-      await this.notificationsService.sendEmail({
+      await this.queueService.queueEmail({
         to: payment.project.client.email,
         subject: overdue ? 'Payment overdue' : 'Payment reminder',
         template: 'payment-reminder',
+        emailType: overdue ? 'PAYMENT_OVERDUE' : 'PAYMENT_REMINDER',
+        recipientUserId: payment.project.clientId,
+        projectId: payment.projectId,
+        paymentId: payment.id,
+        leadId,
         variables: {
           paymentType: payment.type.toLowerCase(),
           amount: `${payment.currency} ${payment.amount}`,
@@ -337,10 +356,14 @@ export class RemindersProcessor extends LoggedWorkerHost {
     );
 
     if (project.client.email) {
-      await this.notificationsService.sendEmail({
+      await this.queueService.queueEmail({
         to: project.client.email,
         subject: title,
         template: 'event-reminder',
+        emailType: 'EVENT_REMINDER',
+        recipientUserId: project.clientId,
+        projectId: project.id,
+        leadId: project.contract.proposal.leadId,
         variables: {
           title: project.contract.proposal.title,
           eventDate: project.contract.proposal.lead.eventDate
@@ -357,20 +380,96 @@ export class RemindersProcessor extends LoggedWorkerHost {
 export class NotificationsProcessor extends LoggedWorkerHost {
   protected readonly logger = new Logger(NotificationsProcessor.name);
 
-  constructor(private readonly notificationsService: NotificationsService) {
+  constructor(
+    private readonly notificationsService: NotificationsService,
+    private readonly emailDeliveryService: EmailDeliveryService,
+    private readonly queueService: QueueService,
+  ) {
     super();
   }
 
   async process(job: Job<Record<string, unknown>>) {
     if (job.name === 'send-email') {
-      await this.notificationsService.sendEmail({
-        to: String(job.data.to),
-        subject: String(job.data.subject),
-        template: String(job.data.template),
-        variables: (job.data.variables as Record<string, unknown>) ?? {},
-      });
+      await this.handleTrackedEmail(job);
     }
 
     this.logger.log(`Notification job processed: ${job.name} (${job.id})`);
+  }
+
+  private async handleTrackedEmail(job: Job<Record<string, unknown>>) {
+    const emailDeliveryId = String(job.data.emailDeliveryId ?? '');
+
+    if (!emailDeliveryId) {
+      return;
+    }
+
+    const emailPayload = (job.data.email as EmailQueuePayload | undefined) ?? {
+      to: '',
+      subject: '',
+      template: '',
+    };
+    const attemptNumber = Math.max(Number(job.data.attemptNumber ?? 1), 1);
+
+    await this.emailDeliveryService.markProcessing(
+      emailDeliveryId,
+      attemptNumber,
+      job.id?.toString(),
+    );
+
+    try {
+      const result = await this.notificationsService.sendEmail({
+        to: String(emailPayload.to),
+        subject: String(emailPayload.subject),
+        template: String(emailPayload.template),
+        variables: emailPayload.variables,
+      });
+
+      await this.emailDeliveryService.markSent({
+        emailDeliveryId,
+        attemptNumber,
+        jobId: job.id?.toString(),
+        result,
+      });
+      return;
+    } catch (error) {
+      const retryDelayMs = getEmailRetryDelayMs(attemptNumber);
+
+      if (retryDelayMs !== null) {
+        const nextRetryAt = new Date(Date.now() + retryDelayMs);
+
+        await this.emailDeliveryService.markRetryScheduled({
+          emailDeliveryId,
+          attemptNumber,
+          nextRetryAt,
+          error,
+          jobId: job.id?.toString(),
+        });
+
+        try {
+          await this.queueService.enqueueEmailAttempt(
+            emailDeliveryId,
+            emailPayload,
+            attemptNumber + 1,
+            retryDelayMs,
+          );
+          return;
+        } catch (requeueError) {
+          await this.emailDeliveryService.markFailed({
+            emailDeliveryId,
+            attemptNumber,
+            error: requeueError,
+            jobId: job.id?.toString(),
+          });
+          throw requeueError;
+        }
+      }
+
+      await this.emailDeliveryService.markFailed({
+        emailDeliveryId,
+        attemptNumber,
+        error,
+        jobId: job.id?.toString(),
+      });
+    }
   }
 }

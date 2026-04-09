@@ -25,7 +25,7 @@ export default function StepEvent({
           Lock the event essentials
         </h2>
         <p className={styles.description}>
-          Your selected service already defines the service lane. Now we just need the date, venue, and guest count.
+          Date, location, and guest count are enough to start shaping the plan.
         </p>
       </div>
 
@@ -43,7 +43,7 @@ export default function StepEvent({
             onChange={(event) => onChange("location", event.target.value)}
           />
           <span className={`${styles.hint} ${errors.location ? styles.error : ""}`}>
-            {errors.location ?? "City, venue, or neighborhood is perfect for this stage."}
+            {errors.location ?? "City, venue, or neighborhood is enough."}
           </span>
         </label>
 
@@ -60,7 +60,7 @@ export default function StepEvent({
             onChange={(event) => onChange("eventDate", event.target.value)}
           />
           <span className={`${styles.hint} ${errors.eventDate ? styles.error : ""}`}>
-            {errors.eventDate ?? "Choose the expected start time. An informed estimate is absolutely fine."}
+            {errors.eventDate ?? "An informed estimate is fine."}
           </span>
         </label>
 
@@ -80,7 +80,7 @@ export default function StepEvent({
             }
           />
           <span className={`${styles.hint} ${errors.guestCount ? styles.error : ""}`}>
-            {errors.guestCount ?? "This helps us recommend staffing, setup size, and the right package lane."}
+            {errors.guestCount ?? "This helps us size the setup and staffing."}
           </span>
         </label>
       </div>

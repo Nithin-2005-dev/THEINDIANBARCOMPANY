@@ -79,6 +79,17 @@ export function NotificationsIcon(props: IconProps) {
   )
 }
 
+export function EmailIcon(props: IconProps) {
+  return (
+    <DashboardIcon {...props}>
+      <rect x="3.5" y="5.5" width="17" height="13" rx="2.5" />
+      <path d="M4.5 7l7.5 6 7.5-6" />
+      <path d="M8 11.5l-3.5 3" />
+      <path d="M16 11.5l3.5 3" />
+    </DashboardIcon>
+  )
+}
+
 export function AnalyticsIcon(props: IconProps) {
   return (
     <DashboardIcon {...props}>

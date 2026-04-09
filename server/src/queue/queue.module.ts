@@ -1,10 +1,12 @@
 import { Global, Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
+import { EmailModule } from '../email/email.module';
 import { QueueService } from './queue.service';
 
 @Global()
 @Module({
   imports: [
+    EmailModule,
     BullModule.registerQueue(
       { name: 'otp' },
       { name: 'notifications' },

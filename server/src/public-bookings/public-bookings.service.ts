@@ -9,6 +9,11 @@ import {
   Role,
 } from '@prisma/client';
 import { AuditService } from '../audit/audit.service';
+import {
+  normalizeEmailContact,
+  normalizePhoneContact,
+  resolveClientUserFromContacts,
+} from '../common/utils/contact-identity';
 import { buildClientPortalLoginUrl } from '../common/utils/client-portal-url';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -37,13 +42,13 @@ export class PublicBookingsService {
     }
 
     const normalizedName = dto.name.trim();
-    const normalizedPhone = dto.phone.trim().replace(/\s+/g, '');
-    const normalizedEmail = dto.email?.trim().toLowerCase();
+    const normalizedPhone = normalizePhoneContact(dto.phone);
+    const normalizedEmail = normalizeEmailContact(dto.email);
 
     const matchingUsers = await this.prisma.user.findMany({
       where: {
         OR: [
-          { phone: normalizedPhone },
+          ...(normalizedPhone ? [{ phone: normalizedPhone }] : []),
           ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
         ],
         deletedAt: null,
@@ -51,24 +56,11 @@ export class PublicBookingsService {
       orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
     });
 
-    const phoneUser =
-      matchingUsers.find((user) => user.phone === normalizedPhone) ?? null;
-    const emailUser =
-      matchingUsers.find((user) => user.email === normalizedEmail) ?? null;
-
-    if (phoneUser && emailUser && phoneUser.id !== emailUser.id) {
-      throw new BadRequestException(
-        'That phone number and email are already linked to different accounts. Please use one existing contact method or call our concierge team.',
-      );
-    }
-
-    const existingUser = phoneUser ?? emailUser;
-
-    if (existingUser && existingUser.role !== Role.CLIENT) {
-      throw new BadRequestException(
-        'That phone number or email is already linked to a non-client account. Please use a different contact detail or call our concierge team.',
-      );
-    }
+    const existingUser = resolveClientUserFromContacts({
+      matchingUsers,
+      phone: normalizedPhone,
+      email: normalizedEmail,
+    });
 
     const user = existingUser
       ? await this.prisma.user.update({
@@ -225,6 +217,9 @@ export class PublicBookingsService {
               to: user.email,
               subject: 'Thank you for your event request',
               template: 'lead-confirmation',
+              emailType: 'BOOKING_CONFIRMATION',
+              recipientUserId: user.id,
+              leadId: lead.id,
               variables: {
                 clientName: user.name ?? dto.name,
                 eventType: dto.eventType,
@@ -244,6 +239,8 @@ export class PublicBookingsService {
           to: email,
           subject: `New booking request: ${dto.eventType}`,
           template: 'lead-admin-notification',
+          emailType: 'ADMIN_ALERT',
+          leadId: lead.id,
           variables: {
             clientName: user.name ?? dto.name,
             clientPhone: user.phone ?? dto.phone,

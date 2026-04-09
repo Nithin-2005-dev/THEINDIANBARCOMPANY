@@ -1,6 +1,12 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
 import { JobsOptions, Queue } from 'bullmq';
+import {
+  AdminEmailDeliveryRecord,
+  EmailDeliveryService,
+} from '../email/email-delivery.service';
+import { EmailQueuePayload } from '../email/email.types';
 
 type QueueErrorState = {
   message: string;
@@ -21,6 +27,7 @@ export class QueueService {
     @InjectQueue('payments') private readonly paymentsQueue: Queue,
     @InjectQueue('vendors') private readonly vendorsQueue: Queue,
     @InjectQueue('reminders') private readonly remindersQueue: Queue,
+    private readonly emailDeliveryService: EmailDeliveryService,
   ) {
     this.bindQueueErrorLogging('otp', this.otpQueue);
     this.bindQueueErrorLogging('notifications', this.notificationsQueue);
@@ -29,16 +36,131 @@ export class QueueService {
     this.bindQueueErrorLogging('reminders', this.remindersQueue);
   }
 
-  queueOtp(payload: Record<string, unknown>) {
-    return this.otpQueue.add('send-otp', payload);
+  async queueOtp(payload: Record<string, unknown>) {
+    try {
+      const job = await this.otpQueue.add('send-otp', payload);
+      return {
+        queued: true,
+        jobId: job.id?.toString() ?? null,
+      };
+    } catch (error) {
+      this.logger.error(`Unable to queue OTP job: ${String(error)}`);
+      return {
+        queued: false,
+        error: String(error),
+      };
+    }
   }
 
   queueNotification(payload: Record<string, unknown>) {
     return this.notificationsQueue.add('notify', payload);
   }
 
-  queueEmail(payload: Record<string, unknown>) {
-    return this.notificationsQueue.add('send-email', payload);
+  async queueEmail(payload: EmailQueuePayload) {
+    const emailDelivery =
+      await this.emailDeliveryService.createQueuedEmail(payload);
+
+    try {
+      await this.enqueueEmailAttempt(emailDelivery.id, payload, 1, 0);
+    } catch (error) {
+      await this.emailDeliveryService.markQueueingFailed(emailDelivery.id, error);
+    }
+
+    return this.emailDeliveryService.findForAdmin(emailDelivery.id);
+  }
+
+  async enqueueEmailAttempt(
+    emailDeliveryId: string,
+    payload: EmailQueuePayload,
+    attemptNumber: number,
+    delayMs = 0,
+    options?: {
+      replaceExisting?: boolean;
+    },
+  ) {
+    const jobId = this.buildEmailAttemptJobId(emailDeliveryId, attemptNumber);
+
+    if (options?.replaceExisting) {
+      const existing = await this.notificationsQueue.getJob(jobId);
+      if (existing) {
+        await existing.remove();
+      }
+    }
+
+    return this.notificationsQueue.add(
+      'send-email',
+      {
+        emailDeliveryId,
+        email: payload,
+        attemptNumber,
+      },
+      {
+        attempts: 1,
+        backoff: undefined,
+        delay: delayMs,
+        jobId,
+      },
+    );
+  }
+
+  async requeueTrackedEmail(
+    emailDelivery: Pick<
+      AdminEmailDeliveryRecord,
+      | 'id'
+      | 'toEmail'
+      | 'subject'
+      | 'template'
+      | 'variables'
+      | 'emailType'
+      | 'metadata'
+      | 'recipientUserId'
+      | 'requestedById'
+      | 'leadId'
+      | 'projectId'
+      | 'paymentId'
+      | 'proposalId'
+      | 'contractId'
+      | 'allowManualResend'
+      | 'isSensitive'
+      | 'retryCount'
+    >,
+    options?: {
+      attemptNumber?: number;
+      delayMs?: number;
+      replaceExisting?: boolean;
+    },
+  ) {
+    const payload: EmailQueuePayload = {
+      to: emailDelivery.toEmail,
+      subject: emailDelivery.subject,
+      template: emailDelivery.template,
+      variables:
+        (emailDelivery.variables as Record<string, unknown> | null) ?? undefined,
+      emailType: emailDelivery.emailType,
+      metadata: (emailDelivery.metadata as Prisma.InputJsonValue | null) ?? undefined,
+      recipientUserId: emailDelivery.recipientUserId ?? undefined,
+      requestedById: emailDelivery.requestedById ?? undefined,
+      leadId: emailDelivery.leadId ?? undefined,
+      projectId: emailDelivery.projectId ?? undefined,
+      paymentId: emailDelivery.paymentId ?? undefined,
+      proposalId: emailDelivery.proposalId ?? undefined,
+      contractId: emailDelivery.contractId ?? undefined,
+      allowManualResend: emailDelivery.allowManualResend,
+      isSensitive: emailDelivery.isSensitive,
+    };
+
+    const attemptNumber =
+      options?.attemptNumber ?? Math.max(emailDelivery.retryCount + 1, 1);
+
+    return this.enqueueEmailAttempt(
+      emailDelivery.id,
+      payload,
+      attemptNumber,
+      options?.delayMs ?? 0,
+      {
+        replaceExisting: options?.replaceExisting,
+      },
+    );
   }
 
   queuePaymentJob(name: string, payload: Record<string, unknown>) {
@@ -106,5 +228,9 @@ export class QueueService {
       suppressedCount: 0,
     });
     this.logger.error(`BullMQ "${name}" queue error: ${message}`);
+  }
+
+  private buildEmailAttemptJobId(emailDeliveryId: string, attemptNumber: number) {
+    return `email-${emailDeliveryId}-attempt-${attemptNumber}`;
   }
 }

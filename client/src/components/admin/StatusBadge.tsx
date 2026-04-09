@@ -23,6 +23,7 @@ const accentStatuses = new Set([
   "OPS",
   "CLIENT",
   "VENDOR",
+  "RETRYING",
 ])
 
 const successStatuses = new Set([
@@ -41,6 +42,8 @@ const warningStatuses = new Set([
   "PENDING",
   "BUSY",
   "IN_PROGRESS",
+  "QUEUED",
+  "PROCESSING",
 ])
 
 const dangerStatuses = new Set([
